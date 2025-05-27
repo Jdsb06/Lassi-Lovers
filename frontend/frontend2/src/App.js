@@ -8,6 +8,7 @@ import PrivacyPolicy from './components/PrivacyPolicy';
 import SubmitClaimPage from './components/SubmitClaimPage';
 import FAQ from './components/FAQ';
 import TrustScoreResult from './components/TrustScoreResult';
+import ChatbotLauncher from './components/ChatbotLauncher';
 
 const FactCheckHomepage = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -366,6 +367,9 @@ const FactCheckHomepage = () => {
           </div>
         </div>
       </footer>
+
+      {/* Chatbot Launcher - Add this at the end, just before closing div */}
+      <ChatbotLauncher />
     </div>
   );
 };
