@@ -38,17 +38,12 @@ const SubmitClaimPage = () => {
   const validateForm = () => {
     const newErrors = {};
     
+    // Only validate title as it's the only required field
     newErrors.title = validateTitle(formData.title);
-    newErrors.description = validateDescription(formData.description);
     
-    const sourceErrors = formData.sources.map(validateUrl).filter(error => error);
-    if (sourceErrors.length > 0) {
-      newErrors.sources = sourceErrors;
-    }
-
     setErrors(newErrors);
-    return Object.keys(newErrors).length === 0 || 
-           (Object.keys(newErrors).length === 1 && newErrors.description === '');
+    // Return true if there are no title errors
+    return !newErrors.title;
   };
 
   const handleInputChange = (field, value) => {
@@ -182,15 +177,17 @@ const SubmitClaimPage = () => {
         mediaType: formData.mediaType,
         attachments: formData.attachments.map(att => ({
           name: att.name,
-          url: att.preview // In real app, this would be the uploaded URL
+          url: att.preview
         }))
       };
 
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      console.log('Submitting data:', submitData); // Add logging
       
-      alert('Claim submitted successfully!');
-      navigate('/browse'); // Redirect to browse claims or view claim
+      // Simulate API call with shorter delay
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Navigate to trust score page
+      navigate('/trust-score');
       
     } catch (error) {
       console.error('Submission error:', error);
@@ -200,7 +197,8 @@ const SubmitClaimPage = () => {
     }
   };
 
-  const isFormValid = formData.title.trim() && !errors.title && !errors.sources;
+  // Update isFormValid to only check title
+  const isFormValid = formData.title.trim() && !errors.title;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-red-50">

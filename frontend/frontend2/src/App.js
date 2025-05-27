@@ -6,6 +6,7 @@ import TermsOfService from './components/TermsOfService';
 import CommunityGuidelines from './components/CommunityGuidelines';
 import PrivacyPolicy from './components/PrivacyPolicy';
 import SubmitClaimPage from './components/SubmitClaimPage';
+import TrustScoreResult from './components/TrustScoreResult';
 
 const FactCheckHomepage = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -378,6 +379,7 @@ const App = () => {
         <Route path="/guidelines" element={<CommunityGuidelines />} />
         <Route path="/privacy" element={<PrivacyPolicy />} />
         <Route path="/submit" element={<SubmitClaimPage />} />
+        <Route path="/trust-score" element={<TrustScoreResult />} />
       </Routes>
     </Router>
   );
