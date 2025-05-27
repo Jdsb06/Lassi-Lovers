@@ -2,6 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import './index.css';
 import About from './components/About';
+import TermsOfService from './components/TermsOfService';
+import CommunityGuidelines from './components/CommunityGuidelines';
+import PrivacyPolicy from './components/PrivacyPolicy';
 
 const FactCheckHomepage = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -330,9 +333,9 @@ const FactCheckHomepage = () => {
             <div>
               <h4 className="font-semibold mb-4">Legal</h4>
               <ul className="space-y-2 text-gray-400">
-                <li><a href="#privacy" className="hover:text-white transition-colors">Privacy Policy</a></li>
-                <li><a href="#terms" className="hover:text-white transition-colors">Terms of Service</a></li>
-                <li><a href="#guidelines" className="hover:text-white transition-colors">Community Guidelines</a></li>
+                <li><Link to="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link></li>
+                <li><Link to="/terms" className="hover:text-white transition-colors">Terms of Service</Link></li>
+                <li><Link to="/guidelines" className="hover:text-white transition-colors">Community Guidelines</Link></li>
               </ul>
             </div>
 
@@ -353,7 +356,7 @@ const FactCheckHomepage = () => {
           </div>
 
           <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
-            <p>© 2025 FactCheck - No Misinfo. All Rights Reserved.</p>
+            <p>© {new Date().getFullYear()} FactCheck - No Misinfo. All Rights Reserved.</p>
           </div>
         </div>
       </footer>
@@ -367,6 +370,9 @@ const App = () => {
       <Routes>
         <Route path="/" element={<FactCheckHomepage />} />
         <Route path="/about" element={<About />} />
+        <Route path="/terms" element={<TermsOfService />} />
+        <Route path="/guidelines" element={<CommunityGuidelines />} />
+        <Route path="/privacy" element={<PrivacyPolicy />} />
       </Routes>
     </Router>
   );
