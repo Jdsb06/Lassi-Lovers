@@ -5,6 +5,7 @@ import About from './components/About';
 import TermsOfService from './components/TermsOfService';
 import CommunityGuidelines from './components/CommunityGuidelines';
 import PrivacyPolicy from './components/PrivacyPolicy';
+import SubmitClaimPage from './components/SubmitClaimPage';
 
 const FactCheckHomepage = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -287,12 +288,15 @@ const FactCheckHomepage = () => {
           <p className="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
             Join thousands of users who trust FactCheck - No Misinfo to verify claims and combat misinformation.
           </p>
-          <button className="bg-white text-blue-900 px-8 py-4 rounded-lg text-lg font-semibold hover:bg-gray-100 transition-all duration-300 transform hover:scale-105 shadow-lg">
+          <Link 
+            to="/submit"
+            className="inline-block bg-white text-blue-900 px-8 py-4 rounded-lg text-lg font-semibold hover:bg-gray-100 transition-all duration-300 transform hover:scale-105 shadow-lg"
+          >
             Submit Your First Claim
             <svg className="inline-block ml-2 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
             </svg>
-          </button>
+          </Link>
         </div>
       </section>
 
@@ -323,7 +327,7 @@ const FactCheckHomepage = () => {
               <h4 className="font-semibold mb-4">Quick Links</h4>
               <ul className="space-y-2 text-gray-400">
                 <li><a href="#home" className="hover:text-white transition-colors">Home</a></li>
-                <li><a href="#submit" className="hover:text-white transition-colors">Submit Claim</a></li>
+                <li><a href="/submit" className="hover:text-white transition-colors">Submit Claim</a></li>
                 <li><a href="#browse" className="hover:text-white transition-colors">Browse Claims</a></li>
                 <li><a href="#about" className="hover:text-white transition-colors">About</a></li>
                 <li><a href="#faq" className="hover:text-white transition-colors">FAQ</a></li>
@@ -373,6 +377,7 @@ const App = () => {
         <Route path="/terms" element={<TermsOfService />} />
         <Route path="/guidelines" element={<CommunityGuidelines />} />
         <Route path="/privacy" element={<PrivacyPolicy />} />
+        <Route path="/submit" element={<SubmitClaimPage />} />
       </Routes>
     </Router>
   );
