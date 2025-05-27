@@ -6,6 +6,7 @@ import TermsOfService from './components/TermsOfService';
 import CommunityGuidelines from './components/CommunityGuidelines';
 import PrivacyPolicy from './components/PrivacyPolicy';
 import SubmitClaimPage from './components/SubmitClaimPage';
+import FAQ from './components/FAQ';
 import TrustScoreResult from './components/TrustScoreResult';
 
 const FactCheckHomepage = () => {
@@ -57,7 +58,7 @@ const FactCheckHomepage = () => {
               <Link to="/submit" className="text-gray-700 hover:text-blue-900 transition-colors">Submit a Claim</Link>
               <Link to="/browse" className="text-gray-700 hover:text-blue-900 transition-colors">Browse Claims</Link>
               <Link to="/about" className="text-gray-700 hover:text-blue-900 transition-colors">About</Link>
-              <Link to="/faq" className="text-gray-700 hover:text-blue-900 transition-colors">FAQ/Help</Link>
+              <Link to="/faqs" className="text-gray-700 hover:text-blue-900 transition-colors">FAQ/Help</Link>
               <button className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors">
                 Login/Sign Up
               </button>
@@ -88,7 +89,7 @@ const FactCheckHomepage = () => {
                 <Link to="/submit" className="block text-gray-700">Submit a Claim</Link>
                 <Link to="/browse" className="block text-gray-700">Browse Claims</Link>
                 <Link to="/about" className="block text-gray-700">About</Link>
-                <Link to="/faq" className="block text-gray-700">FAQ/Help</Link>
+                <Link to="/faqs" className="block text-gray-700">FAQ/Help</Link>
                 <button className="w-full bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors">
                   Login/Sign Up
                 </button>
@@ -331,7 +332,7 @@ const FactCheckHomepage = () => {
                 <li><a href="/submit" className="hover:text-white transition-colors">Submit Claim</a></li>
                 <li><a href="#browse" className="hover:text-white transition-colors">Browse Claims</a></li>
                 <li><a href="#about" className="hover:text-white transition-colors">About</a></li>
-                <li><a href="#faq" className="hover:text-white transition-colors">FAQ</a></li>
+                <li><a href="/faqs" className="hover:text-white transition-colors">FAQ</a></li>
               </ul>
             </div>
 
@@ -379,6 +380,7 @@ const App = () => {
         <Route path="/guidelines" element={<CommunityGuidelines />} />
         <Route path="/privacy" element={<PrivacyPolicy />} />
         <Route path="/submit" element={<SubmitClaimPage />} />
+        <Route path="/faqs" element={<FAQ />} />
         <Route path="/trust-score" element={<TrustScoreResult />} />
       </Routes>
     </Router>
