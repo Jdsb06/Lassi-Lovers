@@ -1,0 +1,82 @@
+from pydantic import BaseModel, Field, HttpUrl
+from typing import List, Optional, Dict, Any
+from enum import Enum
+
+class VerificationStatus(str, Enum):
+    """Enum for verification status"""
+    SUPPORTED = "supported"
+    REFUTED = "refuted"
+    NEUTRAL = "neutral"
+
+class ClaimRequest(BaseModel):
+    """Request model for claim verification"""
+    text: str = Field(..., description="Text to analyze for claims", min_length=1)
+    context: Optional[str] = Field(None, description="Optional context for the claims")
+
+class UrlRequest(BaseModel):
+    """Request model for URL verification"""
+    url: HttpUrl = Field(..., description="URL to analyze for claims")
+
+class Evidence(BaseModel):
+    """Model for evidence items"""
+    title: Optional[str] = Field(None, description="Title of the evidence")
+    snippet: Optional[str] = Field(None, description="Snippet of the evidence")
+    link: Optional[str] = Field(None, description="Link to the evidence")
+
+class Review(BaseModel):
+    """Model for fact check reviews"""
+    publisher: str = Field(..., description="Publisher of the review")
+    rating: str = Field(..., description="Rating given by the publisher")
+    url: Optional[str] = Field(None, description="URL of the review")
+    title: Optional[str] = Field(None, description="Title of the review")
+
+class Claim(BaseModel):
+    """Model for a verified claim"""
+    text: str = Field(..., description="The claim text")
+    score: float = Field(..., description="Verification score (0-100)", ge=0, le=100)
+    verdict: VerificationStatus = Field(..., description="Verification verdict")
+    explanation: Optional[str] = Field(None, description="Explanation of the verification")
+    sources: List[str] = Field(default_factory=list, description="Sources for the verification")
+    evidence: List[Evidence] = Field(default_factory=list, description="Evidence for the claim")
+    reviews: List[Review] = Field(default_factory=list, description="Fact check reviews")
+
+class AnalysisResponse(BaseModel):
+    """Response model for text analysis"""
+    claims: List[Claim] = Field(..., description="List of verified claims")
+    sentiment: Optional[Dict[str, Any]] = Field(None, description="Sentiment analysis of the text")
+    processing_time: Optional[float] = Field(None, description="Processing time in seconds")
+
+class ErrorResponse(BaseModel):
+    """Response model for errors"""
+    error: str = Field(..., description="Error message")
+    detail: Optional[str] = Field(None, description="Detailed error information")
+
+class HealthResponse(BaseModel):
+    """Response model for health check"""
+    status: str = Field(..., description="Service status")
+    version: str = Field(..., description="API version")
+    components: Dict[str, bool] = Field(..., description="Status of individual components")
+
+class TokenRequest(BaseModel):
+    """Request model for token generation"""
+    username: str = Field(..., description="Username")
+    password: str = Field(..., description="Password")
+
+class TokenResponse(BaseModel):
+    """Response model for token generation"""
+    access_token: str = Field(..., description="JWT access token")
+    token_type: str = Field(..., description="Token type")
+    expires_in: int = Field(..., description="Token expiration time in seconds")
+
+class SimilarClaim(BaseModel):
+    """Model for similar claims"""
+    id: int = Field(..., description="ID of the claim")
+    text: str = Field(..., description="The claim text")
+    score: float = Field(..., description="Verification score")
+    verdict: VerificationStatus = Field(..., description="Verification verdict")
+    similarity: float = Field(..., description="Similarity score to the query")
+
+class SimilarClaimsResponse(BaseModel):
+    """Response model for similar claims search"""
+    query: str = Field(..., description="The query claim")
+    results: List[SimilarClaim] = Field(..., description="Similar claims")
