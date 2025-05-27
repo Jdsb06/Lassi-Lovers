@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import './index.css';
+import About from './components/About';
 
 const FactCheckHomepage = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -29,7 +31,7 @@ const FactCheckHomepage = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
-            <div className="flex items-center space-x-3">
+            <Link to="/" className="flex items-center space-x-3">
               <div className="w-10 h-10 bg-red-600 rounded-full flex items-center justify-center relative">
                 <div className="w-6 h-6 bg-blue-900 rounded-full flex items-center justify-center">
                   <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
@@ -42,15 +44,15 @@ const FactCheckHomepage = () => {
                 <h1 className="text-xl font-bold text-blue-900">FactCheck</h1>
                 <p className="text-xs text-red-600 font-semibold -mt-1">NO MISINFO</p>
               </div>
-            </div>
+            </Link>
 
             {/* Desktop Navigation */}
             <nav className="hidden md:flex items-center space-x-8">
-              <a href="#home" className="text-blue-900 font-semibold border-b-2 border-red-600">Home</a>
-              <a href="#submit" className="text-gray-700 hover:text-blue-900 transition-colors">Submit a Claim</a>
-              <a href="#browse" className="text-gray-700 hover:text-blue-900 transition-colors">Browse Claims</a>
-              <a href="#about" className="text-gray-700 hover:text-blue-900 transition-colors">About</a>
-              <a href="#faq" className="text-gray-700 hover:text-blue-900 transition-colors">FAQ/Help</a>
+              <Link to="/" className="text-blue-900 font-semibold border-b-2 border-red-600">Home</Link>
+              <Link to="/submit" className="text-gray-700 hover:text-blue-900 transition-colors">Submit a Claim</Link>
+              <Link to="/browse" className="text-gray-700 hover:text-blue-900 transition-colors">Browse Claims</Link>
+              <Link to="/about" className="text-gray-700 hover:text-blue-900 transition-colors">About</Link>
+              <Link to="/faq" className="text-gray-700 hover:text-blue-900 transition-colors">FAQ/Help</Link>
               <button className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors">
                 Login/Sign Up
               </button>
@@ -77,11 +79,11 @@ const FactCheckHomepage = () => {
           {isMenuOpen && (
             <div className="md:hidden bg-white border-t">
               <div className="px-4 py-3 space-y-3">
-                <a href="#home" className="block text-blue-900 font-semibold">Home</a>
-                <a href="#submit" className="block text-gray-700">Submit a Claim</a>
-                <a href="#browse" className="block text-gray-700">Browse Claims</a>
-                <a href="#about" className="block text-gray-700">About</a>
-                <a href="#faq" className="block text-gray-700">FAQ/Help</a>
+                <Link to="/" className="block text-blue-900 font-semibold">Home</Link>
+                <Link to="/submit" className="block text-gray-700">Submit a Claim</Link>
+                <Link to="/browse" className="block text-gray-700">Browse Claims</Link>
+                <Link to="/about" className="block text-gray-700">About</Link>
+                <Link to="/faq" className="block text-gray-700">FAQ/Help</Link>
                 <button className="w-full bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors">
                   Login/Sign Up
                 </button>
@@ -359,4 +361,15 @@ const FactCheckHomepage = () => {
   );
 };
 
-export default FactCheckHomepage;
+const App = () => {
+  return (
+    <Router>
+      <Routes>
+        <Route path="/" element={<FactCheckHomepage />} />
+        <Route path="/about" element={<About />} />
+      </Routes>
+    </Router>
+  );
+};
+
+export default App;
