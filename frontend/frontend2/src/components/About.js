@@ -263,7 +263,7 @@ const About = () => {
               <h4 className="font-semibold mb-4">Quick Links</h4>
               <ul className="space-y-2 text-gray-400">
                 <li><Link to="/" className="hover:text-white transition-colors">Home</Link></li>
-                <li><a href="#submit" className="hover:text-white transition-colors">Submit Claim</a></li>
+                <li><a href="/submit" className="hover:text-white transition-colors">Submit Claim</a></li>
                 <li><a href="#browse" className="hover:text-white transition-colors">Browse Claims</a></li>
                 <li><Link to="/about" className="hover:text-white transition-colors">About</Link></li>
                 <li><a href="/faqs" className="hover:text-white transition-colors">FAQ</a></li>

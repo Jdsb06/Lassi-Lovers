@@ -253,7 +253,7 @@ const FAQ = () => {
                 <li><Link to="/submit" className="hover:text-white transition-colors">Submit Claim</Link></li>
                 <li><Link to="/browse" className="hover:text-white transition-colors">Browse Claims</Link></li>
                 <li><Link to="/about" className="hover:text-white transition-colors">About</Link></li>
-                <li><Link to="/faq" className="hover:text-white transition-colors">FAQ</Link></li>
+                <li><Link to="/faqs" className="hover:text-white transition-colors">FAQ</Link></li>
               </ul>
             </div>
 
