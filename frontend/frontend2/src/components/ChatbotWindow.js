@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import useChatbot from './useChatbot';
+import useAIBot, { MODELS } from './useGeminiBot';
 
 const QUICK_START_QUESTIONS = [
   {
@@ -55,11 +55,12 @@ const ChatbotWindow = ({ onClose }) => {
   const [messages, setMessages] = useState([]);
   const [inputValue, setInputValue] = useState('');
   const [fileUpload, setFileUpload] = useState(null);
+  const [showFlashingMessage, setShowFlashingMessage] = useState(true);
   
   const messagesEndRef = useRef(null);
   const fileInputRef = useRef(null);
   
-  const { sendMessage, isLoading, error } = useChatbot();
+  const { sendMessage, isLoading, error, currentModel, toggleModel } = useAIBot();
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -69,12 +70,21 @@ const ChatbotWindow = ({ onClose }) => {
     scrollToBottom();
   }, [messages]);
 
+  // Flashing message effect
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setShowFlashingMessage(prev => !prev);
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, []);
+
   // Initial welcome message
   useEffect(() => {
     setMessages([{
       id: 1,
       type: 'bot',
-      content: "Hi! I'm VeriBot, your fact-checking assistant. I can help you understand how FactCheck works, answer questions about misinformation, and guide you through our platform. What would you like to know?",
+      content: "Hi! I'm Vaani, your fact-checking assistant. I can help you understand how FactCheck works, answer questions about misinformation, and guide you through our platform. What would you like to know?",
       timestamp: new Date()
     }]);
   }, []);
@@ -96,7 +106,7 @@ const ChatbotWindow = ({ onClose }) => {
     setCurrentView('chat');
     
     try {
-      const response = await sendMessage(subQuestion, 'factcheck-platform');
+      const response = await sendMessage(subQuestion);
       const botMessage = {
         id: Date.now() + 1,
         type: 'bot',
@@ -124,7 +134,8 @@ const ChatbotWindow = ({ onClose }) => {
       ? `${inputValue.trim()} [File: ${fileUpload.name}]`
       : inputValue.trim();
 
-    const newMessage = {
+    // Add user message
+    const userMessage = {
       id: Date.now(),
       type: 'user',
       content: messageContent,
@@ -132,7 +143,7 @@ const ChatbotWindow = ({ onClose }) => {
       file: fileUpload
     };
 
-    setMessages(prev => [...prev, newMessage]);
+    setMessages(prev => [...prev, userMessage]);
     setInputValue('');
     setFileUpload(null);
     
@@ -141,24 +152,46 @@ const ChatbotWindow = ({ onClose }) => {
     }
 
     try {
-      const context = fileUpload ? 'file-analysis' : 'general';
-      const response = await sendMessage(messageContent, context);
-      const botMessage = {
-        id: Date.now() + 1,
+      // Add loading message
+      const loadingId = Date.now() + 1;
+      setMessages(prev => [...prev, {
+        id: loadingId,
         type: 'bot',
-        content: response,
+        isLoading: true,
+        content: 'Vaani is thinking...',
         timestamp: new Date()
-      };
-      setMessages(prev => [...prev, botMessage]);
+      }]);
+
+      // Get response from Gemini
+      const response = await sendMessage(messageContent);
+
+      // Remove loading and add response
+      setMessages(prev => 
+        prev
+          .filter(msg => msg.id !== loadingId)
+          .concat({
+            id: Date.now() + 2,
+            type: 'bot',
+            content: response,
+            timestamp: new Date()
+          })
+      );
+
     } catch (err) {
-      const errorMessage = {
-        id: Date.now() + 1,
-        type: 'bot',
-        content: "Sorry, something went wrong. Please try again or contact support if the issue persists.",
-        timestamp: new Date(),
-        isError: true
-      };
-      setMessages(prev => [...prev, errorMessage]);
+      console.error('Chat error:', err);
+      
+      // Remove loading and add error
+      setMessages(prev => 
+        prev
+          .filter(msg => !msg.isLoading)
+          .concat({
+            id: Date.now() + 2,
+            type: 'bot',
+            content: err.message || "Sorry, I couldn't process that request. Please try again.",
+            timestamp: new Date(),
+            isError: true
+          })
+      );
     }
   };
 
@@ -187,20 +220,32 @@ const ChatbotWindow = ({ onClose }) => {
       <div className="bg-blue-900 text-white p-4 rounded-t-2xl flex items-center justify-between">
         <div className="flex items-center space-x-3">
           <div className="w-8 h-8 bg-red-600 rounded-full flex items-center justify-center">
-            <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-            </svg>
+            <span role="img" aria-label="robot" className="text-xl">🤖</span>
           </div>
           <div>
-            <h3 className="font-semibold">VeriBot</h3>
-            <p className="text-xs text-blue-200">Fact-checking Assistant</p>
+            <div className="flex items-center space-x-2">
+              <h3 className="font-semibold">Vaani</h3>
+              <button
+                onClick={toggleModel}
+                className="text-xs bg-blue-700 hover:bg-blue-600 px-2 py-1 rounded transition-colors"
+              >
+                {currentModel === MODELS.GEMINI 
+                  ? 'Using Gemini' 
+                  : currentModel === MODELS.GPT 
+                    ? 'Using GPT-4o' 
+                    : 'Using Grok'}
+              </button>
+            </div>
+            <p className={`text-xs ${showFlashingMessage ? 'text-blue-200' : 'opacity-0'} transition-opacity duration-500`}>
+              Hi, it's Vaani, here to assist you
+            </p>
           </div>
         </div>
         <button
           onClick={onClose}
-          className="w-6 h-6 flex items-center justify-center hover:bg-blue-800 rounded transition-colors"
+          className="text-white hover:text-red-200 transition-colors"
         >
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
           </svg>
         </button>
@@ -271,6 +316,8 @@ const ChatbotWindow = ({ onClose }) => {
                       ? 'bg-blue-600 text-white'
                       : message.isError
                       ? 'bg-red-50 text-red-800 border border-red-200'
+                      : message.isLoading
+                      ? 'bg-gray-50 text-gray-600 border border-gray-200'
                       : 'bg-gray-100 text-gray-900'
                   }`}
                 >
@@ -279,7 +326,18 @@ const ChatbotWindow = ({ onClose }) => {
                       📎 {message.file.name}
                     </div>
                   )}
-                  <p>{message.content}</p>
+                  {message.isLoading ? (
+                    <div className="flex items-center space-x-2">
+                      <span>{message.content}</span>
+                      <div className="flex space-x-1">
+                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
+                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></div>
+                      </div>
+                    </div>
+                  ) : (
+                    <p>{message.content}</p>
+                  )}
                   <p className="text-xs mt-1 opacity-75">
                     {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                   </p>
