@@ -11,12 +11,12 @@ import logging
 from contextlib import asynccontextmanager
 
 # Import local modules
-from .models import ClaimRequest, UrlRequest, AnalysisResponse, ErrorResponse, HealthResponse, TokenRequest, TokenResponse, SimilarClaimsResponse
-from .nlp_processor import extract_claims, preprocess_text, analyze_sentiment
-from .fact_checker import fact_checker
-from .database import db
-from .security import rate_limit, get_current_user, create_access_token, User, get_api_key, validate_api_key, RateLimitMiddleware
-from .utils import extract_text_from_url, get_embedding, measure_execution_time, truncate_text, TimingMiddleware
+from models import ClaimRequest, UrlRequest, AnalysisResponse, ErrorResponse, HealthResponse, TokenRequest, TokenResponse, SimilarClaimsResponse
+from nlp_processor import extract_claims, analyze_sentiment
+from fact_checker import async_fact_checker
+from database import db
+from security import rate_limit, get_current_user, create_access_token, User, get_api_key, validate_api_key, RateLimitMiddleware
+from utils import extract_text_from_url, get_embedding, measure_execution_time, truncate_text, TimingMiddleware
 
 # Configure logging
 logging.basicConfig(
@@ -119,75 +119,27 @@ async def analyze_text(
     and returns the results with confidence scores and sources.
     """
     try:
-        # Preprocess text
-        text = preprocess_text(claim_request.text)
-
-        # Extract claims
-        claims = extract_claims(text)
-        if not claims:
-            return {"claims": [], "sentiment": analyze_sentiment(text)}
-
-        # Verify each claim
-        verified_claims = []
-        for claim_text in claims:
-            # Get claim embedding for vector search
-            embedding = get_embedding(claim_text)
-
-            # Check for similar claims in database
-            similar_claims = []
-            if embedding:
-                similar_claims = db.find_similar_claims(embedding, limit=1)
-
-            # If we found a very similar claim with high confidence, use cached result
-            if similar_claims and similar_claims[0]["similarity"] > 0.95:
-                # Get full details of the similar claim
-                cached_result = db.get_fact_check_by_id(similar_claims[0]["id"])
-                if cached_result:
-                    verified_claims.append({
-                        "text": claim_text,
-                        "score": cached_result["score"],
-                        "verdict": cached_result["verdict"],
-                        "explanation": cached_result["explanation"],
-                        "sources": cached_result["sources"],
-                        "evidence": cached_result["evidence"],
-                        "reviews": []  # No reviews for cached results
-                    })
-                    continue
-
-            # Verify the claim
-            verification_result = await fact_checker.verify_claim(
-                claim_text, 
-                context=claim_request.context
-            )
-
-            # Store the result in database
-            if embedding:
-                db.store_fact_check(
-                    claim=claim_text,
-                    score=verification_result["score"],
-                    verdict=verification_result["verdict"],
-                    explanation=verification_result["explanation"],
-                    sources=verification_result["sources"],
-                    evidence=verification_result["evidence"],
-                    embedding=embedding
-                )
-
-            # Add to results
-            verified_claims.append({
-                "text": claim_text,
-                "score": verification_result["score"],
-                "verdict": verification_result["verdict"],
-                "explanation": verification_result["explanation"],
-                "sources": verification_result["sources"],
-                "evidence": verification_result["evidence"],
-                "reviews": verification_result.get("reviews", [])
-            })
-
-        # Return results
-        return {
-            "claims": verified_claims,
-            "sentiment": analyze_sentiment(text)
-        }
+        # Extract claims from text
+        claims = extract_claims(claim_request.text)
+        
+        # Analyze each claim
+        analyzed_claims = []
+        for claim in claims:
+            # Verify the claim asynchronously
+            result = await async_fact_checker.verify_claim(claim)
+            # Map 'claim' field to 'text' for response
+            result['text'] = result.pop('claim', claim)
+            analyzed_claims.append(result)
+        
+        # Analyze sentiment
+        sentiment = analyze_sentiment(claim_request.text)
+        
+        return AnalysisResponse(
+            claims=analyzed_claims,
+            sentiment=sentiment,
+            processing_time=None
+        )
+        
     except Exception as e:
         logger.error(f"Error analyzing text: {str(e)}")
         raise HTTPException(
@@ -211,38 +163,29 @@ async def analyze_url(
     """
     try:
         # Extract text from URL
-        text, metadata = await extract_text_from_url(str(url_request.url))
-
-        # Truncate text if it's too long
-        text = truncate_text(text, max_length=5000)
-
-        # Extract claims
+        text = extract_text_from_url(str(url_request.url))
+        
+        # Extract claims from text
         claims = extract_claims(text)
-        if not claims:
-            return {"claims": [], "sentiment": analyze_sentiment(text)}
-
-        # Verify each claim (similar to analyze_text)
-        verified_claims = []
-        for claim_text in claims:
-            # Verify the claim
-            verification_result = await fact_checker.verify_claim(claim_text)
-
-            # Add to results
-            verified_claims.append({
-                "text": claim_text,
-                "score": verification_result["score"],
-                "verdict": verification_result["verdict"],
-                "explanation": verification_result["explanation"],
-                "sources": verification_result["sources"],
-                "evidence": verification_result["evidence"],
-                "reviews": verification_result.get("reviews", [])
-            })
-
-        # Return results
-        return {
-            "claims": verified_claims,
-            "sentiment": analyze_sentiment(text)
-        }
+        
+        # Analyze each claim
+        analyzed_claims = []
+        for claim in claims:
+            # Verify the claim asynchronously
+            result = await async_fact_checker.verify_claim(claim)
+            # Map 'claim' field to 'text' for response
+            result['text'] = result.pop('claim', claim)
+            analyzed_claims.append(result)
+        
+        # Analyze sentiment
+        sentiment = analyze_sentiment(text)
+        
+        return AnalysisResponse(
+            claims=analyzed_claims,
+            sentiment=sentiment,
+            processing_time=None
+        )
+        
     except Exception as e:
         logger.error(f"Error analyzing URL: {str(e)}")
         raise HTTPException(

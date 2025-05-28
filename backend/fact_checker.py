@@ -8,6 +8,10 @@ import redis
 from functools import lru_cache
 import hashlib
 from huggingface_hub import AsyncInferenceClient
+import openai
+import google.generativeai as genai
+import asyncio
+from google.generativeai.types import HarmCategory, HarmBlockThreshold
 
 # Load environment variables
 API_KEY = os.getenv("GOOGLE_API_KEY")
@@ -24,10 +28,76 @@ except:
     REDIS_AVAILABLE = False
     print("Warning: Redis not available. Caching will be disabled.")
 
+# Configure OpenAI API key
+openai.api_key = OPENAI_API_KEY
+
+# Configure Google Generative AI
+if API_KEY:
+    genai.configure(api_key=API_KEY)
+else:
+    print("Warning: GOOGLE_API_KEY not found. Gemini verification will be disabled.")
+
+def fact_checker(claim: str) -> Dict[str, Any]:
+    """
+    Synchronous wrapper for fact checking functionality.
+    
+    Args:
+        claim: The claim to verify
+        
+    Returns:
+        Dictionary with verification results
+    """
+    try:
+        # Basic validation
+        if not claim or len(claim.strip()) < 10:
+            return {
+                "text": claim,
+                "score": 50.0,
+                "verdict": "neutral",
+                "explanation": "Claim too short or empty",
+                "sources": [],
+                "evidence": [],
+                "reviews": []
+            }
+            
+        # For now, return a neutral result
+        return {
+            "text": claim,
+            "score": 50.0,
+            "verdict": "neutral",
+            "explanation": "Claim requires manual verification",
+            "sources": [],
+            "evidence": [],
+            "reviews": []
+        }
+        
+    except Exception as e:
+        return {
+            "text": claim,
+            "score": 50.0,
+            "verdict": "error",
+            "explanation": f"Error processing claim: {str(e)}",
+            "sources": [],
+            "evidence": [],
+            "reviews": []
+        }
+
 class FactChecker:
     def __init__(self):
         """Initialize the fact checker with necessary components."""
         self.http_client = httpx.AsyncClient(timeout=30.0)
+        # Initialize Gemini model
+        try:
+            self.model = genai.GenerativeModel('gemini-2.0-flash-lite')
+            self.generation_config = {
+                "temperature": 0.3,
+                "top_p": 0.8,
+                "top_k": 40
+            }
+            print("Gemini model initialized successfully")
+        except Exception as e:
+            print(f"Error initializing Gemini model: {e}")
+            self.model = None
 
     async def verify_claim(self, claim: str, context: Optional[str] = None) -> Dict[str, Any]:
         """
@@ -54,6 +124,15 @@ class FactChecker:
 
         # Combine results and calculate final score
         final_result = self._combine_verification_results(results, claim)
+
+        # Enhance scoring with AI analysis of evidence
+        try:
+            llm_result = await self._verify_with_llm(claim, results.get("evidence", []))
+            final_result["score"] = llm_result.get("score", final_result.get("score", 50))
+            final_result["verdict"] = llm_result.get("verdict", final_result.get("verdict", "neutral"))
+            final_result["explanation"] = llm_result.get("explanation", final_result.get("explanation", ""))
+        except Exception:
+            pass
 
         # Cache the result
         if REDIS_AVAILABLE:
@@ -307,5 +386,99 @@ class FactChecker:
             "reviews": google_result.get("reviews", [])
         }
 
-# Create a singleton instance
-fact_checker = FactChecker()
+    async def _verify_with_llm(self, claim: str, evidence: List[Dict[str, Any]]) -> Dict[str, Any]:
+        """Use Gemini to analyze the claim and evidence for a trueness score."""
+        if not self.model:
+            return {"score": 50, "verdict": "neutral", "explanation": "LLM verification unavailable"}
+
+        # Format evidence for analysis
+        evidence_text = "\n".join([
+            f"Source {i+1}: {e.get('snippet', 'No text')} (from {e.get('link', 'unknown source')})"
+            for i, e in enumerate(evidence)
+        ])
+
+        prompt = f"""Analyze this claim based on the evidence provided and give a truthfulness score.
+
+Claim: "{claim}"
+
+Evidence:
+{evidence_text}
+
+Give your response in this exact format:
+{{
+    "score": [a number from 0-100],
+    "explanation": [your detailed analysis explaining the score]
+}}
+
+Scoring guide:
+0-20: Definitely false
+21-40: Likely false
+41-60: Uncertain/Mixed evidence
+61-80: Likely true
+81-100: Definitely true"""
+
+        try:
+            response = await self.model.generate_content_async(
+                prompt,
+                generation_config=self.generation_config,
+                safety_settings={
+                    HarmCategory.HARM_CATEGORY_HARASSMENT: HarmBlockThreshold.BLOCK_NONE,
+                    HarmCategory.HARM_CATEGORY_HATE_SPEECH: HarmBlockThreshold.BLOCK_NONE,
+                    HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT: HarmBlockThreshold.BLOCK_NONE,
+                    HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT: HarmBlockThreshold.BLOCK_NONE,
+                }
+            )
+            
+            # Clean and parse response
+            response_text = response.text.strip()
+            if response_text.startswith("```json"):
+                response_text = response_text[7:]
+            elif response_text.startswith("```"):
+                response_text = response_text[3:]
+            if response_text.endswith("```"):
+                response_text = response_text[:-3]
+            response_text = response_text.strip()
+            
+            try:
+                result = json.loads(response_text)
+                score = result.get("score", 50)
+                if isinstance(score, str):
+                    score = float(score)
+                score = max(0, min(100, int(score)))
+                
+                # Determine verdict based on score
+                if score >= 81:
+                    verdict = "true"
+                elif score >= 61:
+                    verdict = "likely_true"
+                elif score >= 41:
+                    verdict = "uncertain"
+                elif score >= 21:
+                    verdict = "likely_false"
+                else:
+                    verdict = "false"
+                
+                return {
+                    "score": score,
+                    "verdict": verdict,
+                    "explanation": result.get("explanation", "Analysis completed.")
+                }
+            except (json.JSONDecodeError, ValueError) as e:
+                print(f"Error parsing response: {str(e)}")
+                print(f"Raw response: {response_text}")
+                return {
+                    "score": 50,
+                    "verdict": "uncertain",
+                    "explanation": "Could not analyze the claim."
+                }
+                
+        except Exception as e:
+            print(f"Error with Gemini API: {str(e)}")
+            return {
+                "score": 50,
+                "verdict": "neutral",
+                "explanation": "Error analyzing the claim."
+            }
+
+# Create a singleton asynchronous fact checker instance
+async_fact_checker = FactChecker()
