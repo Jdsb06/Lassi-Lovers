@@ -33,9 +33,19 @@ openai.api_key = OPENAI_API_KEY
 
 # Configure Google Generative AI
 if API_KEY:
-    genai.configure(api_key=API_KEY)
+    try:
+        genai.configure(api_key=API_KEY)
+        self.model = genai.GenerativeModel('gemini-2.0-flash')
+        self.generation_config = {
+            "temperature": 0.3,
+            "top_p": 0.8,
+            "top_k": 40
+        }
+        print("Gemini model initialized successfully")
+    except Exception as e:
+        print(f"Error configuring Google Generative AI: {str(e)}")
 else:
-    print("Warning: GOOGLE_API_KEY not found. Gemini verification will be disabled.")
+    print("Warning: GOOGLE_API_KEY not found. Please set the GOOGLE_API_KEY environment variable.")
 
 def fact_checker(claim: str) -> Dict[str, Any]:
     """
@@ -88,7 +98,7 @@ class FactChecker:
         self.http_client = httpx.AsyncClient(timeout=30.0)
         # Initialize Gemini model
         try:
-            self.model = genai.GenerativeModel('gemini-2.0-flash-lite')
+            self.model = genai.GenerativeModel('gemini-2.0-flash')
             self.generation_config = {
                 "temperature": 0.3,
                 "top_p": 0.8,
@@ -131,8 +141,15 @@ class FactChecker:
             final_result["score"] = llm_result.get("score", final_result.get("score", 50))
             final_result["verdict"] = llm_result.get("verdict", final_result.get("verdict", "neutral"))
             final_result["explanation"] = llm_result.get("explanation", final_result.get("explanation", ""))
-        except Exception:
-            pass
+
+            # Add GPT scoring if we have an explanation
+            if final_result.get("explanation"):
+                gpt_result = await get_gpt_score(claim, final_result["explanation"])
+                if gpt_result["gpt_score"] is not None:
+                    final_result["gpt_score"] = gpt_result["gpt_score"]
+                    final_result["gpt_explanation"] = gpt_result["gpt_explanation"]
+        except Exception as e:
+            print(f"Error in verification: {str(e)}")
 
         # Cache the result
         if REDIS_AVAILABLE:
@@ -389,7 +406,8 @@ class FactChecker:
     async def _verify_with_llm(self, claim: str, evidence: List[Dict[str, Any]]) -> Dict[str, Any]:
         """Use Gemini to analyze the claim and evidence for a trueness score."""
         if not self.model:
-            return {"score": 50, "verdict": "neutral", "explanation": "LLM verification unavailable"}
+            print("LLM verification unavailable - Gemini model not initialized")
+            return {"score": 50, "verdict": "neutral", "explanation": "LLM verification unavailable - Gemini model not initialized"}
 
         # Format evidence for analysis
         evidence_text = "\n".join([
@@ -397,27 +415,33 @@ class FactChecker:
             for i, e in enumerate(evidence)
         ])
 
-        prompt = f"""Analyze this claim based on the evidence provided and give a truthfulness score.
+        prompt = f"""Analyze this claim based on the evidence provided and determine its truthfulness.
 
 Claim: "{claim}"
 
 Evidence:
 {evidence_text}
 
+Please analyze the claim and evidence carefully. Compare the claim's content with the evidence and determine how well they align.
+
 Give your response in this exact format:
 {{
-    "score": [a number from 0-100],
-    "explanation": [your detailed analysis explaining the score]
+    "score": [a number from 0-100, where 0 means completely false and 100 means completely true],
+    "claim_analysis": [detailed analysis of the claim's key points],
+    "evidence_analysis": [analysis of how well the evidence supports or refutes each key point],
+    "explanation": [your final conclusion explaining the score]
 }}
 
 Scoring guide:
-0-20: Definitely false
-21-40: Likely false
-41-60: Uncertain/Mixed evidence
-61-80: Likely true
-81-100: Definitely true"""
+0-20: Definitely false - Evidence directly contradicts the claim
+21-40: Likely false - Evidence mostly contradicts the claim
+41-60: Uncertain/Mixed - Evidence is inconclusive or contradictory
+61-80: Likely true - Evidence mostly supports the claim
+81-100: Definitely true - Evidence strongly supports all aspects of the claim"""
 
         try:
+            print(f"Sending request to Gemini API with claim: {claim[:100]}...")  # Log first 100 chars of claim
+            
             response = await self.model.generate_content_async(
                 prompt,
                 generation_config=self.generation_config,
@@ -429,8 +453,12 @@ Scoring guide:
                 }
             )
             
+            print("Received response from Gemini API")
+            
             # Clean and parse response
             response_text = response.text.strip()
+            print(f"Raw response from Gemini: {response_text[:200]}...")  # Log first 200 chars of response
+            
             if response_text.startswith("```json"):
                 response_text = response_text[7:]
             elif response_text.startswith("```"):
@@ -458,27 +486,149 @@ Scoring guide:
                 else:
                     verdict = "false"
                 
+                # Construct a detailed explanation combining all analyses
+                explanation = f"""Claim Analysis: {result.get('claim_analysis', '')}
+
+Evidence Analysis: {result.get('evidence_analysis', '')}
+
+Final Verdict: {result.get('explanation', '')}
+
+Score: {score}/100 - {verdict.replace('_', ' ').title()}"""
+                
                 return {
                     "score": score,
                     "verdict": verdict,
-                    "explanation": result.get("explanation", "Analysis completed.")
+                    "explanation": explanation
                 }
             except (json.JSONDecodeError, ValueError) as e:
-                print(f"Error parsing response: {str(e)}")
-                print(f"Raw response: {response_text}")
+                print(f"Error parsing Gemini response: {str(e)}")
+                print(f"Raw response that couldn't be parsed: {response_text}")
                 return {
                     "score": 50,
                     "verdict": "uncertain",
-                    "explanation": "Could not analyze the claim."
+                    "explanation": f"Could not analyze the claim. Error: {str(e)}"
                 }
                 
         except Exception as e:
             print(f"Error with Gemini API: {str(e)}")
+            print(f"Full error details: {str(e.__class__.__name__)}: {str(e)}")
             return {
                 "score": 50,
                 "verdict": "neutral",
-                "explanation": "Error analyzing the claim."
+                "explanation": f"Error analyzing the claim: {str(e)}"
             }
+
+async def compare_with_chatgpt(claim: str, gemini_explanation: str) -> Dict[str, Any]:
+    """
+    Compare Gemini's explanation with the claim using ChatGPT to generate a score.
+    
+    Args:
+        claim: The original claim text
+        gemini_explanation: The explanation provided by Gemini
+        
+    Returns:
+        Dictionary with the comparison score and explanation
+    """
+    if not OPENAI_API_KEY:
+        return {
+            "score": 50,
+            "explanation": "OpenAI API key not available for scoring"
+        }
+        
+    try:
+        prompt = f"""Compare this claim with Gemini's explanation and determine a truthfulness score.
+
+Claim: "{claim}"
+
+Gemini's Analysis: {gemini_explanation}
+
+Based on how well Gemini's explanation supports or refutes the claim, provide a score from 0 to 100:
+- 0: Completely false
+- 100: Completely true
+
+Respond in this exact JSON format:
+{{
+    "score": [number between 0-100],
+    "explanation": [brief explanation of your scoring]
+}}"""
+
+        response = await openai.ChatCompletion.acreate(
+            model="gpt-3.5-turbo",
+            messages=[
+                {"role": "system", "content": "You are a fact-checking scoring system. Your job is to compare claims with explanations and provide numerical scores."},
+                {"role": "user", "content": prompt}
+            ],
+            temperature=0.3,
+            max_tokens=150
+        )
+        
+        result = json.loads(response.choices[0].message.content)
+        return {
+            "score": min(100, max(0, int(result["score"]))),  # Ensure score is 0-100
+            "explanation": result["explanation"]
+        }
+        
+    except Exception as e:
+        print(f"Error in ChatGPT comparison: {str(e)}")
+        return {
+            "score": 50,
+            "explanation": f"Error comparing with ChatGPT: {str(e)}"
+        }
+
+async def get_gpt_score(claim: str, explanation: str) -> Dict[str, Any]:
+    """Get a score from GPT by comparing the claim against the explanation."""
+    if not OPENAI_API_KEY:
+        return {
+            "gpt_score": None,
+            "gpt_explanation": "OpenAI API key not set"
+        }
+
+    try:
+        prompt = f"""Analyze this claim and explanation to determine if the claim is true or false.
+
+Claim: "{claim}"
+
+Explanation from analysis: "{explanation}"
+
+Based on how well the explanation proves or disproves the claim, give a score:
+0 = Completely false
+100 = Completely true
+
+Respond in this exact JSON format:
+{{
+    "score": [number 0-100],
+    "explanation": [brief explanation of why you gave this score]
+}}"""
+
+        response = await openai.ChatCompletion.acreate(
+            model="gpt-3.5-turbo",
+            messages=[
+                {"role": "system", "content": "You are a fact-checking scoring system. Score claims based on their explanations."},
+                {"role": "user", "content": prompt}
+            ],
+            temperature=0.3,
+            max_tokens=150
+        )
+
+        try:
+            result = json.loads(response.choices[0].message.content)
+            return {
+                "gpt_score": min(100, max(0, int(result["score"]))),
+                "gpt_explanation": result["explanation"]
+            }
+        except (json.JSONDecodeError, KeyError, ValueError) as e:
+            print(f"Error parsing GPT response: {e}")
+            return {
+                "gpt_score": None,
+                "gpt_explanation": f"Error parsing GPT response: {e}"
+            }
+
+    except Exception as e:
+        print(f"Error calling GPT API: {e}")
+        return {
+            "gpt_score": None,
+            "gpt_explanation": f"Error calling GPT API: {e}"
+        }
 
 # Create a singleton asynchronous fact checker instance
 async_fact_checker = FactChecker()

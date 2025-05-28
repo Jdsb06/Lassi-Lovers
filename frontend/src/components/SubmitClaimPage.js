@@ -181,17 +181,34 @@ const SubmitClaimPage = () => {
         }))
       };
 
-      console.log('Submitting data:', submitData); // Add logging
+      // Send claim to backend
+      const response = await fetch('http://localhost:5000/verify_claim', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ claim: submitData.title }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to verify claim');
+      }
+
+      const result = await response.json();
       
-      // Simulate API call with shorter delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Store the result in localStorage
+      localStorage.setItem('claimResult', JSON.stringify({
+        ...result,
+        claim: submitData.title // Make sure the claim text is included
+      }));
       
-      // Navigate to trust score page
-      navigate('/trust-score');
+      // Navigate to result page
+      navigate('/result');
       
     } catch (error) {
       console.error('Submission error:', error);
-      alert('Failed to submit claim. Please try again.');
+      alert(error.message || 'Failed to submit claim. Please try again.');
     } finally {
       setIsSubmitting(false);
     }

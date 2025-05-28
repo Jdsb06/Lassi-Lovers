@@ -54,6 +54,10 @@ class ClaimResponse(BaseModel):
     sources: List[str] = []
     evidence: List[Dict[str, Any]] = []
     reviews: List[Dict[str, Any]] = []
+    chatgpt_score: Optional[float] = Field(None, description="Score from ChatGPT comparison (0-100)")
+    chatgpt_explanation: Optional[str] = Field(None, description="Explanation from ChatGPT comparison")
+    gpt_score: Optional[float] = Field(None, description="Score from GPT scoring (0-100)")
+    gpt_explanation: Optional[str] = Field(None, description="Explanation from GPT scoring")
 
 class AnalysisResponse(BaseModel):
     """Response model for text analysis"""

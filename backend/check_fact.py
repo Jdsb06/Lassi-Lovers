@@ -54,6 +54,14 @@ def check_fact(text: str):
             print(f"Verdict: {claim.get('verdict', 'unknown')}")
             print(f"Score: {claim.get('score', 0)}")
             print(f"Explanation: {claim.get('explanation', 'No explanation available')}")
+            
+            # Display GPT score
+            gpt_score = claim.get('gpt_score')
+            if gpt_score is not None:
+                print("\nGPT Analysis:")
+                print(f"Score: {gpt_score}/100")
+                print(f"Reasoning: {claim.get('gpt_explanation', 'No explanation provided')}")
+            
             if claim.get('sources'):
                 print("\nSources:")
                 for source in claim['sources']:

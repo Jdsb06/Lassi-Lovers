@@ -230,6 +230,24 @@ async def find_similar_claims(
             detail=f"Error finding similar claims: {str(e)}"
         )
 
+# Verify claim endpoint
+@app.post("/verify_claim", tags=["Fact Checking"])
+async def verify_claim(request: Request, claim_data: dict):
+    """
+    Verify a single claim and return the analysis results.
+    """
+    try:
+        # Verify the claim using the fact checker
+        result = await async_fact_checker.verify_claim(claim_data["claim"])
+        return result
+        
+    except Exception as e:
+        logger.error(f"Error verifying claim: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error verifying claim: {str(e)}"
+        )
+
 # Error handler
 @app.exception_handler(HTTPException)
 async def http_exception_handler(request: Request, exc: HTTPException):

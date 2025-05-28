@@ -7,7 +7,7 @@ import CommunityGuidelines from './components/CommunityGuidelines';
 import PrivacyPolicy from './components/PrivacyPolicy';
 import SubmitClaimPage from './components/SubmitClaimPage';
 import FAQ from './components/FAQ';
-import TrustScoreResult from './components/TrustScoreResult';
+import TrustScoreDisplay from './components/TrustScoreDisplay';
 import ChatbotLauncher from './components/ChatbotLauncher';
 
 const FactCheckHomepage = () => {
@@ -377,16 +377,19 @@ const FactCheckHomepage = () => {
 const App = () => {
   return (
     <Router>
-      <Routes>
-        <Route path="/" element={<FactCheckHomepage />} />
-        <Route path="/about" element={<About />} />
-        <Route path="/terms" element={<TermsOfService />} />
-        <Route path="/guidelines" element={<CommunityGuidelines />} />
-        <Route path="/privacy" element={<PrivacyPolicy />} />
-        <Route path="/submit" element={<SubmitClaimPage />} />
-        <Route path="/faqs" element={<FAQ />} />
-        <Route path="/trust-score" element={<TrustScoreResult />} />
-      </Routes>
+      <div>
+        <Routes>
+          <Route path="/" element={<FactCheckHomepage />} />
+          <Route path="/submit" element={<SubmitClaimPage />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/terms" element={<TermsOfService />} />
+          <Route path="/guidelines" element={<CommunityGuidelines />} />
+          <Route path="/privacy" element={<PrivacyPolicy />} />
+          <Route path="/faqs" element={<FAQ />} />
+          <Route path="/result" element={<TrustScoreDisplay />} />
+        </Routes>
+        <ChatbotLauncher />
+      </div>
     </Router>
   );
 };
