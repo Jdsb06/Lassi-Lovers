@@ -3,6 +3,15 @@ from typing import List, Dict, Any
 import re
 from transformers import pipeline
 
+# Add after imports:
+try:
+    nlp = spacy.load("en_core_web_sm")
+except:
+    import os
+    os.system("python -m spacy download en_core_web_sm")
+    nlp = spacy.load("en_core_web_sm")
+
+
 # Load spaCy model (run `python -m spacy download en_core_web_md` to install)
 nlp = spacy.load("en_core_web_sm")
 

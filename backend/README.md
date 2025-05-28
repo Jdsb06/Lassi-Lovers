@@ -155,3 +155,158 @@ The system implements rate limiting to prevent abuse and manage operational cost
 ## License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
+
+# Backend Documentation
+
+## Overview
+The backend is a FastAPI application designed for fact-checking claims. It provides endpoints for analyzing text, verifying claims, and searching for similar claims.
+
+## Setup Instructions
+
+### Prerequisites
+- Python 3.8 or higher
+- pip (Python package manager)
+- Virtual environment (recommended)
+
+### Installation
+1. Clone the repository:
+   ```bash
+   git clone <repository-url>
+   cd <repository-directory>
+   ```
+
+2. Create a virtual environment:
+   ```bash
+   python -m venv .venv
+   source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+   ```
+
+3. Install dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+4. Configure environment variables:
+   Create a `.env` file in the `backend` directory with the following variables:
+   ```
+   SERPER_API_KEY="your-serper-api-key"
+   OPENAI_API_KEY="your-openai-api-key"
+   GOOGLE_API_KEY="your-google-api-key"
+   DATABASE_URL="postgresql://user:password@localhost:5432/factcheck"
+   REDIS_URL="redis://localhost:6379/0"
+   VECTOR_DB_URL="http://localhost:6333"
+   RATE_LIMIT_PER_MINUTE=60
+   JWT_SECRET="your-secret-key-for-jwt-tokens"
+   MODEL_PATH="lytang/MiniCheck-Flan-T5-Large"
+   ```
+
+5. Start the server:
+   ```bash
+   uvicorn backend.app:app --host 0.0.0.0 --port 5000 --reload
+   ```
+
+## API Endpoints
+
+### Authentication
+- **POST /token**: Generate a JWT token for API access.
+  - Request Body:
+    ```json
+    {
+      "username": "your-username",
+      "password": "your-password"
+    }
+    ```
+  - Response:
+    ```json
+    {
+      "access_token": "your-jwt-token",
+      "token_type": "bearer",
+      "expires_in": 1800
+    }
+    ```
+
+### Fact Checking
+- **POST /analyze**: Analyze text for factual claims.
+  - Request Body:
+    ```json
+    {
+      "text": "Your text to analyze"
+    }
+    ```
+  - Response:
+    ```json
+    {
+      "claims": [],
+      "sentiment": {
+        "sentiment": "positive",
+        "score": 1.0,
+        "positive_words": 1,
+        "negative_words": 0
+      },
+      "processing_time": null
+    }
+    ```
+
+- **POST /analyze_url**: Analyze a URL for factual claims.
+  - Request Body:
+    ```json
+    {
+      "url": "https://example.com"
+    }
+    ```
+  - Response:
+    ```json
+    {
+      "claims": [],
+      "sentiment": {
+        "sentiment": "neutral",
+        "score": 0.5,
+        "positive_words": 0,
+        "negative_words": 0
+      },
+      "processing_time": null
+    }
+    ```
+
+- **POST /similar_claims**: Find claims similar to the provided claim.
+  - Request Body:
+    ```json
+    {
+      "text": "Your claim to find similar claims for"
+    }
+    ```
+  - Response:
+    ```json
+    {
+      "query": "Your claim to find similar claims for",
+      "results": []
+    }
+    ```
+
+### System
+- **GET /health**: Check the health of the API.
+  - Response:
+    ```json
+    {
+      "status": "healthy",
+      "version": "1.0.0",
+      "components": {
+        "database": true,
+        "vector_db": true,
+        "fact_checker": true
+      }
+    }
+    ```
+
+## Usage Examples
+- Use the `/token` endpoint to obtain a JWT token for authentication.
+- Use the `/analyze` endpoint to verify claims in text.
+- Use the `/analyze_url` endpoint to verify claims from a URL.
+- Use the `/similar_claims` endpoint to find similar claims.
+
+## Additional Information
+- The backend uses FastAPI for routing and request handling.
+- It integrates with Hugging Face for text generation and fact-checking.
+- Redis is used for caching results to improve performance.
+
+For more details, refer to the codebase and inline documentation.

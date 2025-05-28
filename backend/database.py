@@ -5,13 +5,13 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
 from datetime import datetime
 import json
-from qdrant_client import QdrantClient
-from qdrant_client.http import models
+import chromadb
+from chromadb.config import Settings
 import numpy as np
 
 # Load environment variables
 DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://postgres:postgres@localhost:5432/factcheck")
-VECTOR_DB_URL = os.getenv("VECTOR_DB_URL", "http://localhost:6333")
+CHROMA_PERSIST_DIR = os.getenv("CHROMA_PERSIST_DIR", "./chroma_db")
 
 # Initialize SQLAlchemy
 Base = declarative_base()
@@ -57,7 +57,13 @@ class Database:
         
         # Vector database connection
         try:
-            self.vector_client = QdrantClient(url=VECTOR_DB_URL)
+            self.vector_client = chromadb.PersistentClient(
+                path=CHROMA_PERSIST_DIR,
+                settings=Settings(
+                    anonymized_telemetry=False,
+                    allow_reset=True
+                )
+            )
             # Create collection if it doesn't exist
             self._create_vector_collection()
         except Exception as e:
@@ -70,19 +76,11 @@ class Database:
             return
             
         try:
-            # Check if collection exists
-            collections = self.vector_client.get_collections().collections
-            collection_names = [collection.name for collection in collections]
-            
-            if "fact_checks" not in collection_names:
-                # Create collection for fact checks
-                self.vector_client.create_collection(
-                    collection_name="fact_checks",
-                    vectors_config=models.VectorParams(
-                        size=768,  # Standard embedding size
-                        distance=models.Distance.COSINE
-                    )
-                )
+            # Get or create collection
+            self.collection = self.vector_client.get_or_create_collection(
+                name="fact_checks",
+                metadata={"hnsw:space": "cosine"}
+            )
         except Exception as e:
             print(f"Error creating vector collection: {e}")
     
@@ -139,19 +137,14 @@ class Database:
             # Store in vector database if embedding is provided
             if embedding and self.vector_client:
                 try:
-                    self.vector_client.upsert(
-                        collection_name="fact_checks",
-                        points=[
-                            models.PointStruct(
-                                id=fact_check.id,
-                                vector=embedding,
-                                payload={
-                                    "claim": claim,
-                                    "score": score,
-                                    "verdict": verdict
-                                }
-                            )
-                        ]
+                    self.collection.add(
+                        ids=[str(fact_check.id)],
+                        embeddings=[embedding],
+                        metadatas=[{
+                            "claim": claim,
+                            "score": score,
+                            "verdict": verdict
+                        }]
                     )
                 except Exception as e:
                     print(f"Error storing in vector database: {e}")
@@ -179,20 +172,19 @@ class Database:
             return []
             
         try:
-            search_result = self.vector_client.search(
-                collection_name="fact_checks",
-                query_vector=embedding,
-                limit=limit
+            search_result = self.collection.query(
+                query_embeddings=[embedding],
+                n_results=limit
             )
             
             results = []
-            for point in search_result:
+            for i in range(len(search_result['ids'][0])):
                 results.append({
-                    "id": point.id,
-                    "claim": point.payload.get("claim"),
-                    "score": point.payload.get("score"),
-                    "verdict": point.payload.get("verdict"),
-                    "similarity": point.score
+                    "id": int(search_result['ids'][0][i]),
+                    "claim": search_result['metadatas'][0][i]["claim"],
+                    "score": search_result['metadatas'][0][i]["score"],
+                    "verdict": search_result['metadatas'][0][i]["verdict"],
+                    "similarity": 1 - search_result['distances'][0][i]  # Convert distance to similarity
                 })
             
             return results

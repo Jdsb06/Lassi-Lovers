@@ -4,17 +4,16 @@ import json
 import time
 from typing import Dict, List, Any, Optional, Tuple
 import httpx
-from transformers import AutoModelForSeq2SeqLM, AutoTokenizer
 import redis
 from functools import lru_cache
 import hashlib
+from huggingface_hub import AsyncInferenceClient
 
 # Load environment variables
 API_KEY = os.getenv("GOOGLE_API_KEY")
 FACT_CHECK_URL = "https://factchecktools.googleapis.com/v1alpha1/claims:search"
 SERPER_API_KEY = os.getenv("SERPER_API_KEY")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-MODEL_PATH = os.getenv("MODEL_PATH", "lytang/MiniCheck-Flan-T5-Large")
 REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379/0")
 
 # Initialize Redis client for caching if available
@@ -24,20 +23,6 @@ try:
 except:
     REDIS_AVAILABLE = False
     print("Warning: Redis not available. Caching will be disabled.")
-
-# Initialize the MiniCheck model
-@lru_cache(maxsize=1)
-def get_model_and_tokenizer():
-    """
-    Load the MiniCheck model and tokenizer with caching to avoid reloading.
-    """
-    try:
-        tokenizer = AutoTokenizer.from_pretrained(MODEL_PATH)
-        model = AutoModelForSeq2SeqLM.from_pretrained(MODEL_PATH)
-        return model, tokenizer
-    except Exception as e:
-        print(f"Error loading model: {e}")
-        return None, None
 
 class FactChecker:
     def __init__(self):
@@ -164,8 +149,8 @@ class FactChecker:
 
             average_score = sum(scores) / len(scores) * 100
             return {
-                "score": average_score, 
-                "sources": sources, 
+                "score": average_score,
+                "sources": sources,
                 "reviews": reviews,
                 "available": True,
                 "found": True
@@ -175,7 +160,7 @@ class FactChecker:
 
     async def _verify_with_minicheck(self, claim: str, context: Optional[str] = None) -> Dict[str, Any]:
         """
-        Verify a claim using the MiniCheck model.
+        Verify a claim using the MiniCheck model via Hugging Face Inference API.
 
         Args:
             claim: The claim to verify
@@ -184,42 +169,39 @@ class FactChecker:
         Returns:
             Dictionary with verification results from MiniCheck
         """
-        model, tokenizer = get_model_and_tokenizer()
-        if model is None or tokenizer is None:
-            return {"score": 50, "explanation": "Model not available", "available": False}
+        hf_token = os.getenv("HF_TOKEN")
+        if not hf_token:
+            return {"score": 50, "explanation": "Hugging Face token not available", "available": False}
 
         try:
-            # Prepare input for the model
+            client = AsyncInferenceClient(token=hf_token, timeout=30.0)
             input_text = f"Claim: {claim}"
             if context:
                 input_text += f"\nContext: {context}"
 
-            # Tokenize and generate prediction
-            inputs = tokenizer(input_text, return_tensors="pt", max_length=512, truncation=True)
-            outputs = model.generate(
-                inputs.input_ids, 
-                max_length=100, 
-                num_beams=4,
-                early_stopping=True
+            result = await client.text_generation(
+                prompt=input_text,
+                model="lytang/MiniCheck-Flan-T5-Large",
+                max_new_tokens=100,
+                do_sample=True,
+                temperature=0.7
             )
 
-            # Decode the prediction
-            prediction = tokenizer.decode(outputs[0], skip_special_tokens=True)
-
-            # Parse the prediction
-            if "supported" in prediction.lower() or "true" in prediction.lower():
-                score = 90  # Supported claim
+            # Parse the generated result
+            result_lower = result.lower()
+            if "supported" in result_lower or "true" in result_lower:
+                score = 90
                 verdict = "supported"
-            elif "refuted" in prediction.lower() or "false" in prediction.lower():
-                score = 10  # Refuted claim
+            elif "refuted" in result_lower or "false" in result_lower:
+                score = 10
                 verdict = "refuted"
             else:
-                score = 50  # Neutral or unclear
+                score = 50
                 verdict = "neutral"
 
             return {
                 "score": score,
-                "explanation": prediction,
+                "explanation": result,
                 "verdict": verdict,
                 "available": True
             }
@@ -250,8 +232,8 @@ class FactChecker:
             })
 
             response = await self.http_client.post(
-                'https://google.serper.dev/search', 
-                headers=headers, 
+                'https://google.serper.dev/search',
+                headers=headers,
                 content=payload
             )
 

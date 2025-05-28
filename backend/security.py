@@ -8,6 +8,8 @@ from pydantic import BaseModel
 import time
 import redis
 from functools import wraps
+from typing import Callable
+from starlette.middleware.base import BaseHTTPMiddleware
 
 # Load environment variables
 JWT_SECRET = os.getenv("JWT_SECRET", "your-secret-key-for-jwt-tokens")
@@ -180,3 +182,38 @@ def validate_api_key(api_key: str) -> bool:
     # In a real application, you would validate against a database
     # For this example, we'll accept any non-empty string
     return bool(api_key)
+
+class RateLimitMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        client_ip = request.client.host
+        current_time = int(time.time())
+        window = 60  # 1 minute window
+        max_requests = RATE_LIMIT_PER_MINUTE
+        
+        if REDIS_AVAILABLE:
+            key = f"rate_limit:{client_ip}:{current_time // window}"
+            current = redis_client.incr(key)
+            if current == 1:
+                redis_client.expire(key, window)
+            if current > max_requests:
+                raise HTTPException(
+                    status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+                    detail="Rate limit exceeded. Please try again later."
+                )
+        else:
+            key = f"{client_ip}:{current_time // window}"
+            if key not in rate_limit_store:
+                rate_limit_store[key] = 1
+            else:
+                rate_limit_store[key] += 1
+            for k in list(rate_limit_store.keys()):
+                if k.split(":")[1] != str(current_time // window):
+                    rate_limit_store.pop(k, None)
+            if rate_limit_store[key] > max_requests:
+                raise HTTPException(
+                    status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+                    detail="Rate limit exceeded. Please try again later."
+                )
+        
+        response = await call_next(request)
+        return response

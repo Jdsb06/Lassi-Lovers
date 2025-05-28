@@ -11,12 +11,12 @@ import logging
 from contextlib import asynccontextmanager
 
 # Import local modules
-from models import ClaimRequest, UrlRequest, AnalysisResponse, ErrorResponse, HealthResponse, TokenRequest, TokenResponse, SimilarClaimsResponse
-from nlp_processor import extract_claims, preprocess_text, analyze_sentiment
-from fact_checker import fact_checker
-from database import db
-from security import rate_limit, get_current_user, create_access_token, User, get_api_key, validate_api_key
-from utils import extract_text_from_url, get_embedding, measure_execution_time, truncate_text
+from .models import ClaimRequest, UrlRequest, AnalysisResponse, ErrorResponse, HealthResponse, TokenRequest, TokenResponse, SimilarClaimsResponse
+from .nlp_processor import extract_claims, preprocess_text, analyze_sentiment
+from .fact_checker import fact_checker
+from .database import db
+from .security import rate_limit, get_current_user, create_access_token, User, get_api_key, validate_api_key, RateLimitMiddleware
+from .utils import extract_text_from_url, get_embedding, measure_execution_time, truncate_text, TimingMiddleware
 
 # Configure logging
 logging.basicConfig(
@@ -47,6 +47,10 @@ app = FastAPI(
     version=API_VERSION,
     lifespan=lifespan,
 )
+
+# Add middleware
+app.add_middleware(RateLimitMiddleware)
+app.add_middleware(TimingMiddleware)
 
 # Add CORS middleware
 app.add_middleware(
@@ -102,8 +106,6 @@ async def login_for_access_token(form_data: TokenRequest):
 
 # Main analysis endpoint
 @app.post("/analyze", response_model=AnalysisResponse, tags=["Fact Checking"])
-@measure_execution_time
-@rate_limit()
 async def analyze_text(
     request: Request,
     claim_request: ClaimRequest,
@@ -195,8 +197,6 @@ async def analyze_text(
 
 # URL analysis endpoint
 @app.post("/analyze_url", response_model=AnalysisResponse, tags=["Fact Checking"])
-@measure_execution_time
-@rate_limit()
 async def analyze_url(
     request: Request,
     url_request: UrlRequest,
@@ -252,7 +252,6 @@ async def analyze_url(
 
 # Similar claims endpoint
 @app.post("/similar_claims", response_model=SimilarClaimsResponse, tags=["Fact Checking"])
-@rate_limit()
 async def find_similar_claims(
     request: Request,
     claim_request: ClaimRequest,

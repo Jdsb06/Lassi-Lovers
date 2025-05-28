@@ -7,6 +7,9 @@ import re
 from transformers import pipeline
 from functools import lru_cache
 import numpy as np
+from fastapi import Request
+from starlette.middleware.base import BaseHTTPMiddleware
+import json
 
 # Load environment variables
 MODEL_PATH = os.getenv("MODEL_PATH", "lytang/MiniCheck-Flan-T5-Large")
@@ -180,3 +183,24 @@ def truncate_text(text: str, max_length: int = 1000) -> str:
         return truncated[:last_period + 1]
     else:
         return truncated
+
+class TimingMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        start_time = time.time()
+        response = await call_next(request)
+        process_time = time.time() - start_time
+        
+        # Add timing header
+        response.headers["X-Process-Time"] = str(process_time)
+        
+        # If response is JSON, add timing to the response body
+        if hasattr(response, "body"):
+            try:
+                body = json.loads(response.body)
+                if isinstance(body, dict):
+                    body["processing_time"] = process_time
+                    response.body = json.dumps(body).encode()
+            except:
+                pass
+                
+        return response
