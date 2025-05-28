@@ -266,7 +266,7 @@ const About = () => {
                 <li><a href="#submit" className="hover:text-white transition-colors">Submit Claim</a></li>
                 <li><a href="#browse" className="hover:text-white transition-colors">Browse Claims</a></li>
                 <li><Link to="/about" className="hover:text-white transition-colors">About</Link></li>
-                <li><a href="#faq" className="hover:text-white transition-colors">FAQ</a></li>
+                <li><a href="/faqs" className="hover:text-white transition-colors">FAQ</a></li>
               </ul>
             </div>
 
