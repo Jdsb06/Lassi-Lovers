@@ -49,7 +49,7 @@
 
   <p align="center">
     <br />
-    <a href="#about-the-project"><strong>📋 Explore the Documentation »</strong></a>
+    <a href="#about"><strong>📋 Explore the Documentation »</strong></a>
     <br />
     <br />
     <a href="https://your-demo-link.com">
