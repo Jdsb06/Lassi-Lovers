@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>AI Fact Checker</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 0 20px;
+        }
+        .container {
+            background: #f9f9f9;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .input-group {
+            margin-bottom: 20px;
+        }
+        textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            min-height: 100px;
+            margin-bottom: 10px;
+        }
+        button {
+            background: #0066cc;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #0052a3;
+        }
+        #result {
+            margin-top: 20px;
+            padding: 15px;
+            border-left: 4px solid #0066cc;
+            background: #f0f7ff;
+        }
+        .evidence {
+            margin-top: 10px;
+            padding: 10px;
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .loading {
+            display: none;
+            margin: 20px 0;
+            text-align: center;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>AI Fact Checker</h1>
+        <div class="input-group">
+            <textarea id="claim" placeholder="Enter the claim you want to verify..."></textarea>
+            <button onclick="checkFact()">Verify Claim</button>
+        </div>
+        <div id="loading" class="loading">
+            Analyzing claim and gathering evidence...
+        </div>
+        <div id="result"></div>
+    </div>
+
+    <script src="https://js.puter.com/v2/"></script>
+    <script>
+        async function checkFact() {
+            const claim = document.getElementById('claim').value;
+            if (!claim) return;
+
+            const loading = document.getElementById('loading');
+            const result = document.getElementById('result');
+            
+            loading.style.display = 'block';
+            result.innerHTML = '';
+
+            try {
+                // First, get evidence from our backend
+                const response = await fetch('/analyze', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ text: claim })
+                });
+
+                const data = await response.json();
+                const evidence = data.evidence || [];
+                
+                // Format evidence for Grok
+                const evidenceText = evidence
+                    .map((e, i) => `Source ${i + 1}: ${e.snippet} (from ${e.link})`)
+                    .join('\n\n');
+
+                // Use Grok to analyze the claim and evidence
+                const prompt = `Analyze this claim and determine if it's true or false based on the evidence provided.
+
+Claim: "${claim}"
+
+Evidence:
+${evidenceText}
+
+Please analyze the evidence carefully and provide:
+1. A clear verdict (true, false, or uncertain)
+2. A confidence score (0-100)
+3. A detailed explanation of your reasoning
+4. Any important caveats or limitations
+
+Format your response as a clear analysis that a general audience can understand.`;
+
+                const grokResponse = await puter.ai.chat(prompt, {
+                    model: 'grok-3',
+                    stream: true
+                });
+
+                // Create result container
+                result.innerHTML = `
+                    <h3>Analysis Results:</h3>
+                    <div id="analysis"></div>
+                    <h4>Evidence Reviewed:</h4>
+                    <div class="evidence">
+                        ${evidence.map((e, i) => `
+                            <p><strong>Source ${i + 1}:</strong> ${e.snippet}<br>
+                            <a href="${e.link}" target="_blank">${e.link}</a></p>
+                        `).join('')}
+                    </div>
+                `;
+
+                const analysisDiv = document.getElementById('analysis');
+                
+                // Stream Grok's analysis
+                for await (const part of grokResponse) {
+                    analysisDiv.innerHTML += part.text;
+                }
+
+            } catch (error) {
+                result.innerHTML = `<p style="color: red;">Error: ${error.message}</p>`;
+            } finally {
+                loading.style.display = 'none';
+            }
+        }
+
+        // Allow submitting with Enter key
+        document.getElementById('claim').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                checkFact();
+            }
+        });
+    </script>
+</body>
+</html> 
