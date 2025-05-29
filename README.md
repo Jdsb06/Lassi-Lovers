@@ -434,13 +434,6 @@ MongoDB >= 5.0 (local or cloud instance)
 - **Learn About Sources:** "What makes a source trustworthy?"
 - **Request Evidence:** "Show me the evidence for this claim"
 
-### 👥 **Community Participation**
-
-- **Flag Content:** Report suspicious or false claims
-- **Submit Evidence:** Provide additional sources or corrections
-- **Peer Review:** Validate other users' contributions
-- **Build Reputation:** Earn credibility through quality contributions
-
 
 ---
 
@@ -455,9 +448,8 @@ graph TD
     C --> D[Multi-Source Verification]
     D --> E[Confidence Scoring]
     E --> F[Result Generation]
-    F --> G[Community Review]
-    G --> H[Final Trust Score]
-    H --> I[User Notification]
+    F --> G[Final Trust Score]
+    G --> H[User Notification]
 ```
 
 ### 🧠 **AI Processing Pipeline**
@@ -482,7 +474,6 @@ graph TD
    - Evidence strength analysis
    - Uncertainty quantification
 
-
 ---
 
 ## 🗺️ Development Roadmap<a id="dev"></a>
@@ -503,19 +494,16 @@ graph TD
 - [x] **Phase 2: AI Enhancement** *(Completed)*
   - [x] Advanced ML models for claim classification
   - [x] Intelligent chatbot with RAG
-  - [x] Community features and peer review
   - [x] Real-time notifications
 
 - [ ] **Phase 3: Mobile & Audio** *(In Progress)*
   - [ ] React Native mobile application
   - [ ] Audio claim submission and processing
-  - [ ] Voice-activated chatbot interactions
   - [ ] Push notifications for mobile users
 
 - [ ] **Phase 4: Advanced Analytics** *(Planned)*
   - [ ] Misinformation trend analysis dashboard
   - [ ] Predictive modeling for viral false claims
-  - [ ] Geographic spread visualization
   - [ ] Impact assessment metrics
 
 - [ ] **Phase 5: Gamification** *(Future)*
@@ -526,7 +514,6 @@ graph TD
 
 - [ ] **Phase 6: Enterprise Features** *(Future)*
   - [ ] API for third-party integrations
-  - [ ] White-label solutions for organizations
   - [ ] Advanced reporting and analytics
   - [ ] Custom model training capabilities
 
