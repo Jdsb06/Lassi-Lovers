@@ -5,12 +5,12 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
 from datetime import datetime
 import json
-# import chromadb
-# from chromadb.config import Settings
+import chromadb
+from chromadb.config import Settings
 import numpy as np
 
 # Load environment variables
-DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://postgres:postgres@localhost:5432/postgres")
+DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://postgres:postgres@localhost:5432/factcheck")
 CHROMA_PERSIST_DIR = os.getenv("CHROMA_PERSIST_DIR", "./chroma_db")
 
 # Initialize SQLAlchemy
@@ -48,16 +48,41 @@ class Database:
     """Database manager for PostgreSQL and vector database"""
     def __init__(self):
         """Initialize database connections"""
-        # Connect directly to the factcheck database
-        self.engine = create_engine("postgresql://postgres:postgres@localhost:5432/postgres")
+        # PostgreSQL connection
+        self.engine = create_engine(DATABASE_URL)
         self.SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=self.engine)
         
         # Create tables if they don't exist
         Base.metadata.create_all(bind=self.engine)
         
-        # Vector database connection (disabled)
-        self.vector_client = None
-        self.collection = None
+        # Vector database connection
+        try:
+            self.vector_client = chromadb.PersistentClient(
+                path=CHROMA_PERSIST_DIR,
+                settings=Settings(
+                    anonymized_telemetry=False,
+                    allow_reset=True
+                )
+            )
+            # Create collection if it doesn't exist
+            self._create_vector_collection()
+        except Exception as e:
+            print(f"Warning: Vector database connection failed: {e}")
+            self.vector_client = None
+    
+    def _create_vector_collection(self):
+        """Create vector collection if it doesn't exist"""
+        if self.vector_client is None:
+            return
+            
+        try:
+            # Get or create collection
+            self.collection = self.vector_client.get_or_create_collection(
+                name="fact_checks",
+                metadata={"hnsw:space": "cosine"}
+            )
+        except Exception as e:
+            print(f"Error creating vector collection: {e}")
     
     def store_fact_check(self, 
                         claim: str, 
@@ -67,7 +92,21 @@ class Database:
                         sources: Optional[List[str]] = None,
                         evidence: Optional[List[Dict[str, Any]]] = None,
                         embedding: Optional[List[float]] = None) -> int:
-        """Store fact check results in PostgreSQL"""
+        """
+        Store fact check results in PostgreSQL and vector database
+        
+        Args:
+            claim: The verified claim
+            score: The verification score (0-100)
+            verdict: The verification verdict (supported, refuted, neutral)
+            explanation: Optional explanation of the verification
+            sources: Optional list of source URLs
+            evidence: Optional list of evidence items
+            embedding: Optional vector embedding of the claim
+            
+        Returns:
+            ID of the stored fact check
+        """
         # Store in PostgreSQL
         db = self.SessionLocal()
         try:
@@ -95,6 +134,21 @@ class Database:
                     db.add(evidence_item)
                 db.commit()
             
+            # Store in vector database if embedding is provided
+            if embedding and self.vector_client:
+                try:
+                    self.collection.add(
+                        ids=[str(fact_check.id)],
+                        embeddings=[embedding],
+                        metadatas=[{
+                            "claim": claim,
+                            "score": score,
+                            "verdict": verdict
+                        }]
+                    )
+                except Exception as e:
+                    print(f"Error storing in vector database: {e}")
+            
             return fact_check.id
         except Exception as e:
             db.rollback()
@@ -104,23 +158,64 @@ class Database:
             db.close()
     
     def find_similar_claims(self, embedding: List[float], limit: int = 5) -> List[Dict[str, Any]]:
-        """Dummy implementation for similar claims search"""
-        return []
+        """
+        Find similar claims using vector similarity search
+        
+        Args:
+            embedding: Vector embedding of the query claim
+            limit: Maximum number of results to return
+            
+        Returns:
+            List of similar claims with scores and verdicts
+        """
+        if self.vector_client is None:
+            return []
+            
+        try:
+            search_result = self.collection.query(
+                query_embeddings=[embedding],
+                n_results=limit
+            )
+            
+            results = []
+            for i in range(len(search_result['ids'][0])):
+                results.append({
+                    "id": int(search_result['ids'][0][i]),
+                    "claim": search_result['metadatas'][0][i]["claim"],
+                    "score": search_result['metadatas'][0][i]["score"],
+                    "verdict": search_result['metadatas'][0][i]["verdict"],
+                    "similarity": 1 - search_result['distances'][0][i]  # Convert distance to similarity
+                })
+            
+            return results
+        except Exception as e:
+            print(f"Error searching vector database: {e}")
+            return []
     
     def get_fact_check_by_id(self, fact_check_id: int) -> Dict[str, Any]:
-        """Get fact check by ID from PostgreSQL"""
+        """
+        Get fact check by ID from PostgreSQL
+        
+        Args:
+            fact_check_id: ID of the fact check to retrieve
+            
+        Returns:
+            Fact check data with evidence
+        """
         db = self.SessionLocal()
         try:
             fact_check = db.query(FactCheck).filter(FactCheck.id == fact_check_id).first()
             if not fact_check:
                 return None
                 
-            evidence_items = []
-            for evidence in fact_check.evidence:
-                evidence_items.append({
-                    "title": evidence.title,
-                    "snippet": evidence.snippet,
-                    "link": evidence.link
+            # Get evidence
+            evidence_items = db.query(ClaimEvidence).filter(ClaimEvidence.fact_check_id == fact_check_id).all()
+            evidence = []
+            for item in evidence_items:
+                evidence.append({
+                    "title": item.title,
+                    "snippet": item.snippet,
+                    "link": item.link
                 })
                 
             return {
@@ -129,8 +224,9 @@ class Database:
                 "score": fact_check.score,
                 "verdict": fact_check.verdict,
                 "explanation": fact_check.explanation,
-                "sources": json.loads(fact_check.sources) if fact_check.sources else None,
-                "evidence": evidence_items
+                "sources": json.loads(fact_check.sources) if fact_check.sources else [],
+                "evidence": evidence,
+                "created_at": fact_check.created_at.isoformat()
             }
         except Exception as e:
             print(f"Error retrieving fact check: {e}")
@@ -138,5 +234,5 @@ class Database:
         finally:
             db.close()
 
-# Create global database instance
+# Create a singleton instance
 db = Database()
