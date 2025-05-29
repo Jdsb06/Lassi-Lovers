@@ -10,12 +10,12 @@ class VerificationStatus(str, Enum):
 
 class ClaimRequest(BaseModel):
     """Request model for claim verification"""
-    text: str = Field(..., description="Text to analyze for claims", min_length=1)
-    context: Optional[str] = Field(None, description="Optional context for the claims")
+    text: str
+    context: Optional[str] = None
 
 class UrlRequest(BaseModel):
     """Request model for URL verification"""
-    url: HttpUrl = Field(..., description="URL to analyze for claims")
+    url: str
 
 class Evidence(BaseModel):
     """Model for evidence items"""
@@ -40,16 +40,35 @@ class Claim(BaseModel):
     evidence: List[Evidence] = Field(default_factory=list, description="Evidence for the claim")
     reviews: List[Review] = Field(default_factory=list, description="Fact check reviews")
 
+class SentimentResponse(BaseModel):
+    sentiment: str
+    score: float
+    positive_words: Optional[int] = None
+    negative_words: Optional[int] = None
+
+class ClaimResponse(BaseModel):
+    text: str
+    score: float
+    verdict: str
+    explanation: Optional[str] = None
+    sources: List[str] = []
+    evidence: List[Dict[str, Any]] = []
+    reviews: List[Dict[str, Any]] = []
+    chatgpt_score: Optional[float] = Field(None, description="Score from ChatGPT comparison (0-100)")
+    chatgpt_explanation: Optional[str] = Field(None, description="Explanation from ChatGPT comparison")
+    gpt_score: Optional[float] = Field(None, description="Score from GPT scoring (0-100)")
+    gpt_explanation: Optional[str] = Field(None, description="Explanation from GPT scoring")
+
 class AnalysisResponse(BaseModel):
     """Response model for text analysis"""
-    claims: List[Claim] = Field(..., description="List of verified claims")
-    sentiment: Optional[Dict[str, Any]] = Field(None, description="Sentiment analysis of the text")
-    processing_time: Optional[float] = Field(None, description="Processing time in seconds")
+    claims: List[ClaimResponse]
+    sentiment: SentimentResponse
+    processing_time: Optional[float] = None
 
 class ErrorResponse(BaseModel):
     """Response model for errors"""
     error: str = Field(..., description="Error message")
-    detail: Optional[str] = Field(None, description="Detailed error information")
+    detail: str
 
 class HealthResponse(BaseModel):
     """Response model for health check"""
@@ -59,14 +78,14 @@ class HealthResponse(BaseModel):
 
 class TokenRequest(BaseModel):
     """Request model for token generation"""
-    username: str = Field(..., description="Username")
-    password: str = Field(..., description="Password")
+    username: str
+    password: str
 
 class TokenResponse(BaseModel):
     """Response model for token generation"""
-    access_token: str = Field(..., description="JWT access token")
-    token_type: str = Field(..., description="Token type")
-    expires_in: int = Field(..., description="Token expiration time in seconds")
+    access_token: str
+    token_type: str
+    expires_in: int
 
 class SimilarClaim(BaseModel):
     """Model for similar claims"""
@@ -78,5 +97,5 @@ class SimilarClaim(BaseModel):
 
 class SimilarClaimsResponse(BaseModel):
     """Response model for similar claims search"""
-    query: str = Field(..., description="The query claim")
-    results: List[SimilarClaim] = Field(..., description="Similar claims")
+    query: str
+    results: List[Dict[str, Any]]

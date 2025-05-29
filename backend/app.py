@@ -9,15 +9,14 @@ from typing import List, Dict, Any, Optional
 import uvicorn
 import logging
 from contextlib import asynccontextmanager
-from pathlib import Path
 
 # Import local modules
-from .models import ClaimRequest, UrlRequest, AnalysisResponse, ErrorResponse, HealthResponse, TokenRequest, TokenResponse, SimilarClaimsResponse
-from .nlp_processor import extract_claims, preprocess_text, analyze_sentiment
-from .fact_checker import fact_checker
-from .database import db
-from .security import rate_limit, get_current_user, create_access_token, User, get_api_key, validate_api_key, RateLimitMiddleware
-from .utils import extract_text_from_url, get_embedding, measure_execution_time, truncate_text, TimingMiddleware
+from models import ClaimRequest, UrlRequest, AnalysisResponse, ErrorResponse, HealthResponse, TokenRequest, TokenResponse, SimilarClaimsResponse
+from nlp_processor import extract_claims, analyze_sentiment
+from fact_checker import async_fact_checker
+from database import db
+from security import rate_limit, get_current_user, create_access_token, User, get_api_key, validate_api_key, RateLimitMiddleware
+from utils import extract_text_from_url, get_embedding, measure_execution_time, truncate_text, TimingMiddleware
 
 # Configure logging
 logging.basicConfig(
@@ -26,49 +25,8 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-# Get the absolute path to the backend directory and .env file
-BACKEND_DIR = Path(__file__).resolve().parent
-ENV_FILE = BACKEND_DIR / ".env"
-
-# Print detailed path information
-logger.info("=== Environment File Path Information ===")
-logger.info(f"__file__: {__file__}")
-logger.info(f"Resolved __file__: {Path(__file__).resolve()}")
-logger.info(f"Backend directory (parent): {BACKEND_DIR}")
-logger.info(f"ENV file path: {ENV_FILE}")
-logger.info(f"ENV file exists: {ENV_FILE.exists()}")
-logger.info(f"ENV file is file: {ENV_FILE.is_file()}")
-logger.info(f"ENV file is readable: {os.access(str(ENV_FILE), os.R_OK)}")
-if ENV_FILE.exists():
-    logger.info(f"ENV file size: {ENV_FILE.stat().st_size} bytes")
-    logger.info(f"ENV file permissions: {oct(ENV_FILE.stat().st_mode)[-3:]}")
-    logger.info(f"ENV file absolute path: {ENV_FILE.absolute()}")
-    logger.info(f"ENV file real path: {ENV_FILE.resolve()}")
-logger.info("=== End Environment File Path Information ===")
-
-# Try to read the .env file directly to verify its contents
-try:
-    if ENV_FILE.exists():
-        with open(ENV_FILE, 'r') as f:
-            env_contents = f.read()
-            logger.info(f"Successfully read .env file. First 100 chars: {env_contents[:100]}...")
-    else:
-        logger.error(f"Cannot read .env file: File does not exist at {ENV_FILE}")
-except Exception as e:
-    logger.error(f"Error reading .env file: {str(e)}")
-
-# Load environment variables from the backend directory
-load_dotenv(dotenv_path=str(ENV_FILE), override=True)
-
-# Log environment variable status with more detail
-logger.info("=== Environment Variables After Loading ===")
-for key in ["GOOGLE_API_KEY", "SERPER_API_KEY", "OPENAI_API_KEY", "DATABASE_URL", "REDIS_URL"]:
-    value = os.environ.get(key)
-    if value:
-        logger.info(f"{key}: Found (length: {len(value)})")
-    else:
-        logger.error(f"{key}: Not found in environment variables")
-logger.info("=== End Environment Variables ===")
+# Load environment variables
+load_dotenv()
 
 # API version
 API_VERSION = "1.0.0"
@@ -161,75 +119,27 @@ async def analyze_text(
     and returns the results with confidence scores and sources.
     """
     try:
-        # Preprocess text
-        text = preprocess_text(claim_request.text)
-
-        # Extract claims
-        claims = extract_claims(text)
-        if not claims:
-            return {"claims": [], "sentiment": analyze_sentiment(text)}
-
-        # Verify each claim
-        verified_claims = []
-        for claim_text in claims:
-            # Get claim embedding for vector search
-            embedding = get_embedding(claim_text)
-
-            # Check for similar claims in database
-            similar_claims = []
-            if embedding:
-                similar_claims = db.find_similar_claims(embedding, limit=1)
-
-            # If we found a very similar claim with high confidence, use cached result
-            if similar_claims and similar_claims[0]["similarity"] > 0.95:
-                # Get full details of the similar claim
-                cached_result = db.get_fact_check_by_id(similar_claims[0]["id"])
-                if cached_result:
-                    verified_claims.append({
-                        "text": claim_text,
-                        "score": cached_result["score"],
-                        "verdict": cached_result["verdict"],
-                        "explanation": cached_result["explanation"],
-                        "sources": cached_result["sources"],
-                        "evidence": cached_result["evidence"],
-                        "reviews": []  # No reviews for cached results
-                    })
-                    continue
-
-            # Verify the claim
-            verification_result = await fact_checker.verify_claim(
-                claim_text, 
-                context=claim_request.context
-            )
-
-            # Store the result in database
-            if embedding:
-                db.store_fact_check(
-                    claim=claim_text,
-                    score=verification_result["score"],
-                    verdict=verification_result["verdict"],
-                    explanation=verification_result["explanation"],
-                    sources=verification_result["sources"],
-                    evidence=verification_result["evidence"],
-                    embedding=embedding
-                )
-
-            # Add to results
-            verified_claims.append({
-                "text": claim_text,
-                "score": verification_result["score"],
-                "verdict": verification_result["verdict"],
-                "explanation": verification_result["explanation"],
-                "sources": verification_result["sources"],
-                "evidence": verification_result["evidence"],
-                "reviews": verification_result.get("reviews", [])
-            })
-
-        # Return results
-        return {
-            "claims": verified_claims,
-            "sentiment": analyze_sentiment(text)
-        }
+        # Extract claims from text
+        claims = extract_claims(claim_request.text)
+        
+        # Analyze each claim
+        analyzed_claims = []
+        for claim in claims:
+            # Verify the claim asynchronously
+            result = await async_fact_checker.verify_claim(claim)
+            # Map 'claim' field to 'text' for response
+            result['text'] = result.pop('claim', claim)
+            analyzed_claims.append(result)
+        
+        # Analyze sentiment
+        sentiment = analyze_sentiment(claim_request.text)
+        
+        return AnalysisResponse(
+            claims=analyzed_claims,
+            sentiment=sentiment,
+            processing_time=None
+        )
+        
     except Exception as e:
         logger.error(f"Error analyzing text: {str(e)}")
         raise HTTPException(
@@ -253,38 +163,29 @@ async def analyze_url(
     """
     try:
         # Extract text from URL
-        text, metadata = await extract_text_from_url(str(url_request.url))
-
-        # Truncate text if it's too long
-        text = truncate_text(text, max_length=5000)
-
-        # Extract claims
+        text = extract_text_from_url(str(url_request.url))
+        
+        # Extract claims from text
         claims = extract_claims(text)
-        if not claims:
-            return {"claims": [], "sentiment": analyze_sentiment(text)}
-
-        # Verify each claim (similar to analyze_text)
-        verified_claims = []
-        for claim_text in claims:
-            # Verify the claim
-            verification_result = await fact_checker.verify_claim(claim_text)
-
-            # Add to results
-            verified_claims.append({
-                "text": claim_text,
-                "score": verification_result["score"],
-                "verdict": verification_result["verdict"],
-                "explanation": verification_result["explanation"],
-                "sources": verification_result["sources"],
-                "evidence": verification_result["evidence"],
-                "reviews": verification_result.get("reviews", [])
-            })
-
-        # Return results
-        return {
-            "claims": verified_claims,
-            "sentiment": analyze_sentiment(text)
-        }
+        
+        # Analyze each claim
+        analyzed_claims = []
+        for claim in claims:
+            # Verify the claim asynchronously
+            result = await async_fact_checker.verify_claim(claim)
+            # Map 'claim' field to 'text' for response
+            result['text'] = result.pop('claim', claim)
+            analyzed_claims.append(result)
+        
+        # Analyze sentiment
+        sentiment = analyze_sentiment(text)
+        
+        return AnalysisResponse(
+            claims=analyzed_claims,
+            sentiment=sentiment,
+            processing_time=None
+        )
+        
     except Exception as e:
         logger.error(f"Error analyzing URL: {str(e)}")
         raise HTTPException(
@@ -315,18 +216,7 @@ async def find_similar_claims(
             )
 
         # Find similar claims
-        similar_claims_data = db.find_similar_claims(embedding, limit=5)
-
-        # Adjust data structure to match the SimilarClaimsResponse model
-        similar_claims = []
-        for item in similar_claims_data:
-            similar_claims.append({
-                "id": item.get("id"),
-                "text": item.get("claim"), # Map 'claim' to 'text'
-                "score": item.get("score"),
-                "verdict": item.get("verdict"),
-                "similarity": item.get("similarity"),
-            })
+        similar_claims = db.find_similar_claims(embedding, limit=5)
 
         # Return results
         return {
@@ -340,6 +230,24 @@ async def find_similar_claims(
             detail=f"Error finding similar claims: {str(e)}"
         )
 
+# Verify claim endpoint
+@app.post("/verify_claim", tags=["Fact Checking"])
+async def verify_claim(request: Request, claim_data: dict):
+    """
+    Verify a single claim and return the analysis results.
+    """
+    try:
+        # Verify the claim using the fact checker
+        result = await async_fact_checker.verify_claim(claim_data["claim"])
+        return result
+        
+    except Exception as e:
+        logger.error(f"Error verifying claim: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error verifying claim: {str(e)}"
+        )
+
 # Error handler
 @app.exception_handler(HTTPException)
 async def http_exception_handler(request: Request, exc: HTTPException):
@@ -348,42 +256,6 @@ async def http_exception_handler(request: Request, exc: HTTPException):
         status_code=exc.status_code,
         content={"error": exc.detail}
     )
-
-# Add test endpoint for environment variables
-@app.get("/test-env", tags=["System"])
-async def test_env():
-    """Test endpoint to check environment variables."""
-    env_vars = {
-        "GOOGLE_API_KEY": os.environ.get("GOOGLE_API_KEY"),
-        "SERPER_API_KEY": os.environ.get("SERPER_API_KEY"),
-        "OPENAI_API_KEY": os.environ.get("OPENAI_API_KEY"),
-        "DATABASE_URL": os.environ.get("DATABASE_URL"),
-        "REDIS_URL": os.environ.get("REDIS_URL")
-    }
-    
-    # Get detailed path information
-    backend_dir = Path(__file__).resolve().parent
-    env_file = backend_dir / ".env"
-    
-    # Mask the actual values for security
-    masked_vars = {k: f"{v[:10]}..." if v else None for k, v in env_vars.items()}
-    
-    return {
-        "status": "success",
-        "environment_variables": masked_vars,
-        "path_information": {
-            "current_working_dir": os.getcwd(),
-            "backend_dir": str(backend_dir),
-            "env_file_path": str(env_file),
-            "env_file_exists": env_file.exists(),
-            "env_file_is_file": env_file.is_file() if env_file.exists() else False,
-            "env_file_is_readable": os.access(str(env_file), os.R_OK) if env_file.exists() else False,
-            "env_file_size": env_file.stat().st_size if env_file.exists() else None,
-            "env_file_permissions": oct(env_file.stat().st_mode)[-3:] if env_file.exists() else None,
-            "__file__": __file__,
-            "resolved_file": str(Path(__file__).resolve())
-        }
-    }
 
 # Root endpoint
 @app.get("/", tags=["System"])

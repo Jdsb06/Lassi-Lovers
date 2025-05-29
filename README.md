@@ -1,171 +1,70 @@
-# FactCheck: Full-Stack Automated Fact-Checking Platform
+# Getting Started with Create React App
 
-A modern, production-ready system for automated fact-checking, claim verification, and trust scoring.
-Built with **FastAPI** (Python) for the backend and **React** for the frontend.
+This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
----
+## Available Scripts
 
-## Project Structure & File Roles
+In the project directory, you can run:
 
-```
-Lassi-Lovers/
-├── backend/         # FastAPI backend (APIs, ML, DB, logic)
-│   ├── app.py            # Main FastAPI app, API endpoints, server entry
-│   ├── fact_checker.py   # Fact-checking logic, integrates models/APIs
-│   ├── nlp_processor.py  # NLP claim extraction, sentiment analysis
-│   ├── database.py       # PostgreSQL & vector DB logic
-│   ├── models.py         # Pydantic models for API/data
-│   ├── utils.py          # Helper functions (text, embeddings, etc)
-│   ├── security.py       # Auth, JWT, rate limiting
-│   ├── requirements.txt  # Python dependencies
-│   ├── .env.example      # Example environment config
-│   ├── README.md         # Backend-specific docs
-│   └── ...
-├── frontend/        # React frontend (UI, UX)
-│   ├── src/                 # React components, pages, services
-│   ├── public/              # Static assets
-│   ├── package.json         # Frontend dependencies/scripts
-│   ├── README.md            # Frontend-specific docs
-│   └── ...
-├── README.md        # (This file)
-└── ...
-```
+### `npm start`
 
----
+Runs the app in the development mode.\
+Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
 
-## Quick Start: How to Run Locally
+The page will reload when you make changes.\
+You may also see any lint errors in the console.
 
-### Prerequisites
-- **Python 3.8+**
-- **Node.js 14+** (for frontend)
-- **PostgreSQL** (for backend DB)
-- **Redis** (optional, for caching/rate limiting)
-- **Qdrant** (optional, for vector search)
+### `npm test`
 
-### 1. Backend Setup
-```bash
-cd backend
-python3 -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
-python3 -m spacy download en_core_web_md
-cp .env.example .env  # Fill in your API keys and DB URLs
-```
-- Edit `backend/.env` with your keys:
-  ```
-  SERPER_API_KEY=...
-  OPENAI_API_KEY=...
-  GOOGLE_API_KEY=...
-  DATABASE_URL=postgresql://user:password@localhost:5432/factcheck
-  REDIS_URL=redis://localhost:6379/0
-  JWT_SECRET=...
-  MODEL_PATH=lytang/MiniCheck-Flan-T5-Large
-  ```
-- **Start PostgreSQL** and create a database named `factcheck`.
-- **Run the backend:**
-  ```bash
-  uvicorn backend.app:app --host 0.0.0.0 --port 5000 --reload
-  ```
-- **Test the backend:**
-  ```bash
-  curl http://localhost:5000/health
-  curl http://localhost:5000/test-env
-  ```
+Launches the test runner in the interactive watch mode.\
+See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
 
-### 2. Frontend Setup
-```bash
-cd frontend
-npm install
-npm start
-```
-- Open [http://localhost:3000](http://localhost:3000) in your browser.
+### `npm run build`
 
----
+Builds the app for production to the `build` folder.\
+It correctly bundles React in production mode and optimizes the build for the best performance.
 
-## Common Errors & Troubleshooting
-- **.env not found:** Ensure your `.env` is in `backend/` and filled out. Use `/test-env` endpoint to debug environment loading.
-- **Database errors:** Make sure PostgreSQL is running and the `DATABASE_URL` is correct.
-- **Model errors:** If you see errors about `MiniCheck` or `torch`, ensure you have the right model path and have installed all dependencies.
-- **Frontend API errors:** Make sure the backend is running on port 5000 and the frontend is configured to use that port.
-- **Port conflicts:** Change the port in the run command if 5000 or 3000 is in use.
-- **CORS errors:** Update allowed origins in backend/app.py for production.
+The build is minified and the filenames include the hashes.\
+Your app is ready to be deployed!
 
----
+See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
 
-## API Documentation
-Once the backend is running, see:
-- **Swagger UI:** [http://localhost:5000/docs](http://localhost:5000/docs)
-- **ReDoc:** [http://localhost:5000/redoc](http://localhost:5000/redoc)
+### `npm run eject`
 
-### Main Endpoints
-| Endpoint            | Method | Description                                 |
-|---------------------|--------|---------------------------------------------|
-| `/analyze`          | POST   | Analyze text for factual claims             |
-| `/analyze_url`      | POST   | Analyze a URL for factual claims            |
-| `/similar_claims`   | POST   | Find claims similar to the provided claim   |
-| `/token`            | POST   | Get authentication token                    |
-| `/health`           | GET    | Check API health                            |
-| `/test-env`         | GET    | Debug environment variable loading          |
+**Note: this is a one-way operation. Once you `eject`, you can't go back!**
 
-**See `backend/about-api.md` for detailed request/response examples.**
+If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
 
----
+Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
 
-## How It Works
-- **Frontend:** Users submit claims or URLs. The UI is fully responsive (mobile/tablet/desktop).
-- **Backend:**
-  1. Extracts factual claims using spaCy.
-  2. Verifies claims using:
-     - Google Fact Check API
-     - MiniCheck AI model
-     - Evidence search (Serper API)
-  3. Combines results, stores in DB, and returns verdict, score, and sources.
-- **Database:**
-  - PostgreSQL for metadata/results.
-  - Qdrant for vector similarity search (optional).
-  - Redis for caching/rate limiting (optional).
+You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
 
----
+## Learn More
 
-## Deployment
-- **Frontend:**
-  ```bash
-  cd frontend
-  npm run build
-  # Serve build/ with Nginx, Vercel, Netlify, etc.
-  ```
-- **Backend:**
-  ```bash
-  cd backend
-  source .venv/bin/activate
-  gunicorn -w 4 -k uvicorn.workers.UvicornWorker backend.app:app
-  ```
-- **Production Tips:**
-  - Set CORS to your frontend domain in `backend/app.py`.
-  - Use HTTPS.
-  - Store secrets securely.
+You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
 
----
+To learn React, check out the [React documentation](https://reactjs.org/).
 
-## Contributing
-- Fork the repo, create a branch, and submit a PR.
-- Please document any new endpoints or features in this README.
+### Code Splitting
 
----
+This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
 
-## License
-MIT License
+### Analyzing the Bundle Size
 
----
+This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
 
-## Maintainers
-- [Your Name] (add your contact/github here)
-- [Teammate Name(s)]
+### Making a Progressive Web App
 
----
+This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
 
-## Additional Docs
-- See `backend/README.md` and `backend/about-api.md` for backend details.
-- See `frontend/README.md` for frontend-specific scripts and troubleshooting.
+### Advanced Configuration
 
-**Happy Fact-Checking!**
+This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+
+### Deployment
+
+This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+
+### `npm run build` fails to minify
+
+This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)

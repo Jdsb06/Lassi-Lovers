@@ -8,57 +8,17 @@ import redis
 from functools import lru_cache
 import hashlib
 from huggingface_hub import AsyncInferenceClient
-import logging
-from minicheck.minicheck import MiniCheck
-import nltk
-from dotenv import load_dotenv
-from pathlib import Path
-
-# Ensure the NLTK data path is set correctly
-# Replace with the actual path to your .venv/nltk_data directory
-NLTK_VENV_DATA_PATH = os.path.join(os.path.dirname(__file__), "..", ".venv", "nltk_data")
-if NLTK_VENV_DATA_PATH not in nltk.data.path:
-    nltk.data.path.append(NLTK_VENV_DATA_PATH)
+import openai
+import google.generativeai as genai
+import asyncio
+from google.generativeai.types import HarmCategory, HarmBlockThreshold
 
 # Load environment variables
-from pathlib import Path
-
-# Get the absolute path to the backend directory
-BACKEND_DIR = Path(__file__).parent.absolute()
-ENV_FILE = BACKEND_DIR / ".env"
-
-# Load environment variables from the backend directory
-load_dotenv(dotenv_path=ENV_FILE, override=True)
-
-# Get API keys with explicit error handling
-API_KEY = os.environ.get("GOOGLE_API_KEY")
-if not API_KEY:
-    logging.error("GOOGLE_API_KEY not found in environment variables")
-else:
-    logging.info("GOOGLE_API_KEY found (first 10 chars): " + API_KEY[:10] + "...")
-
-SERPER_API_KEY = os.environ.get("SERPER_API_KEY")
-if not SERPER_API_KEY:
-    logging.error("SERPER_API_KEY not found in environment variables")
-else:
-    logging.info("SERPER_API_KEY found (first 10 chars): " + SERPER_API_KEY[:10] + "...")
-
+API_KEY = os.getenv("GOOGLE_API_KEY")
 FACT_CHECK_URL = "https://factchecktools.googleapis.com/v1alpha1/claims:search"
-OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
-REDIS_URL = os.environ.get("REDIS_URL", "redis://localhost:6379/0")
-
-# Log environment file status
-logging.info(f"Loading environment variables from: {ENV_FILE}")
-logging.info(f"Environment file exists: {ENV_FILE.exists()}")
-
-# Log all environment variables for debugging
-logging.debug("Environment variables:")
-for key in ["GOOGLE_API_KEY", "SERPER_API_KEY", "OPENAI_API_KEY", "REDIS_URL"]:
-    value = os.environ.get(key)
-    if value:
-        logging.debug(f"{key}: {'*' * len(value)}")  # Mask the actual values
-    else:
-        logging.debug(f"{key}: Not set")
+SERPER_API_KEY = os.getenv("SERPER_API_KEY")
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379/0")
 
 # Initialize Redis client for caching if available
 try:
@@ -68,39 +28,86 @@ except:
     REDIS_AVAILABLE = False
     print("Warning: Redis not available. Caching will be disabled.")
 
+# Configure OpenAI API key
+openai.api_key = OPENAI_API_KEY
+
+# Configure Google Generative AI
+if API_KEY:
+    try:
+        genai.configure(api_key=API_KEY)
+        self.model = genai.GenerativeModel('gemini-2.0-flash')
+        self.generation_config = {
+            "temperature": 0.3,
+            "top_p": 0.8,
+            "top_k": 40
+        }
+        print("Gemini model initialized successfully")
+    except Exception as e:
+        print(f"Error configuring Google Generative AI: {str(e)}")
+else:
+    print("Warning: GOOGLE_API_KEY not found. Please set the GOOGLE_API_KEY environment variable.")
+
+def fact_checker(claim: str) -> Dict[str, Any]:
+    """
+    Synchronous wrapper for fact checking functionality.
+    
+    Args:
+        claim: The claim to verify
+        
+    Returns:
+        Dictionary with verification results
+    """
+    try:
+        # Basic validation
+        if not claim or len(claim.strip()) < 10:
+            return {
+                "text": claim,
+                "score": 50.0,
+                "verdict": "neutral",
+                "explanation": "Claim too short or empty",
+                "sources": [],
+                "evidence": [],
+                "reviews": []
+            }
+            
+        # For now, return a neutral result
+        return {
+            "text": claim,
+            "score": 50.0,
+            "verdict": "neutral",
+            "explanation": "Claim requires manual verification",
+            "sources": [],
+            "evidence": [],
+            "reviews": []
+        }
+        
+    except Exception as e:
+        return {
+            "text": claim,
+            "score": 50.0,
+            "verdict": "error",
+            "explanation": f"Error processing claim: {str(e)}",
+            "sources": [],
+            "evidence": [],
+            "reviews": []
+        }
+
 class FactChecker:
     def __init__(self):
         """Initialize the fact checker with necessary components."""
         self.http_client = httpx.AsyncClient(timeout=30.0)
-        
-        # Initialize MiniCheck model locally
-        self.minicheck_available = False
-        self.minicheck_scorer = None
-        
+        # Initialize Gemini model
         try:
-            logging.info("Initializing MiniCheck model...")
-            # Initialize with one of the supported models
-            self.minicheck_scorer = MiniCheck(
-                model_name='flan-t5-large',  # Using the supported flan-t5-large model
-                cache_dir='./ckpts'
-            )
-            
-            # Test the model with a simple claim
-            test_docs = ["This is a test context."]
-            test_claims = ["This is a test claim."]
-            try:
-                _, _, _, _ = self.minicheck_scorer.score(docs=test_docs, claims=test_claims)
-                self.minicheck_available = True
-                logging.info("MiniCheck model initialized successfully")
-            except Exception as test_error:
-                logging.error(f"MiniCheck model test failed: {test_error}", exc_info=True)
-                self.minicheck_available = False
-                self.minicheck_scorer = None
-                
+            self.model = genai.GenerativeModel('gemini-2.0-flash')
+            self.generation_config = {
+                "temperature": 0.3,
+                "top_p": 0.8,
+                "top_k": 40
+            }
+            print("Gemini model initialized successfully")
         except Exception as e:
-            logging.error(f"Error initializing MiniCheck model: {e}", exc_info=True)
-            self.minicheck_available = False
-            self.minicheck_scorer = None
+            print(f"Error initializing Gemini model: {e}")
+            self.model = None
 
     async def verify_claim(self, claim: str, context: Optional[str] = None) -> Dict[str, Any]:
         """
@@ -127,6 +134,22 @@ class FactChecker:
 
         # Combine results and calculate final score
         final_result = self._combine_verification_results(results, claim)
+
+        # Enhance scoring with AI analysis of evidence
+        try:
+            llm_result = await self._verify_with_llm(claim, results.get("evidence", []))
+            final_result["score"] = llm_result.get("score", final_result.get("score", 50))
+            final_result["verdict"] = llm_result.get("verdict", final_result.get("verdict", "neutral"))
+            final_result["explanation"] = llm_result.get("explanation", final_result.get("explanation", ""))
+
+            # Add GPT scoring if we have an explanation
+            if final_result.get("explanation"):
+                gpt_result = await get_gpt_score(claim, final_result["explanation"])
+                if gpt_result["gpt_score"] is not None:
+                    final_result["gpt_score"] = gpt_result["gpt_score"]
+                    final_result["gpt_explanation"] = gpt_result["gpt_explanation"]
+        except Exception as e:
+            print(f"Error in verification: {str(e)}")
 
         # Cache the result
         if REDIS_AVAILABLE:
@@ -171,7 +194,6 @@ class FactChecker:
             Dictionary with verification results from Google API
         """
         if not API_KEY:
-            logging.error("Google API Key is missing")
             return {"score": 50, "sources": [], "available": False}
 
         params = {
@@ -181,17 +203,12 @@ class FactChecker:
         }
 
         try:
-            logging.info(f"Making Google Fact Check API request for claim: {claim[:100]}...")
             response = await self.http_client.get(FACT_CHECK_URL, params=params)
-            logging.info(f"Google Fact Check API response status: {response.status_code}")
-            
             if response.status_code != 200:
-                logging.error(f"Google Fact Check API error: {response.text}")
                 return {"score": 50, "sources": [], "available": False}
 
             data = response.json()
             if not data.get("claims"):
-                logging.info("No claims found in Google Fact Check API response")
                 return {"score": 50, "sources": [], "available": True, "found": False}
 
             scores = []
@@ -239,92 +256,53 @@ class FactChecker:
 
     async def _verify_with_minicheck(self, claim: str, context: Optional[str] = None) -> Dict[str, Any]:
         """
-        Verify a claim using the MiniCheck model locally.
+        Verify a claim using the MiniCheck model via Hugging Face Inference API.
 
         Args:
             claim: The claim to verify
-            context: Optional context for the claim (MiniCheck uses 'docs')
+            context: Optional context for the claim
 
         Returns:
             Dictionary with verification results from MiniCheck
         """
-        if not self.minicheck_available:
-            return {"score": 50, "explanation": "MiniCheck model not available", "available": False}
-
-        # Input validation
-        if not claim or not isinstance(claim, str) or len(claim.strip()) == 0:
-            return {
-                "score": 50,
-                "explanation": "Invalid claim provided",
-                "available": False
-            }
+        hf_token = os.getenv("HF_TOKEN")
+        if not hf_token:
+            return {"score": 50, "explanation": "Hugging Face token not available", "available": False}
 
         try:
-            # Ensure context is a non-empty string
-            if not context or not isinstance(context, str) or len(context.strip()) == 0:
-                context = "No additional context provided."  # Default context instead of empty string
-            
-            # MiniCheck expects a list of documents (context) and a list of claims
-            docs = [context]
-            claims = [claim]
+            client = AsyncInferenceClient(token=hf_token, timeout=30.0)
+            input_text = f"Claim: {claim}"
+            if context:
+                input_text += f"\nContext: {context}"
 
-            logging.info(f"Processing claim with MiniCheck: {claim[:100]}...")
-            logging.debug(f"Context length: {len(context)}")
+            result = await client.text_generation(
+                prompt=input_text,
+                model="lytang/MiniCheck-Flan-T5-Large",
+                max_new_tokens=100,
+                do_sample=True,
+                temperature=0.7
+            )
 
-            # Use the locally loaded MiniCheck model
-            try:
-                pred_label, raw_prob, _, _ = self.minicheck_scorer.score(docs=docs, claims=claims)
-                
-                if pred_label is None or raw_prob is None:
-                    raise ValueError("MiniCheck model returned None values")
-                
-                # MiniCheck returns results as lists, get the first element
-                pred_label = pred_label[0]
-                raw_prob = raw_prob[0]
-
-            except Exception as model_error:
-                logging.error(f"Error during MiniCheck model inference: {model_error}", exc_info=True)
-                return {
-                    "score": 50,
-                    "explanation": f"Error during model inference: {str(model_error)}",
-                    "available": False
-                }
-
-            # Map MiniCheck result to score and verdict
-            if pred_label == 1:  # Supported
-                # Scale probability from raw_prob (0-1) to score (50-100)
-                # This means even low confidence starts at 50 and goes up to 100
-                score = 50 + (raw_prob * 50)
+            # Parse the generated result
+            result_lower = result.lower()
+            if "supported" in result_lower or "true" in result_lower:
+                score = 90
                 verdict = "supported"
-                explanation = f"MiniCheck model found the claim supported with confidence {raw_prob:.2f}."
-            elif pred_label == 0:  # Unsupported
-                # Scale probability from raw_prob (0-1) to score (0-50)
-                # This means high confidence in unsupported starts at 0 and goes up to 50
-                score = 50 - (raw_prob * 50)
+            elif "refuted" in result_lower or "false" in result_lower:
+                score = 10
                 verdict = "refuted"
-                explanation = f"MiniCheck model found the claim unsupported with confidence {raw_prob:.2f}."
             else:
                 score = 50
                 verdict = "neutral"
-                explanation = "MiniCheck model returned a neutral or unexpected result."
-
-            # Ensure score is within 0-100 bounds
-            score = max(0, min(100, score))
 
             return {
                 "score": score,
-                "explanation": explanation,
+                "explanation": result,
                 "verdict": verdict,
                 "available": True
             }
-
         except Exception as e:
-            logging.error(f"Error during MiniCheck local inference: {e}", exc_info=True)
-            return {
-                "score": 50,
-                "explanation": f"Error during local model inference: {str(e)}",
-                "available": False
-            }
+            return {"score": 50, "explanation": f"Error: {str(e)}", "available": False}
 
     async def _search_for_evidence(self, claim: str) -> List[Dict[str, Any]]:
         """
@@ -337,11 +315,9 @@ class FactChecker:
             List of evidence items with titles, snippets, and links
         """
         if not SERPER_API_KEY:
-            logging.error("Serper API Key is missing")
             return []
 
         try:
-            logging.info(f"Making Serper API request for claim: {claim[:100]}...")
             headers = {
                 'X-API-KEY': SERPER_API_KEY,
                 'Content-Type': 'application/json'
@@ -356,10 +332,8 @@ class FactChecker:
                 headers=headers,
                 content=payload
             )
-            logging.info(f"Serper API response status: {response.status_code}")
 
             if response.status_code != 200:
-                logging.error(f"Serper API error: {response.text}")
                 return []
 
             data = response.json()
@@ -373,10 +347,8 @@ class FactChecker:
                     "link": result.get('link', '')
                 })
 
-            logging.info(f"Found {len(evidence)} pieces of evidence from Serper API")
             return evidence
-        except Exception as e:
-            logging.error(f"Error in Serper API request: {str(e)}", exc_info=True)
+        except Exception:
             return []
 
     def _combine_verification_results(self, results: Dict[str, Any], claim: str) -> Dict[str, Any]:
@@ -431,5 +403,252 @@ class FactChecker:
             "reviews": google_result.get("reviews", [])
         }
 
-# Create a singleton instance
-fact_checker = FactChecker()
+    async def _verify_with_llm(self, claim: str, evidence: List[Dict[str, Any]]) -> Dict[str, Any]:
+        """Use Gemini to analyze the claim and evidence for a trueness score."""
+        if not self.model:
+            print("LLM verification unavailable - Gemini model not initialized")
+            return {"score": 50, "verdict": "neutral", "explanation": "LLM verification unavailable - Gemini model not initialized"}
+
+        # Format evidence for analysis
+        evidence_text = "\n".join([
+            f"Source {i+1}: {e.get('snippet', 'No text')} (from {e.get('link', 'unknown source')})"
+            for i, e in enumerate(evidence)
+        ])
+
+        prompt = f"""Analyze this claim based on the evidence provided and determine its truthfulness.
+
+Claim: "{claim}"
+
+Evidence:
+{evidence_text}
+
+Please analyze the claim and evidence carefully. Compare the claim's content with the evidence and determine how well they align.
+
+Give your response in this exact format:
+{{
+    "score": [a number from 0-100, where 0 means completely false and 100 means completely true],
+    "claim_analysis": [detailed analysis of the claim's key points],
+    "evidence_analysis": [analysis of how well the evidence supports or refutes each key point],
+    "explanation": [your final conclusion explaining the score]
+}}
+
+Scoring guide:
+0-20: Definitely false - Evidence directly contradicts the claim
+21-40: Likely false - Evidence mostly contradicts the claim
+41-60: Uncertain/Mixed - Evidence is inconclusive or contradictory
+61-80: Likely true - Evidence mostly supports the claim
+81-100: Definitely true - Evidence strongly supports all aspects of the claim"""
+
+        try:
+            print(f"Sending request to Gemini API with claim: {claim[:100]}...")  # Log first 100 chars of claim
+            
+            response = await self.model.generate_content_async(
+                prompt,
+                generation_config=self.generation_config,
+                safety_settings={
+                    HarmCategory.HARM_CATEGORY_HARASSMENT: HarmBlockThreshold.BLOCK_NONE,
+                    HarmCategory.HARM_CATEGORY_HATE_SPEECH: HarmBlockThreshold.BLOCK_NONE,
+                    HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT: HarmBlockThreshold.BLOCK_NONE,
+                    HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT: HarmBlockThreshold.BLOCK_NONE,
+                }
+            )
+            
+            print("Received response from Gemini API")
+            
+            # Clean and parse response
+            response_text = response.text.strip()
+            print(f"Raw response from Gemini: {response_text[:200]}...")  # Log first 200 chars of response
+            
+            if response_text.startswith("```json"):
+                response_text = response_text[7:]
+            elif response_text.startswith("```"):
+                response_text = response_text[3:]
+            if response_text.endswith("```"):
+                response_text = response_text[:-3]
+            response_text = response_text.strip()
+            
+            # Attempt to parse JSON, sanitize if necessary, or fallback to Python literal eval
+            import ast, re
+            try:
+                result = json.loads(response_text)
+            except json.JSONDecodeError as e:
+                print(f"JSON decode error: {e} - attempting to sanitize response")
+                # Remove trailing commas that may break strict JSON parsing
+                sanitized = re.sub(r',\s*([\]}])', r'\1', response_text)
+                try:
+                    result = json.loads(sanitized)
+                except json.JSONDecodeError:
+                    try:
+                        # Fallback: treat response as Python literal
+                        result = ast.literal_eval(response_text)
+                    except Exception as e2:
+                        print(f"Error parsing Gemini response: {e2}")
+                        print(f"Raw response that couldn't be parsed: {response_text}")
+                        return {
+                            "score": 50,
+                            "verdict": "uncertain",
+                            "explanation": f"Could not analyze the claim. Error: {e2}"
+                        }
+            # Retrieve raw score
+            score = result.get("score", 50)
+            # Handle case where score is returned as a list
+            if isinstance(score, list):
+                score = score[0] if score else 50
+            # Convert string scores to float
+            if isinstance(score, str):
+                try:
+                    score = float(score)
+                except ValueError:
+                    score = 50
+            # Clamp score to integer between 0 and 100
+            score = max(0, min(100, int(score)))
+            
+            # Determine verdict based on score
+            if score >= 81:
+                verdict = "true"
+            elif score >= 61:
+                verdict = "likely_true"
+            elif score >= 41:
+                verdict = "uncertain"
+            elif score >= 21:
+                verdict = "likely_false"
+            else:
+                verdict = "false"
+            
+            # Construct a detailed explanation combining all analyses
+            explanation = f"""Claim Analysis: {result.get('claim_analysis', '')}
+
+Evidence Analysis: {result.get('evidence_analysis', '')}
+
+Final Verdict: {result.get('explanation', '')}
+
+Score: {score}/100 - {verdict.replace('_', ' ').title()}"""
+            
+            return {
+                "score": score,
+                "verdict": verdict,
+                "explanation": explanation
+            }
+        except Exception as e:
+            print(f"Error with Gemini API: {str(e)}")
+            print(f"Full error details: {str(e.__class__.__name__)}: {str(e)}")
+            return {
+                "score": 50,
+                "verdict": "neutral",
+                "explanation": f"Error analyzing the claim: {str(e)}"
+            }
+
+async def compare_with_chatgpt(claim: str, gemini_explanation: str) -> Dict[str, Any]:
+    """
+    Compare Gemini's explanation with the claim using ChatGPT to generate a score.
+    
+    Args:
+        claim: The original claim text
+        gemini_explanation: The explanation provided by Gemini
+        
+    Returns:
+        Dictionary with the comparison score and explanation
+    """
+    if not OPENAI_API_KEY:
+        return {
+            "score": 50,
+            "explanation": "OpenAI API key not available for scoring"
+        }
+        
+    try:
+        prompt = f"""Compare this claim with Gemini's explanation and determine a truthfulness score.
+
+Claim: "{claim}"
+
+Gemini's Analysis: {gemini_explanation}
+
+Based on how well Gemini's explanation supports or refutes the claim, provide a score from 0 to 100:
+- 0: Completely false
+- 100: Completely true
+
+Respond in this exact JSON format:
+{{
+    "score": [number between 0-100],
+    "explanation": [brief explanation of your scoring]
+}}"""
+
+        response = await openai.ChatCompletion.acreate(
+            model="gpt-3.5-turbo",
+            messages=[
+                {"role": "system", "content": "You are a fact-checking scoring system. Your job is to compare claims with explanations and provide numerical scores."},
+                {"role": "user", "content": prompt}
+            ],
+            temperature=0.3,
+            max_tokens=150
+        )
+        
+        result = json.loads(response.choices[0].message.content)
+        return {
+            "score": min(100, max(0, int(result["score"]))),  # Ensure score is 0-100
+            "explanation": result["explanation"]
+        }
+        
+    except Exception as e:
+        print(f"Error in ChatGPT comparison: {str(e)}")
+        return {
+            "score": 50,
+            "explanation": f"Error comparing with ChatGPT: {str(e)}"
+        }
+
+async def get_gpt_score(claim: str, explanation: str) -> Dict[str, Any]:
+    """Get a score from GPT by comparing the claim against the explanation."""
+    if not OPENAI_API_KEY:
+        return {
+            "gpt_score": None,
+            "gpt_explanation": "OpenAI API key not set"
+        }
+
+    try:
+        prompt = f"""Analyze this claim and explanation to determine if the claim is true or false.
+
+Claim: "{claim}"
+
+Explanation from analysis: "{explanation}"
+
+Based on how well the explanation proves or disproves the claim, give a score:
+0 = Completely false
+100 = Completely true
+
+Respond in this exact JSON format:
+{{
+    "score": [number 0-100],
+    "explanation": [brief explanation of why you gave this score]
+}}"""
+
+        response = await openai.ChatCompletion.acreate(
+            model="gpt-3.5-turbo",
+            messages=[
+                {"role": "system", "content": "You are a fact-checking scoring system. Score claims based on their explanations."},
+                {"role": "user", "content": prompt}
+            ],
+            temperature=0.3,
+            max_tokens=150
+        )
+
+        try:
+            result = json.loads(response.choices[0].message.content)
+            return {
+                "gpt_score": min(100, max(0, int(result["score"]))),
+                "gpt_explanation": result["explanation"]
+            }
+        except (json.JSONDecodeError, KeyError, ValueError) as e:
+            print(f"Error parsing GPT response: {e}")
+            return {
+                "gpt_score": None,
+                "gpt_explanation": f"Error parsing GPT response: {e}"
+            }
+
+    except Exception as e:
+        print(f"Error calling GPT API: {e}")
+        return {
+            "gpt_score": None,
+            "gpt_explanation": f"Error calling GPT API: {e}"
+        }
+
+# Create a singleton asynchronous fact checker instance
+async_fact_checker = FactChecker()
