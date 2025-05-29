@@ -274,12 +274,6 @@ graph LR
 
 ---
 
-### 👥 **Community Features**
-<img src="images/community-dashboard.png" alt="Community Dashboard" width="800">
-<em>Community-driven fact-checking and peer review system</em>
-
----
-
 <!-- ### 📱 **Mobile Responsive Design**
 <table>
 <tr>
