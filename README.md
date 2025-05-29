@@ -5,7 +5,7 @@
     <img src="https://img.shields.io/badge/deployment-active-success?style=for-the-badge" alt="Deployment Status">
   </a>
   <a href="https://github.com/Jdsb06/Lassi-Lovers/graphs/contributors">
-    <img src="https://img.shields.io/github/contributors/your-username/factcheck-no-misinfo.svg?style=for-the-badge" alt="Contributors">
+    <img src="https://img.shields.io/github/contributors/Jdsb06/Lassi-Lovers.svg?style=for-the-badge" alt="Contributors">
   </a>
   <a href="https://reactjs.org/">
     <img src="https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB" alt="Made with React">
