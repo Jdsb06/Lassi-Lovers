@@ -655,7 +655,7 @@ Code Quality:      █████████████████     9.2/1
 [license-shield]: https://img.shields.io/github/license/Jdsb06/Lassi-Lovers.svg?style=for-the-badge
 [license-url]: https://github.com/Jdsb06/Lassi-Lovers/blob/main/LICENSE
 [linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
-[linkedin-url]: https://linkedin.com/in/your-profile
+[linkedin-url]: https://www.linkedin.com/in/kanav-kumar-b655962b5/
 
 <!-- Technology Badges -->
 [React.js]: https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB
