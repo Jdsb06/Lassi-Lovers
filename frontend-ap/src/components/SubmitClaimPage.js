@@ -182,7 +182,7 @@ const SubmitClaimPage = () => {
       };
 
       // Send claim to backend
-      const response = await fetch('http://localhost:5000/verify_claim', {
+      const response = await fetch('/api/verify_claim', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

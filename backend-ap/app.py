@@ -9,11 +9,15 @@ from typing import List, Dict, Any, Optional
 import uvicorn
 import logging
 from contextlib import asynccontextmanager
+import sqlite3, hashlib
+from pathlib import Path
+from pydantic import BaseModel
+import random
 
 # Import local modules
 from models import ClaimRequest, UrlRequest, AnalysisResponse, ErrorResponse, HealthResponse, TokenRequest, TokenResponse, SimilarClaimsResponse
 from nlp_processor import extract_claims, analyze_sentiment
-from fact_checker import async_fact_checker
+from fact_checker import async_fact_checker  # Import the singleton instance directly
 from database import db
 from security import rate_limit, get_current_user, create_access_token, User, get_api_key, validate_api_key, RateLimitMiddleware
 from utils import extract_text_from_url, get_embedding, measure_execution_time, truncate_text, TimingMiddleware
@@ -60,6 +64,70 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# --- SQLite User Auth Setup ---
+users_db_path = Path(__file__).parent / "users.db"
+conn = sqlite3.connect(users_db_path, check_same_thread=False)
+cursor = conn.cursor()
+cursor.execute(
+    """
+    CREATE TABLE IF NOT EXISTS users (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        first_name TEXT NOT NULL,
+        last_name TEXT NOT NULL,
+        email TEXT NOT NULL UNIQUE,
+        phone TEXT,
+        password_hash TEXT NOT NULL
+    )
+    """
+)
+conn.commit()
+
+# Utility to hash passwords
+def hash_password(password: str) -> str:
+    return hashlib.sha256(password.encode()).hexdigest()
+
+# Pydantic models for auth
+class SignupRequest(BaseModel):
+    firstName: str
+    lastName: str
+    email: str
+    phone: str
+    password: str
+
+class LoginRequest(BaseModel):
+    email: str
+    password: str
+
+# Signup endpoint
+@app.post("/api/signup")
+async def signup(signup: SignupRequest):
+    try:
+        pwd_hash = hash_password(signup.password)
+        cursor.execute(
+            "INSERT INTO users (first_name, last_name, email, phone, password_hash) VALUES (?, ?, ?, ?, ?)",
+            (signup.firstName, signup.lastName, signup.email, signup.phone, pwd_hash)
+        )
+        conn.commit()
+        return {"success": True, "message": "User created"}
+    except sqlite3.IntegrityError:
+        return JSONResponse(status_code=400, content={"success": False, "message": "Email already in use"})
+    except Exception as e:
+        logger.error(f"Signup error: {e}")
+        return JSONResponse(status_code=500, content={"success": False, "message": "Server error"})
+
+# Login endpoint
+@app.post("/api/login")
+async def login(login_data: LoginRequest):
+    try:
+        cursor.execute("SELECT password_hash FROM users WHERE email = ?", (login_data.email,))
+        row = cursor.fetchone()
+        if not row or hash_password(login_data.password) != row[0]:
+            return JSONResponse(status_code=400, content={"success": False, "message": "Invalid credentials"})
+        return {"success": True, "message": "Login successful"}
+    except Exception as e:
+        logger.error(f"Login error: {e}")
+        return JSONResponse(status_code=500, content={"success": False, "message": "Server error"})
 
 # Health check endpoint
 @app.get("/health", response_model=HealthResponse, tags=["System"])
@@ -230,22 +298,62 @@ async def find_similar_claims(
             detail=f"Error finding similar claims: {str(e)}"
         )
 
-# Verify claim endpoint
-@app.post("/verify_claim", tags=["Fact Checking"])
-async def verify_claim(request: Request, claim_data: dict):
+# Verify claim endpoint (stub)
+@app.post("/api/verify_claim", tags=["Fact Checking"])
+async def verify_claim_stub(request: Request, claim_data: dict):
     """
-    Verify a single claim and return the analysis results.
+    Verify a single claim using the fact-checking system.
     """
     try:
-        # Verify the claim using the fact checker
-        result = await async_fact_checker.verify_claim(claim_data["claim"])
-        return result
+        claim = claim_data.get("claim", "").strip()
+        logger.info(f"Received claim verification request: {claim[:100]}...")  # Log first 100 chars
         
+        if not claim:
+            logger.warning("Empty claim received")
+            return JSONResponse(
+                status_code=400,
+                content={"success": False, "message": "No claim provided"}
+            )
+
+        # Log fact checker status
+        logger.info(f"Using fact checker instance: {async_fact_checker}")
+        
+        # Use the global fact checker instance
+        logger.info("Starting claim verification...")
+        result = await async_fact_checker.verify_claim(claim)
+        logger.info("Claim verification completed")
+
+        # Ensure we have all required fields
+        if not result.get("explanation"):
+            logger.warning("No explanation in result, using default")
+            result["explanation"] = "Analysis not available"
+        if not result.get("score"):
+            logger.warning("No score in result, using default")
+            result["score"] = 50
+        if not result.get("verdict"):
+            logger.warning("No verdict in result, using default")
+            result["verdict"] = "neutral"
+
+        # Add the claim text to the response
+        result["text"] = claim
+        
+        logger.info(f"Returning result with score: {result.get('score')}, verdict: {result.get('verdict')}")
+        return JSONResponse(
+            status_code=200,
+            content={
+                "success": True,
+                "result": result
+            }
+        )
+
     except Exception as e:
-        logger.error(f"Error verifying claim: {str(e)}")
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error verifying claim: {str(e)}"
+        logger.error(f"Error verifying claim: {str(e)}", exc_info=True)  # Include full traceback
+        return JSONResponse(
+            status_code=500,
+            content={
+                "success": False,
+                "message": f"Error verifying claim: {str(e)}"
+            }
         )
 
 # Error handler
