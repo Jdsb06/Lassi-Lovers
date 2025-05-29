@@ -1,6 +1,6 @@
 <a id="readme-top"></a>
 
-<div style="text-align: center; margin-top: 20px;">
+<div align="center" style="text-align: center; margin-top: 20px;">
   <a href="https://your-deployment-url">
     <img src="https://img.shields.io/badge/deployment-active-success?style=for-the-badge" alt="Deployment Status">
   </a>
@@ -14,6 +14,7 @@
     <img src="https://img.shields.io/badge/Node.js-43853D?style=for-the-badge&logo=node.js&logoColor=white" alt="Made with Node.js">
   </a>
 </div>
+
 
 <!-- PROJECT LOGO -->
 <br />
