@@ -49,12 +49,10 @@ const ChatbotLauncher = () => {
         {/* Help Message Tooltip */}
         {(showHelpMessage || showTooltip) && !isOpen && (
           <div className="absolute bottom-full right-0 mb-3">
-            <div className="relative bg-gradient-to-r from-blue-900 to-red-600 text-white px-4 py-2 rounded-xl shadow-lg">
-              <p className="text-sm font-medium">How may I help you?</p>
-              {/* Animated wave effect */}
-              <div className="absolute -inset-[2px] bg-gradient-to-r from-blue-900 to-red-600 rounded-xl opacity-50 blur group-hover:opacity-75 animate-pulse -z-10"></div>
+            <div className="relative inline-block bg-gradient-to-r from-blue-900 to-red-600 text-white px-3 py-1.5 rounded-lg shadow-lg whitespace-nowrap">
+              <p className="text-xs font-medium">How may I help you?</p>
               {/* Arrow */}
-              <div className="absolute -bottom-2 right-4 w-4 h-4 bg-red-600 transform rotate-45"></div>
+              <div className="absolute -bottom-1 right-4 w-2 h-2 bg-red-600 transform rotate-45"></div>
             </div>
           </div>
         )}
