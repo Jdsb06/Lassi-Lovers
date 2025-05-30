@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 
 const SubmitClaimPage = () => {
@@ -15,6 +15,17 @@ const SubmitClaimPage = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [uploadProgress, setUploadProgress] = useState({});
   const [dragActive, setDragActive] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  // Add scroll effect handler like BrowseClaimsPage
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 50);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   // Validation functions
   const validateTitle = (title) => {
@@ -218,13 +229,16 @@ const SubmitClaimPage = () => {
   const isFormValid = formData.title.trim() && !errors.title;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-red-50">
-      {/* Header with navigation */}
-      <header className="bg-white/95 backdrop-blur-sm shadow-lg sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-between">
-            <Link to="/" className="flex items-center space-x-3 group">
-              <div className="w-10 h-10 bg-red-600 rounded-full flex items-center justify-center relative group-hover:bg-red-700 transition-colors">
+    <div className="min-h-screen bg-gray-50">
+      {/* Header - Updated to match BrowseClaimsPage */}
+      <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+        isScrolled ? 'bg-white shadow-lg' : 'bg-white/95 backdrop-blur-sm'
+      }`}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
+            {/* Logo */}
+            <Link to="/" className="flex items-center space-x-3">
+              <div className="w-10 h-10 bg-red-600 rounded-full flex items-center justify-center relative">
                 <div className="w-6 h-6 bg-blue-900 rounded-full flex items-center justify-center">
                   <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/>
@@ -237,50 +251,69 @@ const SubmitClaimPage = () => {
                 <p className="text-xs text-red-600 font-semibold -mt-1">NO MISINFO</p>
               </div>
             </Link>
-            
-            <nav className="flex items-center space-x-6">
-              <Link to="/" className="text-gray-700 hover:text-blue-900 transition-colors font-medium">Home</Link>
-              <Link to="/browse" className="text-gray-700 hover:text-blue-900 transition-colors font-medium">Browse Claims</Link>
-              <Link to="/about" className="text-gray-700 hover:text-blue-900 transition-colors font-medium">About</Link>
+
+            {/* Desktop Navigation */}
+            <nav className="hidden md:flex items-center space-x-8">
+              <Link to="/" className="text-gray-700 hover:text-blue-900 transition-colors">Home</Link>
+              <Link to="/submit" className="text-blue-900 font-semibold border-b-2 border-red-600">Submit a Claim</Link>
+              <Link to="/browse" className="text-gray-700 hover:text-blue-900 transition-colors">Browse Claims</Link>
+              <Link to="/about" className="text-gray-700 hover:text-blue-900 transition-colors">About</Link>
+              <Link to="/faqs" className="text-gray-700 hover:text-blue-900 transition-colors">FAQ/Help</Link>
             </nav>
+
+            {/* Mobile Menu Button */}
+            <button
+              className="md:hidden p-2"
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+            >
+              {isMenuOpen ? (
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              ) : (
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+              )}
+            </button>
           </div>
+
+          {/* Mobile Navigation */}
+          {isMenuOpen && (
+            <div className="md:hidden bg-white border-t">
+              <div className="px-4 py-3 space-y-3">
+                <Link to="/" className="block text-gray-700">Home</Link>
+                <Link to="/submit" className="block text-blue-900 font-semibold">Submit a Claim</Link>
+                <Link to="/browse" className="block text-gray-700">Browse Claims</Link>
+                <Link to="/about" className="block text-gray-700">About</Link>
+                <Link to="/faqs" className="block text-gray-700">FAQ/Help</Link>
+              </div>
+            </div>
+          )}
         </div>
       </header>
 
-      {/* Hero Section */}
-      <section className="py-12 bg-gradient-to-r from-blue-900/5 to-red-600/5">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <div className="inline-flex items-center bg-white/70 backdrop-blur-sm rounded-full px-6 py-2 mb-6 border border-blue-200">
-            <svg className="w-5 h-5 text-blue-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            <span className="text-blue-900 font-medium">Submit New Claim</span>
-          </div>
-          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-            Help Us Fight <span className="text-red-600">Misinformation</span>
-          </h1>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Submit claims for fact-checking and contribute to a more informed digital world.
-          </p>
+      <div className="container mx-auto px-4 pt-24 pb-12 max-w-6xl">
+        {/* Page title */}
+        <div className="flex justify-center mb-8">
+          <h1 className="text-3xl font-bold text-blue-900">Submit a Claim</h1>
         </div>
-      </section>
 
-      {/* Main Content */}
-      <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="bg-white rounded-2xl shadow-xl p-8 md:p-12 border border-gray-100">
-          <form onSubmit={handleSubmit} className="space-y-8">
+        {/* Submission Form */}
+        <div className="bg-white rounded-xl shadow-md overflow-hidden mb-8">
+          <form onSubmit={handleSubmit} className="p-6">
             {/* Claim Title */}
-            <div className="space-y-2">
+            <div className="space-y-2 mb-6">
               <label htmlFor="title" className="block text-lg font-bold text-gray-900">
                 Claim Title *
               </label>
-              <p className="text-gray-600 text-sm mb-3">Provide a clear, concise title that summarizes the claim you want fact-checked.</p>
+              <p className="text-gray-600 text-sm">Provide a clear, concise title that summarizes the claim you want fact-checked.</p>
               <input
                 type="text"
                 id="title"
                 value={formData.title}
                 onChange={(e) => handleInputChange('title', e.target.value)}
-                className={`w-full px-6 py-4 border-2 rounded-xl text-lg focus:ring-4 focus:ring-blue-500/20 focus:border-blue-900 transition-all duration-300 ${
+                className={`w-full px-4 py-2 border-2 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-900 transition-all ${
                   errors.title ? 'border-red-500 bg-red-50/50' : 'border-gray-200 hover:border-gray-300'
                 }`}
                 placeholder="Enter a clear, concise title for the claim..."
@@ -293,17 +326,17 @@ const SubmitClaimPage = () => {
             </div>
 
             {/* Description */}
-            <div className="space-y-2">
+            <div className="space-y-2 mb-6">
               <label htmlFor="description" className="block text-lg font-bold text-gray-900">
                 Additional Context
               </label>
-              <p className="text-gray-600 text-sm mb-3">Provide background information, where you encountered this claim, and why you think it needs verification.</p>
+              <p className="text-gray-600 text-sm">Provide background information, where you encountered this claim, and why you think it needs verification.</p>
               <textarea
                 id="description"
                 rows={5}
                 value={formData.description}
                 onChange={(e) => handleInputChange('description', e.target.value)}
-                className={`w-full px-6 py-4 border-2 rounded-xl text-lg focus:ring-4 focus:ring-blue-500/20 focus:border-blue-900 transition-all duration-300 resize-none ${
+                className={`w-full px-4 py-2 border-2 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-900 transition-all resize-none ${
                   errors.description ? 'border-red-500 bg-red-50/50' : 'border-gray-200 hover:border-gray-300'
                 }`}
                 placeholder="Provide additional context, where you encountered this claim, why you think it might be false, etc..."
@@ -316,7 +349,7 @@ const SubmitClaimPage = () => {
             </div>
 
             {/* Media Type */}
-            <div className="space-y-4">
+            <div className="space-y-2 mb-6">
               <label className="block text-lg font-bold text-gray-900">
                 Content Type
               </label>
@@ -336,7 +369,7 @@ const SubmitClaimPage = () => {
                       onChange={(e) => handleInputChange('mediaType', e.target.value)}
                       className="sr-only"
                     />
-                    <div className={`p-4 border-2 rounded-xl text-center transition-all duration-300 ${
+                    <div className={`p-4 border-2 rounded-xl text-center transition-all ${
                       formData.mediaType === type.value
                         ? 'border-red-500 bg-red-50 shadow-lg transform scale-105'
                         : 'border-gray-200 hover:border-gray-300 hover:shadow-md'
@@ -350,7 +383,7 @@ const SubmitClaimPage = () => {
             </div>
 
             {/* Sources */}
-            <div className="space-y-4">
+            <div className="space-y-2 mb-6">
               <label className="block text-lg font-bold text-gray-900">
                 Supporting URLs or Sources
               </label>
@@ -363,7 +396,7 @@ const SubmitClaimPage = () => {
                         type="url"
                         value={source}
                         onChange={(e) => handleSourceChange(index, e.target.value)}
-                        className="w-full px-6 py-4 border-2 border-gray-200 rounded-xl text-lg focus:ring-4 focus:ring-blue-500/20 focus:border-blue-900 transition-all duration-300 hover:border-gray-300"
+                        className="w-full px-4 py-2 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-900 transition-all hover:border-gray-300"
                         placeholder="https://example.com/source"
                       />
                     </div>
@@ -371,9 +404,9 @@ const SubmitClaimPage = () => {
                       <button
                         type="button"
                         onClick={() => removeSource(index)}
-                        className="p-3 text-red-600 hover:bg-red-50 rounded-xl transition-colors group"
+                        className="p-2 text-red-600 hover:bg-red-50 rounded-xl transition-colors"
                       >
-                        <svg className="w-6 h-6 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                         </svg>
                       </button>
@@ -397,16 +430,16 @@ const SubmitClaimPage = () => {
             </div>
 
             {/* File Upload */}
-            <div className="space-y-4">
+            <div className="space-y-2 mb-6">
               <label className="block text-lg font-bold text-gray-900">
                 Upload Evidence (Max 3 images)
               </label>
               <p className="text-gray-600 text-sm">Screenshots, photos, or other visual evidence that supports your claim.</p>
               
               <div
-                className={`border-3 border-dashed rounded-2xl p-12 text-center transition-all duration-300 ${
+                className={`border-2 border-dashed rounded-xl p-8 text-center transition-all ${
                   dragActive 
-                    ? 'border-blue-500 bg-blue-50/50 scale-105' 
+                    ? 'border-blue-500 bg-blue-50/50' 
                     : 'border-gray-300 hover:border-gray-400 hover:bg-gray-50/50'
                 }`}
                 onDragEnter={handleDrag}
@@ -432,7 +465,7 @@ const SubmitClaimPage = () => {
                     />
                     <label
                       htmlFor="file-upload"
-                      className="bg-gradient-to-r from-red-600 to-red-700 text-white px-8 py-3 rounded-xl hover:from-red-700 hover:to-red-800 transition-all duration-300 cursor-pointer inline-block font-semibold shadow-lg hover:shadow-xl transform hover:scale-105"
+                      className="bg-gradient-to-r from-red-600 to-red-700 text-white px-6 py-2 rounded-xl hover:from-red-700 hover:to-red-800 transition-all cursor-pointer inline-block font-semibold shadow-lg hover:shadow-xl"
                     >
                       Choose Files
                     </label>
@@ -447,7 +480,7 @@ const SubmitClaimPage = () => {
                   {Object.entries(uploadProgress).map(([fileId, progress]) => (
                     <div key={fileId} className="bg-gray-200 rounded-full h-3 overflow-hidden">
                       <div 
-                        className="bg-gradient-to-r from-blue-600 to-red-600 h-3 rounded-full transition-all duration-300 shadow-sm"
+                        className="bg-gradient-to-r from-blue-600 to-red-600 h-3 rounded-full transition-all"
                         style={{ width: `${progress}%` }}
                       />
                     </div>
@@ -457,24 +490,24 @@ const SubmitClaimPage = () => {
 
               {/* Image Previews */}
               {formData.attachments.length > 0 && (
-                <div className="grid grid-cols-3 gap-6">
+                <div className="grid grid-cols-3 gap-4 mt-4">
                   {formData.attachments.map((attachment) => (
                     <div key={attachment.id} className="relative group">
                       <img
                         src={attachment.preview}
                         alt={attachment.name}
-                        className="w-full h-32 object-cover rounded-xl shadow-lg group-hover:shadow-xl transition-shadow"
+                        className="w-full h-32 object-cover rounded-xl shadow-md"
                       />
                       <button
                         type="button"
                         onClick={() => removeAttachment(attachment.id)}
-                        className="absolute -top-3 -right-3 w-8 h-8 bg-red-600 text-white rounded-full flex items-center justify-center hover:bg-red-700 transition-colors shadow-lg hover:shadow-xl transform hover:scale-110"
+                        className="absolute -top-2 -right-2 w-6 h-6 bg-red-600 text-white rounded-full flex items-center justify-center hover:bg-red-700 transition-colors"
                       >
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                         </svg>
                       </button>
-                      <div className="absolute bottom-0 left-0 right-0 bg-black/50 text-white text-xs p-2 rounded-b-xl truncate">
+                      <div className="absolute bottom-0 left-0 right-0 bg-black/50 text-white text-xs p-1 rounded-b-xl truncate">
                         {attachment.name}
                       </div>
                     </div>
@@ -484,12 +517,12 @@ const SubmitClaimPage = () => {
             </div>
 
             {/* Submit Section */}
-            <div className="flex items-center justify-between pt-8 border-t-2 border-gray-100">
+            <div className="flex items-center justify-between pt-6 border-t border-gray-100">
               <Link
                 to="/"
-                className="flex items-center space-x-2 text-gray-600 hover:text-gray-800 transition-colors font-medium group"
+                className="flex items-center space-x-2 text-gray-600 hover:text-gray-800 transition-colors font-medium"
               >
-                <svg className="w-5 h-5 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                 </svg>
                 <span>Back to Home</span>
@@ -498,16 +531,16 @@ const SubmitClaimPage = () => {
               <button
                 type="submit"
                 disabled={!isFormValid || isSubmitting}
-                className={`px-10 py-4 rounded-xl font-bold text-lg transition-all duration-300 ${
+                className={`px-8 py-3 rounded-xl font-bold transition-all ${
                   isFormValid && !isSubmitting
-                    ? 'bg-gradient-to-r from-red-600 to-red-700 text-white hover:from-red-700 hover:to-red-800 transform hover:scale-105 shadow-lg hover:shadow-xl'
+                    ? 'bg-gradient-to-r from-red-600 to-red-700 text-white hover:from-red-700 hover:to-red-800 shadow-md hover:shadow-lg'
                     : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                 }`}
               >
                 {isSubmitting ? (
-                  <div className="flex items-center space-x-3">
-                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                    <span>Submitting Claim...</span>
+                  <div className="flex items-center space-x-2">
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    <span>Submitting...</span>
                   </div>
                 ) : (
                   <div className="flex items-center space-x-2">
@@ -523,15 +556,15 @@ const SubmitClaimPage = () => {
         </div>
 
         {/* Help Section */}
-        <div className="mt-12 bg-gradient-to-r from-blue-50 to-red-50 rounded-2xl p-8 border border-blue-100">
+        <div className="bg-white rounded-xl shadow-md p-6 mb-8">
           <div className="text-center">
-            <h3 className="text-2xl font-bold text-gray-900 mb-4">Need Help?</h3>
+            <h3 className="text-xl font-bold text-gray-900 mb-4">Need Help?</h3>
             <p className="text-gray-600 mb-6">
               Our AI-powered system will analyze your submission and provide a comprehensive fact-check report. 
               The more details you provide, the more accurate our analysis will be.
             </p>
-            <div className="grid md:grid-cols-3 gap-6 text-sm">
-              <div className="bg-white/70 backdrop-blur-sm p-4 rounded-xl">
+            <div className="grid md:grid-cols-3 gap-6">
+              <div className="bg-gray-50 p-4 rounded-xl">
                 <div className="w-12 h-12 bg-blue-100 rounded-full mx-auto mb-3 flex items-center justify-center">
                   <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -540,7 +573,7 @@ const SubmitClaimPage = () => {
                 <h4 className="font-semibold text-gray-900 mb-2">Be Specific</h4>
                 <p className="text-gray-600">Provide clear, specific claims rather than vague statements</p>
               </div>
-              <div className="bg-white/70 backdrop-blur-sm p-4 rounded-xl">
+              <div className="bg-gray-50 p-4 rounded-xl">
                 <div className="w-12 h-12 bg-red-100 rounded-full mx-auto mb-3 flex items-center justify-center">
                   <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -549,7 +582,7 @@ const SubmitClaimPage = () => {
                 <h4 className="font-semibold text-gray-900 mb-2">Add Context</h4>
                 <p className="text-gray-600">Include background information and why verification is needed</p>
               </div>
-              <div className="bg-white/70 backdrop-blur-sm p-4 rounded-xl">
+              <div className="bg-gray-50 p-4 rounded-xl">
                 <div className="w-12 h-12 bg-green-100 rounded-full mx-auto mb-3 flex items-center justify-center">
                   <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
@@ -561,9 +594,75 @@ const SubmitClaimPage = () => {
             </div>
           </div>
         </div>
-      </main>
+      </div>
+
+      {/* Footer - Added to match BrowseClaimsPage */}
+      <footer className="bg-gray-900 text-white py-8 mt-auto">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid md:grid-cols-4 gap-8">
+            <div>
+              <div className="flex items-center space-x-3 mb-4">
+                <div className="w-8 h-8 bg-red-600 rounded-full flex items-center justify-center relative">
+                  <div className="w-5 h-5 bg-blue-900 rounded-full flex items-center justify-center">
+                    <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/>
+                    </svg>
+                  </div>
+                </div>
+                <div>
+                  <h3 className="font-bold">FactCheck</h3>
+                  <p className="text-xs text-red-400">NO MISINFO</p>
+                </div>
+              </div>
+              <p className="text-gray-400">
+                Fighting misinformation with AI-powered fact-checking and community collaboration.
+              </p>
+            </div>
+
+            <div>
+              <h4 className="font-semibold mb-4">Quick Links</h4>
+              <ul className="space-y-2 text-gray-400">
+                <li><Link to="/" className="hover:text-white transition-colors">Home</Link></li>
+                <li><Link to="/submit" className="hover:text-white transition-colors">Submit Claim</Link></li>
+                <li><Link to="/browse" className="hover:text-white transition-colors">Browse Claims</Link></li>
+                <li><Link to="/about" className="hover:text-white transition-colors">About</Link></li>
+                <li><Link to="/faqs" className="hover:text-white transition-colors">FAQ</Link></li>
+              </ul>
+            </div>
+
+            <div>
+              <h4 className="font-semibold mb-4">Legal</h4>
+              <ul className="space-y-2 text-gray-400">
+                <li><Link to="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link></li>
+                <li><Link to="/terms" className="hover:text-white transition-colors">Terms of Service</Link></li>
+                <li><Link to="/guidelines" className="hover:text-white transition-colors">Community Guidelines</Link></li>
+              </ul>
+            </div>
+
+            <div>
+              <h4 className="font-semibold mb-4">Connect</h4>
+              <div className="flex space-x-4">
+                <a href="/" className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center hover:bg-blue-700 transition-colors">
+                  <span className="text-sm font-bold">f</span>
+                </a>
+                <a href="/" className="w-10 h-10 bg-blue-400 rounded-full flex items-center justify-center hover:bg-blue-500 transition-colors">
+                  <span className="text-sm font-bold">t</span>
+                </a>
+                <a href="/" className="w-10 h-10 bg-blue-700 rounded-full flex items-center justify-center hover:bg-blue-800 transition-colors">
+                  <span className="text-sm font-bold">in</span>
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
+            <p>© {new Date().getFullYear()} FactCheck - No Misinfo. All Rights Reserved.</p>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 };
 
 export default SubmitClaimPage;
+

@@ -4,8 +4,8 @@
   <a href="https://your-deployment-url">
     <img src="https://img.shields.io/badge/deployment-active-success?style=for-the-badge" alt="Deployment Status">
   </a>
-  <a href="https://github.com/Jdsb06/Lassi-Lovers/graphs/contributors">
-    <img src="https://img.shields.io/github/contributors/Jdsb06/Lassi-Lovers.svg?style=for-the-badge" alt="Contributors">
+  <a href="https://github.com/your-username/factcheck-no-misinfo/graphs/contributors">
+    <img src="https://img.shields.io/github/contributors/your-username/factcheck-no-misinfo.svg?style=for-the-badge" alt="Contributors">
   </a>
   <a href="https://reactjs.org/">
     <img src="https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB" alt="Made with React">
@@ -49,7 +49,7 @@
 
   <p align="center">
     <br />
-    <a href="#about"><strong>📋 Explore the Documentation »</strong></a>
+    <a href="#about-the-project"><strong>📋 Explore the Documentation »</strong></a>
     <br />
     <br />
     <a href="https://your-demo-link.com">
@@ -517,8 +517,6 @@ graph TD
   - [ ] Advanced reporting and analytics
   - [ ] Custom model training capabilities
 
----
-
 ### 🎮 **Upcoming Features**
 
 <table>
@@ -558,16 +556,6 @@ graph TD
 
 </td>
 </tr>
-<tr>
-<td width="50%">
-
-**🕶️ Incognito Mode**
-- Browse and submit claims privately
-- History won’t be saved in user profile
-- Ideal for sensitive or anonymous use
-</td> 
-<td width="50%"> </td> 
-</tr> 
 </table>
 
 
@@ -667,7 +655,7 @@ Code Quality:      █████████████████     9.2/1
 [license-shield]: https://img.shields.io/github/license/Jdsb06/Lassi-Lovers.svg?style=for-the-badge
 [license-url]: https://github.com/Jdsb06/Lassi-Lovers/blob/main/LICENSE
 [linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
-[linkedin-url]: https://www.linkedin.com/in/kanav-kumar-b655962b5/
+[linkedin-url]: https://linkedin.com/in/your-profile
 
 <!-- Technology Badges -->
 [React.js]: https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB

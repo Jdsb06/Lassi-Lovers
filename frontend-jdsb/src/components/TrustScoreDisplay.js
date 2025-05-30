@@ -3,6 +3,9 @@ import { useNavigate, Link } from 'react-router-dom';
 import AuthButton from './AuthButton';
 import Footer from './Footer';
 
+/** @type {any} */
+const puter = window.puter;
+
 const TrustScoreDisplay = () => {
   const navigate = useNavigate();
   const [color, setColor] = useState('');
@@ -17,6 +20,7 @@ const TrustScoreDisplay = () => {
   const [feedbackType, setFeedbackType] = useState(null);
   const [feedbackText, setFeedbackText] = useState('');
   const [showFeedbackForm, setShowFeedbackForm] = useState(false);
+  const [grokScore, setGrokScore] = useState(null);
 
   // Constants for the circle
   const radius = 100; // Increased size for better visibility
@@ -36,9 +40,15 @@ const TrustScoreDisplay = () => {
       const result = JSON.parse(storedResult);
       setClaimResult(result.result || result); // Handle both new and old response format
       
-      // Use the score from the result, falling back through multiple possible fields
-      const finalScore = result.result?.score ?? result.score ?? 50;
-      setScore(finalScore);
+      // Get Grok's score based on the AI analysis
+      if (result.result?.explanation || result.explanation) {
+        const analysis = result.result?.explanation || result.explanation;
+        getGrokScore(analysis).then(grokScore => {
+          if (grokScore !== null) {
+            setScore(grokScore); // Set the main score to Grok score
+          }
+        });
+      }
       
       setIsLoading(false);
     } catch (e) {
@@ -46,6 +56,35 @@ const TrustScoreDisplay = () => {
       setIsLoading(false);
     }
   }, [navigate]);
+
+  const getGrokScore = async (analysis) => {
+    try {
+      const prompt = `Based on the following AI analysis, provide a single integer score between 0 and 100 that represents how truthful or accurate the claim is. Only respond with a single number, nothing else.
+
+Analysis: ${analysis}`;
+
+      const response = await puter.ai.chat(prompt, {
+        model: 'x-ai/grok-3-beta',
+        system: "You are a fact-checking scoring system. You must ONLY return a single integer between 0 and 100, nothing else. The score should reflect how truthful or accurate the claim is based on the analysis provided."
+      });
+
+      let score;
+      if (typeof response === 'object' && response.message) {
+        score = parseInt(response.message.content);
+      } else if (typeof response === 'string') {
+        score = parseInt(response);
+      }
+
+      if (!isNaN(score) && score >= 0 && score <= 100) {
+        setGrokScore(score);
+        return score;
+      }
+      return null;
+    } catch (error) {
+      console.error('Error getting Grok score:', error);
+      return null;
+    }
+  };
 
   useEffect(() => {
     // Calculate circle properties
@@ -258,7 +297,6 @@ const TrustScoreDisplay = () => {
           {/* Gemini Analysis */}
           <div className="bg-blue-50/50 backdrop-blur-sm rounded-2xl shadow-xl p-8 border border-blue-100">
             <h3 className="text-2xl font-bold mb-4 text-gray-900">AI Analysis</h3>
-            <p className="text-lg font-semibold text-gray-700 mb-6">Model Score: {score}%</p>
             <div className="prose max-w-none">
               {claimResult.explanation && (
                 <div className="mb-6">
@@ -266,16 +304,23 @@ const TrustScoreDisplay = () => {
                   <p className="text-gray-700 leading-relaxed">{claimResult.explanation}</p>
                 </div>
               )}
-              {/* Commenting out GPT Analysis section since the API is not working
-              {claimResult.gpt_explanation && (
-                <div className="mb-6">
-                  <h4 className="text-lg font-semibold mb-3 text-blue-900">GPT Analysis:</h4>
-                  <p className="text-gray-700 leading-relaxed">{claimResult.gpt_explanation}</p>
-                </div>
-              )}
-              */}
             </div>
           </div>
+
+          {/* Grok Score Box */}
+          {grokScore !== null && (
+            <div className="bg-purple-50/50 backdrop-blur-sm rounded-2xl shadow-xl p-8 border border-purple-100">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-2xl font-bold mb-2 text-gray-900">Grok Score</h3>
+                  <p className="text-gray-600">AI-generated trustworthiness score</p>
+                </div>
+                <div className="flex items-center justify-center w-24 h-24 bg-white rounded-full shadow-lg border-4" style={{ borderColor: color }}>
+                  <span className="text-4xl font-bold" style={{ color }}>{grokScore}</span>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Evidence Sources */}
           <div className="bg-red-50/50 backdrop-blur-sm rounded-2xl shadow-xl p-8 border border-red-100">
