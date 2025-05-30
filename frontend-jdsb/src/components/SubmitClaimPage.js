@@ -1,6 +1,5 @@
 import React, { useState, useCallback } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { analyzeText, analyzeUrl } from '../services/api';
 
 const SubmitClaimPage = () => {
   const navigate = useNavigate();
@@ -9,10 +8,9 @@ const SubmitClaimPage = () => {
     description: '',
     sources: [''],
     mediaType: 'Article',
-    attachments: [],
-    url: ''
+    attachments: []
   });
-
+  
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [uploadProgress, setUploadProgress] = useState({});
@@ -39,23 +37,18 @@ const SubmitClaimPage = () => {
 
   const validateForm = () => {
     const newErrors = {};
-
-    // Validate title (required)
+    
+    // Only validate title as it's the only required field
     newErrors.title = validateTitle(formData.title);
-
-    // Validate URL if provided
-    if (formData.url.trim()) {
-      newErrors.url = validateUrl(formData.url);
-    }
-
+    
     setErrors(newErrors);
-    // Return true if there are no errors
-    return !Object.values(newErrors).some(error => error);
+    // Return true if there are no title errors
+    return !newErrors.title;
   };
 
   const handleInputChange = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }));
-
+    
     // Clear errors for this field
     if (errors[field]) {
       setErrors(prev => ({ ...prev, [field]: '' }));
@@ -66,7 +59,7 @@ const SubmitClaimPage = () => {
     const newSources = [...formData.sources];
     newSources[index] = value;
     setFormData(prev => ({ ...prev, sources: newSources }));
-
+    
     // Clear source errors
     if (errors.sources) {
       setErrors(prev => ({ ...prev, sources: undefined }));
@@ -102,7 +95,7 @@ const SubmitClaimPage = () => {
     validFiles.forEach(file => {
       const fileId = Date.now() + Math.random();
       setUploadProgress(prev => ({ ...prev, [fileId]: 0 }));
-
+      
       // Simulate upload progress
       const interval = setInterval(() => {
         setUploadProgress(prev => {
@@ -160,7 +153,7 @@ const SubmitClaimPage = () => {
     e.preventDefault();
     e.stopPropagation();
     setDragActive(false);
-
+    
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
       handleFileUpload(e.dataTransfer.files);
     }
@@ -168,13 +161,13 @@ const SubmitClaimPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+    
     if (!validateForm()) {
       return;
     }
 
     setIsSubmitting(true);
-
+    
     try {
       // Prepare form data for submission
       const submitData = {
@@ -188,32 +181,34 @@ const SubmitClaimPage = () => {
         }))
       };
 
-      console.log('Submitting data:', submitData);
+      // Send claim to backend
+      const response = await fetch('/api/verify_claim', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ claim: submitData.title }),
+      });
 
-      let analysisResult;
-
-      // If URL is provided, use URL analysis
-      if (formData.url.trim()) {
-        console.log('Analyzing URL:', formData.url);
-        analysisResult = await analyzeUrl(formData.url);
-      } else {
-        // Otherwise, use text analysis
-        const textToAnalyze = `${submitData.title}. ${submitData.description}`;
-        console.log('Analyzing text:', textToAnalyze);
-        analysisResult = await analyzeText(textToAnalyze, submitData.sources.join(' '));
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to verify claim');
       }
 
-      console.log('Analysis result:', analysisResult);
-
+      const result = await response.json();
+      
       // Store the result in localStorage
-      localStorage.setItem('analysisResult', JSON.stringify(analysisResult));
-
-      // Navigate to trust score page
-      navigate('/trust-score');
-
+      localStorage.setItem('claimResult', JSON.stringify({
+        ...result,
+        claim: submitData.title // Make sure the claim text is included
+      }));
+      
+      // Navigate to result page
+      navigate('/result');
+      
     } catch (error) {
       console.error('Submission error:', error);
-      alert('Failed to submit claim. Please try again.');
+      alert(error.message || 'Failed to submit claim. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
@@ -242,7 +237,7 @@ const SubmitClaimPage = () => {
                 <p className="text-xs text-red-600 font-semibold -mt-1">NO MISINFO</p>
               </div>
             </Link>
-
+            
             <nav className="flex items-center space-x-6">
               <Link to="/" className="text-gray-700 hover:text-blue-900 transition-colors font-medium">Home</Link>
               <Link to="/browse" className="text-gray-700 hover:text-blue-900 transition-colors font-medium">Browse Claims</Link>
@@ -318,25 +313,6 @@ const SubmitClaimPage = () => {
                 {errors.description && <p className="text-red-600 text-sm font-medium">{errors.description}</p>}
                 <p className="text-gray-500 text-sm ml-auto font-medium">{formData.description.length}/500</p>
               </div>
-            </div>
-
-            {/* URL Input */}
-            <div className="space-y-2">
-              <label htmlFor="url" className="block text-lg font-bold text-gray-900">
-                URL to Analyze (Optional)
-              </label>
-              <p className="text-gray-600 text-sm mb-3">Enter a URL to analyze its content for claims. If provided, this will be used instead of the title and description.</p>
-              <input
-                type="url"
-                id="url"
-                value={formData.url}
-                onChange={(e) => handleInputChange('url', e.target.value)}
-                className={`w-full px-6 py-4 border-2 rounded-xl text-lg focus:ring-4 focus:ring-blue-500/20 focus:border-blue-900 transition-all duration-300 ${
-                  errors.url ? 'border-red-500 bg-red-50/50' : 'border-gray-200 hover:border-gray-300'
-                }`}
-                placeholder="https://example.com/article"
-              />
-              {errors.url && <p className="text-red-600 text-sm font-medium">{errors.url}</p>}
             </div>
 
             {/* Media Type */}
@@ -426,7 +402,7 @@ const SubmitClaimPage = () => {
                 Upload Evidence (Max 3 images)
               </label>
               <p className="text-gray-600 text-sm">Screenshots, photos, or other visual evidence that supports your claim.</p>
-
+              
               <div
                 className={`border-3 border-dashed rounded-2xl p-12 text-center transition-all duration-300 ${
                   dragActive 
@@ -508,24 +484,38 @@ const SubmitClaimPage = () => {
             </div>
 
             {/* Submit Section */}
-            <div className="pt-4">
+            <div className="flex items-center justify-between pt-8 border-t-2 border-gray-100">
+              <Link
+                to="/"
+                className="flex items-center space-x-2 text-gray-600 hover:text-gray-800 transition-colors font-medium group"
+              >
+                <svg className="w-5 h-5 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+                <span>Back to Home</span>
+              </Link>
+              
               <button
                 type="submit"
                 disabled={!isFormValid || isSubmitting}
-                className={`w-full bg-gradient-to-r from-red-600 to-red-700 text-white px-8 py-4 rounded-xl text-lg font-bold transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl ${
-                  (!isFormValid || isSubmitting) ? 'opacity-50 cursor-not-allowed' : 'hover:from-red-700 hover:to-red-800'
+                className={`px-10 py-4 rounded-xl font-bold text-lg transition-all duration-300 ${
+                  isFormValid && !isSubmitting
+                    ? 'bg-gradient-to-r from-red-600 to-red-700 text-white hover:from-red-700 hover:to-red-800 transform hover:scale-105 shadow-lg hover:shadow-xl'
+                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                 }`}
               >
                 {isSubmitting ? (
-                  <span className="flex items-center justify-center">
-                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    Analyzing...
-                  </span>
+                  <div className="flex items-center space-x-3">
+                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    <span>Submitting Claim...</span>
+                  </div>
                 ) : (
-                  'Analyze Claim'
+                  <div className="flex items-center space-x-2">
+                    <span>Submit Claim</span>
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </div>
                 )}
               </button>
             </div>

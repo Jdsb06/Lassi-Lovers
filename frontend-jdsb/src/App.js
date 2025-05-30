@@ -6,10 +6,12 @@ import TermsOfService from './components/TermsOfService';
 import CommunityGuidelines from './components/CommunityGuidelines';
 import PrivacyPolicy from './components/PrivacyPolicy';
 import SubmitClaimPage from './components/SubmitClaimPage';
-import FAQ from './components/FAQ';
-import TrustScoreResult from './components/TrustScoreResult';
-import ChatbotLauncher from './components/ChatbotLauncher';
 import BrowseClaimsPage from './components/BrowseClaimsPage';
+import FAQ from './components/FAQ';
+import TrustScoreDisplay from './components/TrustScoreDisplay';
+import ChatbotLauncher from './components/ChatbotLauncher';
+import AuthButton from './components/AuthButton';
+import { AuthProvider } from './components/AuthContext';
 
 const FactCheckHomepage = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -61,9 +63,7 @@ const FactCheckHomepage = () => {
               <Link to="/browse" className="text-gray-700 hover:text-blue-900 transition-colors">Browse Claims</Link>
               <Link to="/about" className="text-gray-700 hover:text-blue-900 transition-colors">About</Link>
               <Link to="/faqs" className="text-gray-700 hover:text-blue-900 transition-colors">FAQ/Help</Link>
-              <button className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors">
-                Login/Sign Up
-              </button>
+              <AuthButton />
             </nav>
 
             {/* Mobile Menu Button */}
@@ -92,9 +92,9 @@ const FactCheckHomepage = () => {
                 <Link to="/browse" className="block text-gray-700">Browse Claims</Link>
                 <Link to="/about" className="block text-gray-700">About</Link>
                 <Link to="/faqs" className="block text-gray-700">FAQ/Help</Link>
-                <button className="w-full bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors">
-                  Login/Sign Up
-                </button>
+                <div className="mt-2">
+                  <AuthButton />
+                </div>
               </div>
             </div>
           )}
@@ -377,19 +377,24 @@ const FactCheckHomepage = () => {
 
 const App = () => {
   return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<FactCheckHomepage />} />
-        <Route path="/about" element={<About />} />
-        <Route path="/terms" element={<TermsOfService />} />
-        <Route path="/guidelines" element={<CommunityGuidelines />} />
-        <Route path="/privacy" element={<PrivacyPolicy />} />
-        <Route path="/submit" element={<SubmitClaimPage />} />
-        <Route path="/faqs" element={<FAQ />} />
-        <Route path="/trust-score" element={<TrustScoreResult />} />
-        <Route path="/browse" element={<BrowseClaimsPage />} />
-      </Routes>
-    </Router>
+    <AuthProvider>
+      <Router>
+        <div>
+          <Routes>
+            <Route path="/" element={<FactCheckHomepage />} />
+            <Route path="/submit" element={<SubmitClaimPage />} />
+            <Route path="/browse" element={<BrowseClaimsPage />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/terms" element={<TermsOfService />} />
+            <Route path="/guidelines" element={<CommunityGuidelines />} />
+            <Route path="/privacy" element={<PrivacyPolicy />} />
+            <Route path="/faqs" element={<FAQ />} />
+            <Route path="/result" element={<TrustScoreDisplay />} />
+          </Routes>
+          <ChatbotLauncher />
+        </div>
+      </Router>
+    </AuthProvider>
   );
 };
 

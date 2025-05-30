@@ -1,31 +1,3 @@
-# FactCheck Frontend
-
-See the root [README.md](../README.md) for full project setup, running instructions, and API documentation.
-
-## Frontend File/Folder Roles
-
-- `src/`: All React source code (components, pages, services)
-- `public/`: Static assets (favicon, index.html, etc)
-- `package.json`: Frontend dependencies and scripts
-- `tailwind.config.js`: Tailwind CSS configuration
-- `postcss.config.js`: PostCSS configuration
-
-## Frontend-Specific Troubleshooting
-- **API errors:** Make sure the backend is running on port 5000 and the frontend is configured to use that port.
-- **CORS errors:** If you see CORS errors, update allowed origins in the backend.
-- **Port conflicts:** Change the port in the run command if 3000 is in use.
-
-## Running Frontend Only
-```bash
-cd frontend
-npm install
-npm start
-```
-
-## Customization
-- Edit `src/services/api.js` to change the backend API URL if needed.
-- All UI components are in `src/components/`.
-
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).

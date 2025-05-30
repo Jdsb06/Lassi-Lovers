@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { ChevronDown, ChevronUp } from 'lucide-react';
+import AuthButton from './AuthButton';
 
 const FAQ = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -85,9 +86,7 @@ const FAQ = () => {
               <Link to="/browse" className="text-gray-700 hover:text-blue-900 transition-colors">Browse Claims</Link>
               <Link to="/about" className="text-gray-700 hover:text-blue-900 transition-colors">About</Link>
               <Link to="/faq" className="text-blue-900 font-semibold border-b-2 border-red-600">FAQ/Help</Link>
-              <button className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors">
-                Login/Sign Up
-              </button>
+              <AuthButton />
             </nav>
 
             {/* Mobile Menu Button */}
@@ -116,9 +115,9 @@ const FAQ = () => {
                 <Link to="/browse" className="block text-gray-700">Browse Claims</Link>
                 <Link to="/about" className="block text-gray-700">About</Link>
                 <Link to="/faq" className="block text-blue-900 font-semibold">FAQ/Help</Link>
-                <button className="w-full bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors">
-                  Login/Sign Up
-                </button>
+                <div className="mt-2">
+                  <AuthButton />
+                </div>
               </div>
             </div>
           )}

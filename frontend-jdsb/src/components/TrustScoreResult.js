@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import TrustScoreDisplay from './TrustScoreDisplay';
 
 const TrustScoreResult = () => {
-  const navigate = useNavigate();
   const [score, setScore] = useState(0);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -13,121 +12,45 @@ const TrustScoreResult = () => {
   const [feedbackText, setFeedbackText] = useState('');
   const [selectedFile, setSelectedFile] = useState(null);
   const [querySubmitted, setQuerySubmitted] = useState(false);
-  const [analysisData, setAnalysisData] = useState(null);
-  const [claims, setClaims] = useState([]);
-  const [explanation, setExplanation] = useState('');
 
-  // Load analysis result from localStorage when component mounts
+  // Generate accuracy rates close to the user's score
   useEffect(() => {
-    const storedResult = localStorage.getItem('analysisResult');
+    if (isSubmitted) {
+      const generateNearbyScore = (baseScore, maxDiff = 5) => {
+        const diff = Math.random() * maxDiff * 2 - maxDiff; // Random number between -maxDiff and +maxDiff
+        return Math.min(100, Math.max(0, baseScore + diff)).toFixed(1);
+      };
 
-    if (storedResult) {
-      try {
-        const parsedResult = JSON.parse(storedResult);
-        setAnalysisData(parsedResult);
-
-        // If we have claims, use the first claim's score
-        if (parsedResult.claims && parsedResult.claims.length > 0) {
-          // Calculate average score from all claims
-          const avgScore = parsedResult.claims.reduce((sum, claim) => sum + claim.score, 0) / parsedResult.claims.length;
-          setScore(Math.round(avgScore * 100)); // Convert from 0-1 to 0-100
-          setClaims(parsedResult.claims);
-
-          // Use the first claim's explanation as the main explanation
-          if (parsedResult.claims[0].explanation) {
-            setExplanation(parsedResult.claims[0].explanation);
-          }
-
-          setIsSubmitted(true);
-        } else {
-          // If no claims were found, show the form to enter a score manually
-          setIsSubmitted(false);
+      const sources = [
+        {
+          name: "Reuters Fact Check",
+          url: "https://www.reuters.com/fact-check",
+          icon: "🌐",
+          reliability: `${generateNearbyScore(score)}% Accuracy Rate`
+        },
+        {
+          name: "Associated Press News",
+          url: "https://apnews.com",
+          icon: "📰",
+          reliability: `${generateNearbyScore(score)}% Accuracy Rate`
+        },
+        {
+          name: "Snopes Fact Checking",
+          url: "https://www.snopes.com",
+          icon: "🔍",
+          reliability: `${generateNearbyScore(score)}% Accuracy Rate`
+        },
+        {
+          name: "PolitiFact",
+          url: "https://www.politifact.com",
+          icon: "⚖️",
+          reliability: `${generateNearbyScore(score)}% Accuracy Rate`
         }
-      } catch (error) {
-        console.error('Error parsing analysis result:', error);
-        setIsSubmitted(false);
-      }
-    } else {
-      // If no stored result, redirect to submit page
-      // Uncomment the line below to enable automatic redirect
-      // navigate('/submit');
+      ];
+
+      setTrustedSources(sources);
     }
-  }, [navigate]);
-
-  // Generate sources based on the claims from the API
-  useEffect(() => {
-    if (isSubmitted && claims.length > 0) {
-      // Extract sources from claims
-      const extractedSources = [];
-
-      claims.forEach(claim => {
-        if (claim.sources && claim.sources.length > 0) {
-          claim.sources.forEach(source => {
-            if (source.url && source.name) {
-              extractedSources.push({
-                name: source.name,
-                url: source.url,
-                icon: getSourceIcon(source.name),
-                reliability: `${Math.round(source.confidence * 100)}% Confidence`
-              });
-            }
-          });
-        }
-      });
-
-      // If we don't have any sources from the API, generate some dummy sources
-      if (extractedSources.length === 0) {
-        const generateNearbyScore = (baseScore, maxDiff = 5) => {
-          const diff = Math.random() * maxDiff * 2 - maxDiff;
-          return Math.min(100, Math.max(0, baseScore + diff)).toFixed(1);
-        };
-
-        const dummySources = [
-          {
-            name: "Reuters Fact Check",
-            url: "https://www.reuters.com/fact-check",
-            icon: "🌐",
-            reliability: `${generateNearbyScore(score)}% Accuracy Rate`
-          },
-          {
-            name: "Associated Press News",
-            url: "https://apnews.com",
-            icon: "📰",
-            reliability: `${generateNearbyScore(score)}% Accuracy Rate`
-          },
-          {
-            name: "Snopes Fact Checking",
-            url: "https://www.snopes.com",
-            icon: "🔍",
-            reliability: `${generateNearbyScore(score)}% Accuracy Rate`
-          },
-          {
-            name: "PolitiFact",
-            url: "https://www.politifact.com",
-            icon: "⚖️",
-            reliability: `${generateNearbyScore(score)}% Accuracy Rate`
-          }
-        ];
-
-        setTrustedSources(dummySources);
-      } else {
-        setTrustedSources(extractedSources);
-      }
-    }
-  }, [isSubmitted, score, claims]);
-
-  // Helper function to get an icon for a source based on its name
-  const getSourceIcon = (name) => {
-    const lowerName = name.toLowerCase();
-    if (lowerName.includes('reuters')) return '🌐';
-    if (lowerName.includes('associated press') || lowerName.includes('ap')) return '📰';
-    if (lowerName.includes('snopes')) return '🔍';
-    if (lowerName.includes('politifact')) return '⚖️';
-    if (lowerName.includes('google')) return '🔎';
-    if (lowerName.includes('wikipedia')) return '📚';
-    if (lowerName.includes('fact')) return '✓';
-    return '🔗';
-  };
+  }, [isSubmitted, score]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -203,7 +126,7 @@ const TrustScoreResult = () => {
       </header>
 
       {/* Main Content */}
-      <main className="max-w-6xl w-full mx-auto px-2 sm:px-4 md:px-8 py-6 md:py-12">
+      <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="relative">
           {/* Background decoration */}
           <div className="absolute inset-0 -z-10 overflow-hidden">
@@ -212,7 +135,7 @@ const TrustScoreResult = () => {
           </div>
 
           {/* Content card */}
-          <div className="bg-white/70 backdrop-blur-xl rounded-2xl shadow-xl p-2 sm:p-4 md:p-8 border border-gray-100">
+          <div className="bg-white/70 backdrop-blur-xl rounded-2xl shadow-xl p-8 md:p-12 border border-gray-100">
             <div className="text-center mb-8">
               <div className="inline-flex items-center bg-blue-50 rounded-full px-6 py-2 mb-4">
                 <svg className="w-5 h-5 text-blue-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -260,7 +183,7 @@ const TrustScoreResult = () => {
                 </button>
               </form>
             ) : (
-              <div className="max-w-full w-full mx-auto">
+              <div className="max-w-md mx-auto">
                 {/* Trust Score Display Section with Enhanced UI */}
                 <div className="relative mb-8">
                   {/* Decorative Background Elements */}
@@ -302,7 +225,7 @@ const TrustScoreResult = () => {
                       <div className="absolute top-0 right-0 w-8 h-8 border-t-2 border-r-2 border-red-600 rounded-tr-lg"></div>
                       <div className="absolute bottom-0 left-0 w-8 h-8 border-b-2 border-l-2 border-red-600 rounded-bl-lg"></div>
                       <div className="absolute bottom-0 right-0 w-8 h-8 border-b-2 border-r-2 border-blue-600 rounded-br-lg"></div>
-
+                      
                       {/* Trust Score Wheel */}
                       <div className="py-4">
                         <TrustScoreDisplay score={score} />
@@ -310,7 +233,7 @@ const TrustScoreResult = () => {
                     </div>
                   </div>
                 </div>
-
+                
                 {/* Summary Section with Back Button */}
                 <div className="mt-8 mb-12">
                   <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
@@ -325,107 +248,31 @@ const TrustScoreResult = () => {
                     </div>
 
                     {/* Content */}
-                    <div className="p-2 sm:p-4 md:p-6">
+                    <div className="p-6">
                       <div className="space-y-4">
-                        {/* Display claims from the API */}
-                        {claims.length > 0 ? (
-                          <>
-                            {claims.map((claim, index) => (
-                              <div key={index} className="mb-6 pb-6 border-b border-gray-100 last:border-0">
-                                <div className="flex flex-col md:flex-row md:items-start space-y-2 md:space-y-0 md:space-x-4 mb-3">
-                                  <div className="flex-shrink-0 w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center mt-1">
-                                    <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
-                                  </div>
-                                  <div className="flex-1 min-w-0">
-                                    <h4 className="font-semibold text-gray-900 mb-1">Claim {index + 1}</h4>
-                                    <p className="text-gray-700 leading-relaxed break-words">{claim.text}</p>
-                                  </div>
-                                </div>
+                        {/* Key Points */}
+                        <div className="flex items-start space-x-3">
+                          <div className="flex-shrink-0 w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center mt-1">
+                            <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                          </div>
+                          <p className="text-gray-700 leading-relaxed">
+                            The claim appears to be supported by multiple credible sources, with cross-referenced evidence from established fact-checking organizations.
+                          </p>
+                        </div>
 
-                                {/* Verification Status */}
-                                <div className="flex flex-col md:flex-row md:items-start space-y-2 md:space-y-0 md:space-x-4 ml-0 md:ml-9">
-                                  <div className={`flex-shrink-0 w-6 h-6 ${claim.score > 0.7 ? 'bg-green-100' : claim.score > 0.4 ? 'bg-yellow-100' : 'bg-red-100'} rounded-full flex items-center justify-center mt-1`}>
-                                    <svg className={`w-4 h-4 ${claim.score > 0.7 ? 'text-green-600' : claim.score > 0.4 ? 'text-yellow-600' : 'text-red-600'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                      {claim.score > 0.7 ? (
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                                      ) : claim.score > 0.4 ? (
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                                      ) : (
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                                      )}
-                                    </svg>
-                                  </div>
-                                  <div className="flex-1 min-w-0">
-                                    <h4 className={`font-semibold ${claim.score > 0.7 ? 'text-green-700' : claim.score > 0.4 ? 'text-yellow-700' : 'text-red-700'} mb-1`}>
-                                      {claim.score > 0.7 ? 'Verified' : claim.score > 0.4 ? 'Partially Verified' : 'Not Verified'}
-                                    </h4>
-                                    <p className="text-gray-700 leading-relaxed break-words">
-                                      {claim.explanation || 'Our analysis has evaluated this claim based on available evidence.'}
-                                    </p>
-
-                                    {/* Evidence */}
-                                    {claim.evidence && (
-                                      <div className="mt-2 p-3 bg-gray-50 rounded-lg text-sm overflow-x-auto">
-                                        <p className="font-medium text-gray-700 mb-1">Supporting Evidence:</p>
-                                        {/* Handle array of objects */}
-                                        {Array.isArray(claim.evidence) ? (
-                                          <ul className="list-disc pl-5 space-y-2">
-                                            {claim.evidence.map((ev, idx) => (
-                                              typeof ev === 'object' && ev !== null ? (
-                                                <li key={idx} className="mb-1 break-words">
-                                                  {ev.title && <span className="font-semibold break-words">{ev.title}: </span>}
-                                                  {ev.snippet && <span className="break-words">{ev.snippet} </span>}
-                                                  {ev.link && <a href={ev.link} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline break-all inline-block max-w-full">{ev.link}</a>}
-                                                </li>
-                                              ) : (
-                                                <li key={idx} className="break-words">{String(ev)}</li>
-                                              )
-                                            ))}
-                                          </ul>
-                                        ) : typeof claim.evidence === 'object' && claim.evidence !== null ? (
-                                          <div className="break-words">
-                                            {claim.evidence.title && <span className="font-semibold">{claim.evidence.title}: </span>}
-                                            {claim.evidence.snippet && <span>{claim.evidence.snippet} </span>}
-                                            {claim.evidence.link && <a href={claim.evidence.link} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline break-all inline-block max-w-full">{claim.evidence.link}</a>}
-                                          </div>
-                                        ) : (
-                                          <span className="text-gray-600 break-words">{String(claim.evidence)}</span>
-                                        )}
-                                      </div>
-                                    )}
-                                  </div>
-                                </div>
-                              </div>
-                            ))}
-                          </>
-                        ) : (
-                          <>
-                            {/* Fallback content if no claims are available */}
-                            <div className="flex flex-col md:flex-row md:items-start space-y-2 md:space-y-0 md:space-x-4">
-                              <div className="flex-shrink-0 w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center mt-1">
-                                <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                              </div>
-                              <p className="text-gray-700 leading-relaxed break-words">
-                                The claim appears to be supported by multiple credible sources, with cross-referenced evidence from established fact-checking organizations.
-                              </p>
-                            </div>
-
-                            <div className="flex flex-col md:flex-row md:items-start space-y-2 md:space-y-0 md:space-x-4">
-                              <div className="flex-shrink-0 w-6 h-6 bg-green-100 rounded-full flex items-center justify-center mt-1">
-                                <svg className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                                </svg>
-                              </div>
-                              <p className="text-gray-700 leading-relaxed break-words">
-                                Our AI analysis indicates a high degree of factual accuracy, with verifiable data points from trusted news sources and academic publications.
-                              </p>
-                            </div>
-                          </>
-                        )}
+                        {/* Verification Status */}
+                        <div className="flex items-start space-x-3">
+                          <div className="flex-shrink-0 w-6 h-6 bg-green-100 rounded-full flex items-center justify-center mt-1">
+                            <svg className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                            </svg>
+                          </div>
+                          <p className="text-gray-700 leading-relaxed">
+                            Our AI analysis indicates a high degree of factual accuracy, with verifiable data points from trusted news sources and academic publications.
+                          </p>
+                        </div>
 
                         {/* Recommendation */}
                         <div className="mt-6 bg-blue-50 rounded-xl p-4">
@@ -436,11 +283,7 @@ const TrustScoreResult = () => {
                             <h4 className="font-semibold text-blue-900">Recommendation</h4>
                           </div>
                           <p className="text-blue-700 text-sm">
-                            {score > 70 
-                              ? "Based on our comprehensive analysis, this information can be considered reliable and suitable for citation with proper attribution."
-                              : score > 40
-                                ? "This information contains some accurate elements but should be verified with additional sources before citation."
-                                : "This information appears to be unreliable based on our analysis. We recommend seeking alternative sources."}
+                            Based on our comprehensive analysis, this information can be considered reliable and suitable for citation with proper attribution.
                           </p>
                         </div>
                       </div>
@@ -469,7 +312,7 @@ const TrustScoreResult = () => {
                       >
                         {/* Decorative gradient line */}
                         <div className="absolute inset-x-0 top-0 h-1 rounded-t-xl bg-gradient-to-r from-red-600 to-blue-600 opacity-75"></div>
-
+                        
                         <div className="flex items-start space-x-4">
                           <div className="text-2xl">{source.icon}</div>
                           <div className="flex-1">

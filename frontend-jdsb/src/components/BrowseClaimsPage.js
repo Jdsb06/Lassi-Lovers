@@ -1,57 +1,106 @@
 import React, { useState, useEffect } from 'react';
+import { useAuth } from './AuthContext';
 import { Link } from 'react-router-dom';
-import { findSimilarClaims } from '../services/api';
+import AuthButton from './AuthButton';
 
 const BrowseClaimsPage = () => {
-  const [searchQuery, setSearchQuery] = useState('');
   const [claims, setClaims] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [filteredClaims, setFilteredClaims] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterCategory, setFilterCategory] = useState('all');
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
+  const { user } = useAuth();
 
-  const handleSearch = async (e) => {
-    e.preventDefault();
-    if (!searchQuery.trim()) return;
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 50);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
-    setIsLoading(true);
-    setError(null);
+  useEffect(() => {
+    // Fetch claims data from the server
+    const fetchClaims = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch('/api/claims');
+        if (!response.ok) {
+          throw new Error('Failed to fetch claims');
+        }
+        const data = await response.json();
+        setClaims(data.claims);
+        setFilteredClaims(data.claims);
+        setLoading(false);
+      } catch (err) {
+        console.error('Error fetching claims:', err);
+        setError(err.message);
+        setLoading(false);
+      }
+    };
 
-    try {
-      const result = await findSimilarClaims(searchQuery);
-      setClaims(result.results);
-    } catch (err) {
-      setError('Failed to search claims. Please try again.');
-      console.error('Search error:', err);
-    } finally {
-      setIsLoading(false);
+    fetchClaims();
+  }, []);
+
+  // Filter claims based on search term and category
+  useEffect(() => {
+    if (claims.length > 0) {
+      const filtered = claims.filter(claim => {
+        const matchesSearch = claim.text.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                             claim.explanation.toLowerCase().includes(searchTerm.toLowerCase());
+
+        const matchesCategory = filterCategory === 'all' ||
+                              (filterCategory === 'true' && claim.verdict === 'true') ||
+                              (filterCategory === 'false' && claim.verdict === 'false') ||
+                              (filterCategory === 'neutral' && claim.verdict === 'neutral');
+
+        return matchesSearch && matchesCategory;
+      });
+
+      setFilteredClaims(filtered);
     }
-  };
+  }, [searchTerm, filterCategory, claims]);
 
-  const getVerdictColor = (verdict) => {
-    switch (verdict.toLowerCase()) {
-      case 'supported':
+  // Get verdict class for color coding
+  const getVerdictClass = (verdict) => {
+    switch (verdict) {
+      case 'true':
         return 'bg-green-100 text-green-800';
-      case 'refuted':
+      case 'false':
         return 'bg-red-100 text-red-800';
+      case 'neutral':
       default:
-        return 'bg-gray-100 text-gray-800';
+        return 'bg-yellow-100 text-yellow-800';
     }
   };
 
-  const getScoreColor = (score) => {
-    if (score >= 70) return 'text-green-600';
-    if (score <= 30) return 'text-red-600';
-    return 'text-gray-600';
+  // Get verdict text for display
+  const getVerdictText = (verdict) => {
+    switch (verdict) {
+      case 'true':
+        return 'True';
+      case 'false':
+        return 'False';
+      case 'neutral':
+      default:
+        return 'Uncertain';
+    }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-red-50">
+    <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <header className="bg-white/95 backdrop-blur-sm shadow-lg sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-between">
-            <Link to="/" className="flex items-center space-x-3 group">
-              <div className="w-10 h-10 bg-red-600 rounded-full flex items-center justify-center relative group-hover:bg-red-700 transition-colors">
+      <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+        isScrolled ? 'bg-white shadow-lg' : 'bg-white/95 backdrop-blur-sm'
+      }`}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
+            {/* Logo */}
+            <Link to="/" className="flex items-center space-x-3">
+              <div className="w-10 h-10 bg-red-600 rounded-full flex items-center justify-center relative">
                 <div className="w-6 h-6 bg-blue-900 rounded-full flex items-center justify-center">
                   <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/>
@@ -65,10 +114,14 @@ const BrowseClaimsPage = () => {
               </div>
             </Link>
 
-            <nav className="hidden md:flex items-center space-x-6">
-              <Link to="/" className="text-gray-700 hover:text-blue-900 transition-colors font-medium">Home</Link>
+            {/* Desktop Navigation */}
+            <nav className="hidden md:flex items-center space-x-8">
+              <Link to="/" className="text-gray-700 hover:text-blue-900 transition-colors">Home</Link>
+              <Link to="/submit" className="text-gray-700 hover:text-blue-900 transition-colors">Submit a Claim</Link>
               <Link to="/browse" className="text-blue-900 font-semibold border-b-2 border-red-600">Browse Claims</Link>
-              <Link to="/about" className="text-gray-700 hover:text-blue-900 transition-colors font-medium">About</Link>
+              <Link to="/about" className="text-gray-700 hover:text-blue-900 transition-colors">About</Link>
+              <Link to="/faqs" className="text-gray-700 hover:text-blue-900 transition-colors">FAQ/Help</Link>
+              <AuthButton />
             </nav>
 
             {/* Mobile Menu Button */}
@@ -93,111 +146,187 @@ const BrowseClaimsPage = () => {
             <div className="md:hidden bg-white border-t">
               <div className="px-4 py-3 space-y-3">
                 <Link to="/" className="block text-gray-700">Home</Link>
+                <Link to="/submit" className="block text-gray-700">Submit a Claim</Link>
                 <Link to="/browse" className="block text-blue-900 font-semibold">Browse Claims</Link>
                 <Link to="/about" className="block text-gray-700">About</Link>
+                <Link to="/faqs" className="block text-gray-700">FAQ/Help</Link>
+                <div className="mt-2">
+                  <AuthButton />
+                </div>
               </div>
             </div>
           )}
         </div>
       </header>
 
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Search Section */}
-        <div className="mb-12">
-          <div className="text-center mb-8">
-            <h1 className="text-4xl font-bold text-gray-900 mb-4">
-              Browse Verified Claims
-            </h1>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Search through our database of fact-checked claims to find information you can trust.
-            </p>
-          </div>
-
-          <form onSubmit={handleSearch} className="max-w-3xl mx-auto">
-            <div className="flex gap-4">
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Enter a claim to search..."
-                className="flex-1 px-6 py-4 border-2 border-gray-200 rounded-xl text-lg focus:ring-4 focus:ring-blue-500/20 focus:border-blue-900 transition-all duration-300 hover:border-gray-300"
-              />
-              <button
-                type="submit"
-                disabled={isLoading || !searchQuery.trim()}
-                className={`px-8 py-4 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-xl text-lg font-bold transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl ${
-                  (isLoading || !searchQuery.trim()) ? 'opacity-50 cursor-not-allowed' : 'hover:from-red-700 hover:to-red-800'
-                }`}
-              >
-                {isLoading ? (
-                  <span className="flex items-center">
-                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    Searching...
-                  </span>
-                ) : (
-                  'Search Claims'
-                )}
-              </button>
-            </div>
-          </form>
+      <div className="container mx-auto px-4 pt-24 pb-12 max-w-6xl">
+        <div className="flex justify-center mb-8">
+          <h1 className="text-3xl font-bold text-blue-900">Browse Claims</h1>
         </div>
 
-        {/* Results Section */}
-        {error && (
-          <div className="max-w-3xl mx-auto mb-8 p-4 bg-red-50 border border-red-200 rounded-xl text-red-600">
-            {error}
+        {/* Search and Filter */}
+        <div className="bg-white rounded-xl shadow-md p-6 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="col-span-2">
+              <label htmlFor="search" className="block text-sm font-medium text-gray-700 mb-1">
+                Search Claims
+              </label>
+              <input
+                type="text"
+                id="search"
+                placeholder="Search for claims..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full px-4 py-2 rounded-xl border border-gray-200 focus:border-red-500 focus:ring-2 focus:ring-red-500/20 transition-all"
+              />
+            </div>
+            <div>
+              <label htmlFor="filter" className="block text-sm font-medium text-gray-700 mb-1">
+                Filter by Verdict
+              </label>
+              <select
+                id="filter"
+                value={filterCategory}
+                onChange={(e) => setFilterCategory(e.target.value)}
+                className="w-full px-4 py-2 rounded-xl border border-gray-200 focus:border-red-500 focus:ring-2 focus:ring-red-500/20 transition-all"
+              >
+                <option value="all">All Claims</option>
+                <option value="true">True</option>
+                <option value="false">False</option>
+                <option value="neutral">Uncertain</option>
+              </select>
+            </div>
           </div>
-        )}
+        </div>
 
-        {claims.length > 0 ? (
+        {/* Claims List */}
+        {loading ? (
+          <div className="flex items-center justify-center h-64">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-600"></div>
+          </div>
+        ) : error ? (
+          <div className="bg-red-100 text-red-700 p-4 rounded-xl mb-8">
+            Error: {error}. Please try again later.
+          </div>
+        ) : filteredClaims.length === 0 ? (
+          <div className="bg-gray-50 rounded-xl p-8 text-center">
+            <p className="text-gray-600">No claims found matching your search criteria.</p>
+          </div>
+        ) : (
           <div className="space-y-6">
-            {claims.map((claim) => (
-              <div key={claim.id} className="bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition-shadow">
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex-1">
-                    <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                      {claim.text}
-                    </h3>
-                    <div className="flex items-center gap-4">
-                      <span className={`px-3 py-1 rounded-full text-sm font-medium ${getVerdictColor(claim.verdict)}`}>
-                        {claim.verdict}
-                      </span>
-                      <span className={`text-lg font-semibold ${getScoreColor(claim.score)}`}>
-                        Score: {Math.round(claim.score)}%
-                      </span>
-                      <span className="text-sm text-gray-500">
-                        Similarity: {Math.round(claim.similarity * 100)}%
-                      </span>
+            {filteredClaims.map((claim) => (
+              <div key={claim.id} className="bg-white rounded-xl shadow-md overflow-hidden transition-all hover:shadow-lg border border-gray-100">
+                <div className="p-6">
+                  <div className="flex justify-between items-start mb-4">
+                    <h3 className="text-xl font-semibold text-blue-900">{claim.text}</h3>
+                    <span className={`px-3 py-1 rounded-full text-sm font-medium ${getVerdictClass(claim.verdict)}`}>
+                      {getVerdictText(claim.verdict)}
+                    </span>
+                  </div>
+
+                  <p className="text-gray-600 mb-4">{claim.explanation}</p>
+
+                  <div className="flex justify-between items-center text-sm text-gray-500">
+                    <div>
+                      <span className="font-medium">Confidence Score:</span> {claim.score}%
+                    </div>
+                    <div>
+                      <span className="font-medium">Verified on:</span> {new Date(claim.timestamp).toLocaleDateString()}
                     </div>
                   </div>
-                  <Link
-                    to={`/trust-score?id=${claim.id}`}
-                    className="ml-4 px-4 py-2 bg-blue-50 text-blue-900 rounded-lg hover:bg-blue-100 transition-colors"
-                  >
-                    View Details
-                  </Link>
+
+                  {claim.sources && claim.sources.length > 0 && (
+                    <div className="mt-4 pt-4 border-t border-gray-100">
+                      <h4 className="font-medium text-gray-700 mb-2">Sources:</h4>
+                      <ul className="list-disc pl-5 space-y-1">
+                        {claim.sources.map((source, idx) => (
+                          <li key={idx}>
+                            <a 
+                              href={source.url} 
+                              target="_blank" 
+                              rel="noopener noreferrer" 
+                              className="text-red-600 hover:underline"
+                            >
+                              {source.name || source.url}
+                            </a>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
                 </div>
               </div>
             ))}
           </div>
-        ) : searchQuery && !isLoading && !error ? (
-          <div className="text-center py-12">
-            <div className="w-16 h-16 bg-gray-100 rounded-full mx-auto mb-4 flex items-center justify-center">
-              <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
+        )}
+      </div>
+
+      {/* Footer */}
+      <footer className="bg-gray-900 text-white py-8 mt-auto">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid md:grid-cols-4 gap-8">
+            <div>
+              <div className="flex items-center space-x-3 mb-4">
+                <div className="w-8 h-8 bg-red-600 rounded-full flex items-center justify-center relative">
+                  <div className="w-5 h-5 bg-blue-900 rounded-full flex items-center justify-center">
+                    <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/>
+                    </svg>
+                  </div>
+                </div>
+                <div>
+                  <h3 className="font-bold">FactCheck</h3>
+                  <p className="text-xs text-red-400">NO MISINFO</p>
+                </div>
+              </div>
+              <p className="text-gray-400">
+                Fighting misinformation with AI-powered fact-checking and community collaboration.
+              </p>
             </div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">No claims found</h3>
-            <p className="text-gray-600">Try adjusting your search query or submit a new claim for verification.</p>
+
+            <div>
+              <h4 className="font-semibold mb-4">Quick Links</h4>
+              <ul className="space-y-2 text-gray-400">
+                <li><Link to="/" className="hover:text-white transition-colors">Home</Link></li>
+                <li><Link to="/submit" className="hover:text-white transition-colors">Submit Claim</Link></li>
+                <li><Link to="/browse" className="hover:text-white transition-colors">Browse Claims</Link></li>
+                <li><Link to="/about" className="hover:text-white transition-colors">About</Link></li>
+                <li><Link to="/faqs" className="hover:text-white transition-colors">FAQ</Link></li>
+              </ul>
+            </div>
+
+            <div>
+              <h4 className="font-semibold mb-4">Legal</h4>
+              <ul className="space-y-2 text-gray-400">
+                <li><Link to="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link></li>
+                <li><Link to="/terms" className="hover:text-white transition-colors">Terms of Service</Link></li>
+                <li><Link to="/guidelines" className="hover:text-white transition-colors">Community Guidelines</Link></li>
+              </ul>
+            </div>
+
+            <div>
+              <h4 className="font-semibold mb-4">Connect</h4>
+              <div className="flex space-x-4">
+                <a href="/" className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center hover:bg-blue-700 transition-colors">
+                  <span className="text-sm font-bold">f</span>
+                </a>
+                <a href="/" className="w-10 h-10 bg-blue-400 rounded-full flex items-center justify-center hover:bg-blue-500 transition-colors">
+                  <span className="text-sm font-bold">t</span>
+                </a>
+                <a href="/" className="w-10 h-10 bg-blue-700 rounded-full flex items-center justify-center hover:bg-blue-800 transition-colors">
+                  <span className="text-sm font-bold">in</span>
+                </a>
+              </div>
+            </div>
           </div>
-        ) : null}
-      </main>
+
+          <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
+            <p>© {new Date().getFullYear()} FactCheck - No Misinfo. All Rights Reserved.</p>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 };
 
-export default BrowseClaimsPage; 
+export default BrowseClaimsPage;

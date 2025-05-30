@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import AuthButton from './AuthButton';
 
 const About = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -44,9 +45,7 @@ const About = () => {
               <Link to="/browse" className="text-gray-700 hover:text-blue-900 transition-colors">Browse Claims</Link>
               <Link to="/about" className="text-blue-900 font-semibold border-b-2 border-red-600">About</Link>
               <Link to="/faqs" className="text-gray-700 hover:text-blue-900 transition-colors">FAQ/Help</Link>
-              <button className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors">
-                Login/Sign Up
-              </button>
+              <AuthButton />
             </nav>
 
             {/* Mobile Menu Button */}
@@ -75,9 +74,9 @@ const About = () => {
                 <Link to="/browse" className="block text-gray-700">Browse Claims</Link>
                 <Link to="/about" className="block text-blue-900 font-semibold">About</Link>
                 <Link to="/faqs" className="block text-gray-700">FAQ/Help</Link>
-                <button className="w-full bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors">
-                  Login/Sign Up
-                </button>
+                <div className="mt-2">
+                  <AuthButton />
+                </div>
               </div>
             </div>
           )}
