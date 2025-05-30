@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import AuthButton from './AuthButton';
+import Footer from './Footer';
 
 const TrustScoreDisplay = () => {
   const navigate = useNavigate();
@@ -430,6 +431,9 @@ const TrustScoreDisplay = () => {
           )}
         </div>
       </div>
+
+      {/* Add Footer */}
+      <Footer />
     </div>
   );
 };
