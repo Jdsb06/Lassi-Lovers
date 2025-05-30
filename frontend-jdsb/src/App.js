@@ -90,7 +90,7 @@ const FactCheckHomepage = () => {
               Powerful Features
             </h2>
             <p className="text-xl md:text-2xl text-gray-600 max-w-3xl mx-auto font-light leading-relaxed">
-              Our comprehensive platform provides everything you need to combat misinformation effectively.
+              This comprehensive platform provides everything you need to combat misinformation effectively.
             </p>
           </div>
           
@@ -264,7 +264,7 @@ const FactCheckHomepage = () => {
                   "FactCheck helped us clarify a misleading news article in just minutes. 
                   The detailed explanations and source citations were invaluable."
                 </p>
-                <p className="font-semibold bg-gradient-to-r from-blue-900 to-red-600 bg-clip-text text-transparent">John, Journalist</p>
+                <p className="font-semibold bg-gradient-to-r from-blue-900 to-red-600 bg-clip-text text-transparent">Arnab Goswami, Journalist</p>
               </div>
             </div>
 
@@ -289,7 +289,7 @@ const FactCheckHomepage = () => {
                   "As an educator, this platform has become essential for teaching 
                   media literacy. The trust scores help students understand reliability."
                 </p>
-                <p className="font-semibold bg-gradient-to-r from-blue-900 to-red-600 bg-clip-text text-transparent">Sarah, Teacher</p>
+                <p className="font-semibold bg-gradient-to-r from-blue-900 to-red-600 bg-clip-text text-transparent">Alakh Pandey, Teacher</p>
               </div>
             </div>
 
@@ -314,7 +314,7 @@ const FactCheckHomepage = () => {
                   "The crowdsourced fact-checking feature lets our community contribute 
                   to fighting misinformation. It's democracy in action."
                 </p>
-                <p className="font-semibold bg-gradient-to-r from-blue-900 to-red-600 bg-clip-text text-transparent">Maria, Community Leader</p>
+                <p className="font-semibold bg-gradient-to-r from-blue-900 to-red-600 bg-clip-text text-transparent">Narendra Modi, Leader</p>
               </div>
             </div>
           </div>

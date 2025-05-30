@@ -37,10 +37,9 @@ const About = () => {
             <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-900 to-red-600 rounded-lg blur opacity-0 group-hover:opacity-100 transition duration-300"></div>
             <div className="relative bg-white rounded-lg p-8">
               <p className="text-gray-700 text-lg leading-relaxed">
-                FactCheck is a fact-checking platform designed to evaluate public claims and provide clarity through credible, 
-                transparent, and evidence-backed verification. Our mission is to empower people with the truth by checking 
-                statements, viral posts, or any circulating claims against trusted, verifiable sources — and scoring them 
-                on a 0 to 100 credibility scale.
+              FactCheck is a smart fact-checking platform that analyzes public claims, viral posts, and trending statements—comparing 
+              them with reliable, verified sources to deliver clear, transparent, and evidence-based results. Each claim gets a 
+              credibility score from 0 to 100, helping you separate fact from fiction with confidence.
               </p>
             </div>
           </div>

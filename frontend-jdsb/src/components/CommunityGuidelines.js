@@ -224,7 +224,7 @@ const CommunityGuidelines = () => {
                       className="text-transparent bg-clip-text bg-gradient-to-r from-blue-900 to-red-600 font-semibold 
                         hover:from-red-600 hover:to-blue-900 transition-all duration-300"
                     >
-                      ayushpatel11m@gmail.com
+                      fact-checker@gmail.com
                     </a>
                   </div>
                 </div>

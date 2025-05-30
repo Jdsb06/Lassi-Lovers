@@ -201,11 +201,11 @@ const TermsOfService = () => {
                 </p>
                 <div className="space-y-4">
                   <a 
-                    href="mailto:ayushpatel11m@gmail.com" 
+                    href="mailto:fact-checker@gmail.com" 
                     className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-900 to-red-600 
                       hover:from-red-600 hover:to-blue-900 transition-all duration-300 transform hover:scale-110"
                   >
-                    ayushpatel11m@gmail.com
+                    fact-checker@gmail.com
                   </a>
                   <a 
                     href="https://factcheck.com" 
