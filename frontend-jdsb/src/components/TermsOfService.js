@@ -224,7 +224,7 @@ const TermsOfService = () => {
               <ul className="space-y-2 text-gray-400">
                 <li><a href="/" className="hover:text-white transition-colors">Home</a></li>
                 <li><a href="/submit" className="hover:text-white transition-colors">Submit Claim</a></li>
-                <li><a href="#browse" className="hover:text-white transition-colors">Browse Claims</a></li>
+                <li><a href="/browse" className="hover:text-white transition-colors">Browse Claims</a></li>
                 <li><a href="/about" className="hover:text-white transition-colors">About</a></li>
                 <li><a href="/faqs" className="hover:text-white transition-colors">FAQ</a></li>
               </ul>
