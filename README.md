@@ -517,6 +517,8 @@ graph TD
   - [ ] Advanced reporting and analytics
   - [ ] Custom model training capabilities
 
+---
+
 ### 🎮 **Upcoming Features**
 
 <table>
@@ -556,6 +558,16 @@ graph TD
 
 </td>
 </tr>
+<tr>
+<td width="50%">
+
+**🕶️ Incognito Mode**
+- Browse and submit claims privately
+- History won’t be saved in user profile
+- Ideal for sensitive or anonymous use
+</td> 
+<td width="50%"> </td> 
+</tr> 
 </table>
 
 
