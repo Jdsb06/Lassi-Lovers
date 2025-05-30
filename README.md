@@ -632,7 +632,7 @@ Code Quality:      █████████████████     9.2/1
 
 ### 🚀 **Ready to Fight Misinformation?**
 
-<a href="https://your-live-site.com">
+<a href="readme-top">
   <img src="https://img.shields.io/badge/🌟%20Try%20FactCheck%20Now-FF6B6B?style=for-the-badge&logoColor=white" alt="Try Now" height="50">
 </a>
 
