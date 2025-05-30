@@ -17,161 +17,157 @@ const About = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-red-50">
       <Header />
-      {/* Add padding top to account for fixed header */}
-      <div className="pt-24">
-        {/* About Content */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <h1 className="text-4xl font-bold text-gray-900 mb-8">About FactCheck</h1>
-          <div className="bg-white shadow-lg rounded-lg p-8">
-            <div className="prose prose-lg max-w-none">
-              <p className="text-xl text-gray-600 mb-8">
-                In an era where misinformation spreads faster than the truth, we believe facts should be louder than fiction.
+      
+      <main className="pt-32 pb-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Page Title */}
+          <div className="text-center mb-12">
+            <h1 className="text-4xl md:text-5xl font-extrabold bg-gradient-to-r from-blue-900 to-red-600 bg-clip-text text-transparent mb-6">
+              About FactCheck
+            </h1>
+            <p className="text-xl md:text-2xl text-gray-600 max-w-3xl mx-auto font-light leading-relaxed">
+              In an era where misinformation spreads faster than the truth, we believe facts should be louder than fiction.
+            </p>
+          </div>
+
+          {/* Mission Statement */}
+          <div className="group relative transform transition-all duration-300 hover:scale-[1.02] mb-12">
+            <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-900 to-red-600 rounded-lg blur opacity-0 group-hover:opacity-100 transition duration-300"></div>
+            <div className="relative bg-white rounded-lg p-8">
+              <p className="text-gray-700 text-lg leading-relaxed">
+                FactCheck is a fact-checking platform designed to evaluate public claims and provide clarity through credible, 
+                transparent, and evidence-backed verification. Our mission is to empower people with the truth by checking 
+                statements, viral posts, or any circulating claims against trusted, verifiable sources — and scoring them 
+                on a 0 to 100 credibility scale.
               </p>
+            </div>
+          </div>
 
-              <div className="bg-blue-50 rounded-xl p-8 mb-8">
-                <p className="text-gray-700">
-                  FactCheck is a fact-checking platform designed to evaluate public claims and provide clarity through credible, 
-                  transparent, and evidence-backed verification. Our mission is to empower people with the truth by checking 
-                  statements, viral posts, or any circulating claims against trusted, verifiable sources — and scoring them 
-                  on a 0 to 100 credibility scale.
-                </p>
-              </div>
-
-              <div className="bg-red-50 rounded-xl p-8 mb-12">
-                <h2 className="text-2xl font-bold text-red-800 mb-6">Our Process</h2>
-                <p className="text-gray-700 mb-4">Each claim is:</p>
-                <ul className="list-none space-y-4">
-                  <li className="flex items-center">
-                    <span className="text-2xl mr-3">🔍</span>
-                    <span className="text-gray-700">Carefully analyzed for context and accuracy</span>
-                  </li>
-                  <li className="flex items-center">
-                    <span className="text-2xl mr-3">📚</span>
-                    <span className="text-gray-700">Cross-referenced with trusted media outlets, academic sources, and official data</span>
-                  </li>
-                  <li className="flex items-center">
-                    <span className="text-2xl mr-3">⭐</span>
-                    <span className="text-gray-700">Scored based on how strongly it's supported by reliable information</span>
-                  </li>
-                  <li className="flex items-center">
-                    <span className="text-2xl mr-3">🔗</span>
-                    <span className="text-gray-700">Linked to original sources so you can verify for yourself</span>
-                  </li>
-                </ul>
-              </div>
-
-              <div className="bg-blue-50 rounded-xl p-8 mb-12">
-                <p className="text-gray-700">
-                  Whether it's political statements, social media trends, or viral misinformation, we provide a simple, 
-                  transparent, and research-driven view of what's true and what's not — all in one place.
-                </p>
-              </div>
-
-              <h2 className="text-3xl font-bold text-blue-900 mb-8 text-center">Meet the Team</h2>
-              <p className="text-gray-700 mb-8 text-center">This platform is built by a team of passionate developers and truth-seekers:</p>
-              
-              <div className="grid md:grid-cols-3 gap-8 mb-12">
-                {/* Team Member 1 */}
-                <a
-                  href="https://www.linkedin.com/in/jdsb06/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="block transform hover:scale-105 transition-transform"
-                >
-                  <div className="bg-white shadow-lg rounded-xl p-6">
-                    <div className="w-32 h-32 mx-auto mb-4 rounded-full overflow-hidden relative">
-                      <img 
-                        src="/images/jashandeep.jpeg" 
-                        alt="Jashandeep Singh Bedi" 
-                        className="w-full h-full object-cover"
-                        onError={(e) => {
-                          e.target.style.display = 'none';
-                          const fallback = e.target.nextElementSibling;
-                          if (fallback) fallback.style.display = 'flex';
-                        }}
-                      />
-                      <div className="w-full h-full bg-red-100 rounded-full flex items-center justify-center absolute top-0 left-0 hidden">
-                        <span className="text-4xl text-red-600">JS</span>
-                      </div>
-                    </div>
-                    <h3 className="text-xl font-semibold text-blue-900 text-center">Jashandeep Singh</h3>
-                    <p className="text-gray-600 text-center">Backend Architect</p>
+          {/* Our Process */}
+          <div className="group relative transform transition-all duration-300 hover:scale-[1.02] mb-12">
+            <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-900 to-red-600 rounded-lg blur opacity-0 group-hover:opacity-100 transition duration-300"></div>
+            <div className="relative bg-white rounded-lg p-8">
+              <h2 className="text-2xl font-bold bg-gradient-to-r from-blue-900 to-red-600 bg-clip-text text-transparent mb-6">
+                Our Process
+              </h2>
+              <p className="text-gray-700 mb-6 text-lg">Each claim is:</p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {[
+                  { icon: '🔍', text: 'Carefully analyzed for context and accuracy' },
+                  { icon: '📚', text: 'Cross-referenced with trusted media outlets, academic sources, and official data' },
+                  { icon: '⭐', text: 'Scored based on how strongly it\'s supported by reliable information' },
+                  { icon: '🔗', text: 'Linked to original sources so you can verify for yourself' }
+                ].map((item, index) => (
+                  <div 
+                    key={index}
+                    className="flex items-center p-4 rounded-lg bg-gradient-to-r from-blue-50 to-red-50 
+                      transform transition-all duration-300 hover:scale-105 hover:shadow-lg"
+                  >
+                    <span className="text-3xl mr-4 animate-bounce">{item.icon}</span>
+                    <span className="text-gray-700 text-lg">{item.text}</span>
                   </div>
-                </a>
-
-
-                {/* Team Member 2 */}
-                <a
-                  href="https://www.linkedin.com/in/kanav-kumar-b655962b5/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="block transform hover:scale-105 transition-transform"
-                >
-                  <div className="bg-white shadow-lg rounded-xl p-6">
-                    <div className="w-32 h-32 mx-auto mb-4 rounded-full overflow-hidden relative">
-                      <img 
-                        src="/images/kanav.jpeg" 
-                        alt="Kanav Kumar" 
-                        className="w-full h-full object-cover"
-                        onError={(e) => {
-                          e.target.style.display = 'none';
-                          const fallback = e.target.nextElementSibling;
-                          if (fallback) fallback.style.display = 'flex';
-                        }}
-                      />
-                      <div className="w-full h-full bg-red-100 rounded-full flex items-center justify-center absolute top-0 left-0 hidden">
-                        <span className="text-4xl text-red-600">KK</span>
-                      </div>
-                    </div>
-                    <h3 className="text-xl font-semibold text-blue-900 text-center">Kanav Kumar</h3>
-                    <p className="text-gray-600 text-center">Integration Architect</p>
-                  </div>
-                </a>
-
-                {/* Team Member 3 */}
-                <a
-                  href="https://www.linkedin.com/in/ayush-patel-72a037316/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="block transform hover:scale-105 transition-transform"
-                >
-                  <div className="bg-white shadow-lg rounded-xl p-6">
-                    <div className="w-32 h-32 mx-auto mb-4 rounded-full overflow-hidden relative">
-                      <img 
-                        src="/images/ayush.jpeg" 
-                        alt="Ayush Patel" 
-                        className="w-full h-full object-cover"
-                        onError={(e) => {
-                          e.target.style.display = 'none';
-                          const fallback = e.target.nextElementSibling;
-                          if (fallback) fallback.style.display = 'flex';
-                        }}
-                      />
-                      <div className="w-full h-full bg-blue-100 rounded-full flex items-center justify-center absolute top-0 left-0 hidden">
-                        <span className="text-4xl text-blue-900">AP</span>
-                      </div>
-                    </div>
-                    <h3 className="text-xl font-semibold text-blue-900 text-center">Ayush Patel</h3>
-                    <p className="text-gray-600 text-center">UI/UX Designer</p>
-                  </div>
-                </a>
-              </div>
-              <div className="bg-gradient-to-r from-blue-600 to-red-600 rounded-xl p-8">
-                <h2 className="text-2xl font-bold text-white mb-4">Why It Matters</h2>
-                <p className="text-white">
-                  In a digital world overflowing with opinions, algorithms, and half-truths, facts matter more than ever. 
-                  With FactCheck, we're building a future where anyone can get clear, unbiased, and reliable answers—backed 
-                  by sources you can trust.
-                </p>
+                ))}
               </div>
             </div>
           </div>
-        </div>
-      </div>
 
-      {/* Add Footer */}
+          {/* Additional Info */}
+          <div className="group relative transform transition-all duration-300 hover:scale-[1.02] mb-12">
+            <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-900 to-red-600 rounded-lg blur opacity-0 group-hover:opacity-100 transition duration-300"></div>
+            <div className="relative bg-white rounded-lg p-8">
+              <p className="text-gray-700 text-lg leading-relaxed">
+                Whether it's political statements, social media trends, or viral misinformation, we provide a simple, 
+                transparent, and research-driven view of what's true and what's not — all in one place.
+              </p>
+            </div>
+          </div>
+
+          {/* Team Section */}
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold bg-gradient-to-r from-blue-900 to-red-600 bg-clip-text text-transparent mb-6">
+              Meet the Team
+            </h2>
+            <p className="text-xl text-gray-600 mb-8">
+              This platform is built by a team of passionate developers and truth-seekers
+            </p>
+            
+            <div className="grid md:grid-cols-3 gap-8">
+              {[
+                {
+                  name: 'Jashandeep Singh',
+                  role: 'Backend Architect',
+                  image: '/images/jashandeep.jpeg',
+                  initials: 'JS',
+                  linkedin: 'https://www.linkedin.com/in/jdsb06/'
+                },
+                {
+                  name: 'Kanav Kumar',
+                  role: 'UI/UX Designer',
+                  image: '/images/kanav.jpeg',
+                  initials: 'KK',
+                  linkedin: 'https://www.linkedin.com/in/kanav-kumar-b655962b5/'
+                },
+                {
+                  name: 'Ayush Patel',
+                  role: 'Integration Architect',
+                  image: '/images/ayush.jpeg',
+                  initials: 'AP',
+                  linkedin: 'https://www.linkedin.com/in/ayush-patel-72a037316/'
+                }
+              ].map((member, index) => (
+                <a
+                  key={index}
+                  href={member.linkedin}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group relative transform transition-all duration-300 hover:scale-[1.05]"
+                >
+                  <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-900 to-red-600 rounded-lg blur opacity-0 group-hover:opacity-100 transition duration-300"></div>
+                  <div className="relative bg-white rounded-lg p-6">
+                    <div className="w-32 h-32 mx-auto mb-4 rounded-full overflow-hidden relative transform transition-transform duration-500 group-hover:rotate-[360deg]">
+                      <img 
+                        src={member.image}
+                        alt={member.name}
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          e.target.style.display = 'none';
+                          const fallback = e.target.nextElementSibling;
+                          if (fallback) fallback.style.display = 'flex';
+                        }}
+                      />
+                      <div className="w-full h-full bg-gradient-to-r from-blue-100 to-red-100 rounded-full flex items-center justify-center absolute top-0 left-0 hidden">
+                        <span className="text-4xl bg-gradient-to-r from-blue-900 to-red-600 bg-clip-text text-transparent">
+                          {member.initials}
+                        </span>
+                      </div>
+                    </div>
+                    <h3 className="text-xl font-semibold bg-gradient-to-r from-blue-900 to-red-600 bg-clip-text text-transparent text-center mb-2">
+                      {member.name}
+                    </h3>
+                    <p className="text-gray-600 text-center">{member.role}</p>
+                  </div>
+                </a>
+              ))}
+            </div>
+          </div>
+
+          {/* Why It Matters */}
+          <div className="group relative transform transition-all duration-300 hover:scale-[1.02]">
+            <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-900 to-red-600 rounded-lg blur opacity-0 group-hover:opacity-100 transition duration-300"></div>
+            <div className="relative bg-gradient-to-r from-blue-900 to-red-600 rounded-lg p-8">
+              <h2 className="text-2xl font-bold text-white mb-4">Why It Matters</h2>
+              <p className="text-white text-lg leading-relaxed">
+                In a digital world overflowing with opinions, algorithms, and half-truths, facts matter more than ever. 
+                With FactCheck, we're building a future where anyone can get clear, unbiased, and reliable answers—backed 
+                by sources you can trust.
+              </p>
+            </div>
+          </div>
+        </div>
+      </main>
+
       <Footer />
     </div>
   );

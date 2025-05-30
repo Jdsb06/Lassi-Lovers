@@ -220,310 +220,223 @@ const SubmitClaimPage = () => {
   const isFormValid = formData.title.trim() && !errors.title;
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-red-50">
       <Header />
-      {/* Add padding top to account for fixed header */}
-      <div className="pt-24">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <h1 className="text-4xl font-bold text-gray-900 mb-8">Submit a Claim</h1>
-          <div className="bg-white rounded-2xl shadow-xl p-8 md:p-12 border border-gray-100">
-            <form onSubmit={handleSubmit} className="space-y-8">
-              {/* Claim Title */}
-              <div className="space-y-2">
-                <label htmlFor="title" className="block text-lg font-bold text-gray-900">
-                  Claim Title *
-                </label>
-                <p className="text-gray-600 text-sm mb-3">Provide a clear, concise title that summarizes the claim you want fact-checked.</p>
-                <input
-                  type="text"
-                  id="title"
-                  value={formData.title}
-                  onChange={(e) => handleInputChange('title', e.target.value)}
-                  className={`w-full px-6 py-4 border-2 rounded-xl text-lg focus:ring-4 focus:ring-blue-500/20 focus:border-blue-900 transition-all duration-300 ${
-                    errors.title ? 'border-red-500 bg-red-50/50' : 'border-gray-200 hover:border-gray-300'
-                  }`}
-                  placeholder="Enter a clear, concise title for the claim..."
-                  maxLength={100}
-                />
-                <div className="flex justify-between mt-2">
-                  {errors.title && <p className="text-red-600 text-sm font-medium">{errors.title}</p>}
-                  <p className="text-gray-500 text-sm ml-auto font-medium">{formData.title.length}/100</p>
-                </div>
-              </div>
-
-              {/* Description */}
-              <div className="space-y-2">
-                <label htmlFor="description" className="block text-lg font-bold text-gray-900">
-                  Additional Context
-                </label>
-                <p className="text-gray-600 text-sm mb-3">Provide background information, where you encountered this claim, and why you think it needs verification.</p>
-                <textarea
-                  id="description"
-                  rows={5}
-                  value={formData.description}
-                  onChange={(e) => handleInputChange('description', e.target.value)}
-                  className={`w-full px-6 py-4 border-2 rounded-xl text-lg focus:ring-4 focus:ring-blue-500/20 focus:border-blue-900 transition-all duration-300 resize-none ${
-                    errors.description ? 'border-red-500 bg-red-50/50' : 'border-gray-200 hover:border-gray-300'
-                  }`}
-                  placeholder="Provide additional context, where you encountered this claim, why you think it might be false, etc..."
-                  maxLength={500}
-                />
-                <div className="flex justify-between mt-2">
-                  {errors.description && <p className="text-red-600 text-sm font-medium">{errors.description}</p>}
-                  <p className="text-gray-500 text-sm ml-auto font-medium">{formData.description.length}/500</p>
-                </div>
-              </div>
-
-              {/* Media Type */}
-              <div className="space-y-4">
-                <label className="block text-lg font-bold text-gray-900">
-                  Content Type
-                </label>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  {[
-                    { value: 'Article', icon: '📰', label: 'Article' },
-                    { value: 'Social Media Post', icon: '📱', label: 'Social Media' },
-                    { value: 'Video', icon: '🎥', label: 'Video' },
-                    { value: 'Other', icon: '📄', label: 'Other' }
-                  ].map((type) => (
-                    <label key={type.value} className="group cursor-pointer">
-                      <input
-                        type="radio"
-                        name="mediaType"
-                        value={type.value}
-                        checked={formData.mediaType === type.value}
-                        onChange={(e) => handleInputChange('mediaType', e.target.value)}
-                        className="sr-only"
-                      />
-                      <div className={`p-4 border-2 rounded-xl text-center transition-all duration-300 ${
-                        formData.mediaType === type.value
-                          ? 'border-red-500 bg-red-50 shadow-lg transform scale-105'
-                          : 'border-gray-200 hover:border-gray-300 hover:shadow-md'
-                      }`}>
-                        <div className="text-2xl mb-2">{type.icon}</div>
-                        <span className="text-sm font-semibold text-gray-700">{type.label}</span>
-                      </div>
-                    </label>
-                  ))}
-                </div>
-              </div>
-
-              {/* Sources */}
-              <div className="space-y-4">
-                <label className="block text-lg font-bold text-gray-900">
-                  Supporting URLs or Sources
-                </label>
-                <p className="text-gray-600 text-sm">Add links to articles, social media posts, or other sources related to this claim.</p>
-                <div className="space-y-3">
-                  {formData.sources.map((source, index) => (
-                    <div key={index} className="flex gap-3 items-center">
-                      <div className="flex-1">
-                        <input
-                          type="url"
-                          value={source}
-                          onChange={(e) => handleSourceChange(index, e.target.value)}
-                          className="w-full px-6 py-4 border-2 border-gray-200 rounded-xl text-lg focus:ring-4 focus:ring-blue-500/20 focus:border-blue-900 transition-all duration-300 hover:border-gray-300"
-                          placeholder="https://example.com/source"
-                        />
-                      </div>
-                      {formData.sources.length > 1 && (
-                        <button
-                          type="button"
-                          onClick={() => removeSource(index)}
-                          className="p-3 text-red-600 hover:bg-red-50 rounded-xl transition-colors group"
-                        >
-                          <svg className="w-6 h-6 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                          </svg>
-                        </button>
-                      )}
-                    </div>
-                  ))}
-                </div>
-                {errors.sources && (
-                  <p className="text-red-600 text-sm font-medium">Please check your URLs for correct formatting</p>
-                )}
-                <button
-                  type="button"
-                  onClick={addSource}
-                  className="text-blue-900 hover:text-blue-700 text-sm font-bold flex items-center space-x-2 px-4 py-2 rounded-lg hover:bg-blue-50 transition-colors"
-                >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                  </svg>
-                  <span>Add another source</span>
-                </button>
-              </div>
-
-              {/* File Upload */}
-              <div className="space-y-4">
-                <label className="block text-lg font-bold text-gray-900">
-                  Upload Evidence (Max 3 images)
-                </label>
-                <p className="text-gray-600 text-sm">Screenshots, photos, or other visual evidence that supports your claim.</p>
-                
-                <div
-                  className={`border-3 border-dashed rounded-2xl p-12 text-center transition-all duration-300 ${
-                    dragActive 
-                      ? 'border-blue-500 bg-blue-50/50 scale-105' 
-                      : 'border-gray-300 hover:border-gray-400 hover:bg-gray-50/50'
-                  }`}
-                  onDragEnter={handleDrag}
-                  onDragLeave={handleDrag}
-                  onDragOver={handleDrag}
-                  onDrop={handleDrop}
-                >
-                  <div className="space-y-4">
-                    <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-red-500 rounded-full mx-auto flex items-center justify-center">
-                      <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                      </svg>
-                    </div>
-                    <div>
-                      <p className="text-gray-700 text-lg mb-2 font-medium">Drag and drop images here, or</p>
-                      <input
-                        type="file"
-                        multiple
-                        accept="image/*"
-                        onChange={(e) => handleFileUpload(e.target.files)}
-                        className="hidden"
-                        id="file-upload"
-                      />
-                      <label
-                        htmlFor="file-upload"
-                        className="bg-gradient-to-r from-red-600 to-red-700 text-white px-8 py-3 rounded-xl hover:from-red-700 hover:to-red-800 transition-all duration-300 cursor-pointer inline-block font-semibold shadow-lg hover:shadow-xl transform hover:scale-105"
-                      >
-                        Choose Files
-                      </label>
-                    </div>
-                    <p className="text-gray-500 text-sm">JPG, PNG up to 5MB each</p>
-                  </div>
-                </div>
-
-                {/* Upload Progress */}
-                {Object.keys(uploadProgress).length > 0 && (
-                  <div className="space-y-3">
-                    {Object.entries(uploadProgress).map(([fileId, progress]) => (
-                      <div key={fileId} className="bg-gray-200 rounded-full h-3 overflow-hidden">
-                        <div 
-                          className="bg-gradient-to-r from-blue-600 to-red-600 h-3 rounded-full transition-all duration-300 shadow-sm"
-                          style={{ width: `${progress}%` }}
-                        />
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                {/* Image Previews */}
-                {formData.attachments.length > 0 && (
-                  <div className="grid grid-cols-3 gap-6">
-                    {formData.attachments.map((attachment) => (
-                      <div key={attachment.id} className="relative group">
-                        <img
-                          src={attachment.preview}
-                          alt={attachment.name}
-                          className="w-full h-32 object-cover rounded-xl shadow-lg group-hover:shadow-xl transition-shadow"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => removeAttachment(attachment.id)}
-                          className="absolute -top-3 -right-3 w-8 h-8 bg-red-600 text-white rounded-full flex items-center justify-center hover:bg-red-700 transition-colors shadow-lg hover:shadow-xl transform hover:scale-110"
-                        >
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                          </svg>
-                        </button>
-                        <div className="absolute bottom-0 left-0 right-0 bg-black/50 text-white text-xs p-2 rounded-b-xl truncate">
-                          {attachment.name}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              {/* Submit Section */}
-              <div className="flex items-center justify-between pt-8 border-t-2 border-gray-100">
-                <Link
-                  to="/"
-                  className="flex items-center space-x-2 text-gray-600 hover:text-gray-800 transition-colors font-medium group"
-                >
-                  <svg className="w-5 h-5 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                  </svg>
-                  <span>Back to Home</span>
-                </Link>
-                
-                <button
-                  type="submit"
-                  disabled={!isFormValid || isSubmitting}
-                  className={`px-10 py-4 rounded-xl font-bold text-lg transition-all duration-300 ${
-                    isFormValid && !isSubmitting
-                      ? 'bg-gradient-to-r from-red-600 to-red-700 text-white hover:from-red-700 hover:to-red-800 transform hover:scale-105 shadow-lg hover:shadow-xl'
-                      : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                  }`}
-                >
-                  {isSubmitting ? (
-                    <div className="flex items-center space-x-3">
-                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                      <span>Submitting Claim...</span>
-                    </div>
-                  ) : (
-                    <div className="flex items-center space-x-2">
-                      <span>Submit Claim</span>
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                      </svg>
-                    </div>
-                  )}
-                </button>
-              </div>
-            </form>
+      
+      <main className="pt-32 pb-16">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Page Title */}
+          <div className="text-center mb-12">
+            <h1 className="text-4xl md:text-5xl font-extrabold bg-gradient-to-r from-blue-900 to-red-600 bg-clip-text text-transparent mb-6">
+              Submit a Claim
+            </h1>
+            <p className="text-xl md:text-2xl text-gray-600 max-w-3xl mx-auto font-light leading-relaxed">
+              Help us combat misinformation by submitting claims for verification.
+            </p>
           </div>
 
-          {/* Help Section */}
-          <div className="mt-12 bg-gradient-to-r from-blue-50 to-red-50 rounded-2xl p-8 border border-blue-100">
-            <div className="text-center">
-              <h3 className="text-2xl font-bold text-gray-900 mb-4">Need Help?</h3>
-              <p className="text-gray-600 mb-6">
-                Our AI-powered system will analyze your submission and provide a comprehensive fact-check report. 
-                The more details you provide, the more accurate our analysis will be.
-              </p>
-              <div className="grid md:grid-cols-3 gap-6 text-sm">
-                <div className="bg-white/70 backdrop-blur-sm p-4 rounded-xl">
-                  <div className="w-12 h-12 bg-blue-100 rounded-full mx-auto mb-3 flex items-center justify-center">
-                    <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                  </div>
-                  <h4 className="font-semibold text-gray-900 mb-2">Be Specific</h4>
-                  <p className="text-gray-600">Provide clear, specific claims rather than vague statements</p>
-                </div>
-                <div className="bg-white/70 backdrop-blur-sm p-4 rounded-xl">
-                  <div className="w-12 h-12 bg-red-100 rounded-full mx-auto mb-3 flex items-center justify-center">
-                    <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                    </svg>
-                  </div>
-                  <h4 className="font-semibold text-gray-900 mb-2">Add Context</h4>
-                  <p className="text-gray-600">Include background information and why verification is needed</p>
-                </div>
-                <div className="bg-white/70 backdrop-blur-sm p-4 rounded-xl">
-                  <div className="w-12 h-12 bg-green-100 rounded-full mx-auto mb-3 flex items-center justify-center">
-                    <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
-                    </svg>
-                  </div>
-                  <h4 className="font-semibold text-gray-900 mb-2">Include Sources</h4>
-                  <p className="text-gray-600">Add relevant URLs and supporting evidence when possible</p>
+          {/* Claim Form */}
+          <form onSubmit={handleSubmit} className="space-y-8">
+            {/* Title Input */}
+            <div className="group relative transform transition-all duration-300 hover:scale-[1.02]">
+              <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-900 to-red-600 rounded-lg blur opacity-0 group-hover:opacity-100 transition duration-300"></div>
+              <div className="relative bg-white rounded-lg p-6">
+                <label className="block text-lg font-semibold mb-2 bg-gradient-to-r from-blue-900 to-red-600 bg-clip-text text-transparent">
+                  Title
+                </label>
+                <input
+                  type="text"
+                  value={formData.title}
+                  onChange={(e) => handleInputChange('title', e.target.value)}
+                  className="w-full px-4 py-3 rounded-lg border focus:ring-2 focus:ring-blue-900 focus:border-transparent transition-all duration-300"
+                  placeholder="Enter the claim to be fact-checked"
+                />
+                {errors.title && (
+                  <p className="mt-2 text-red-600">{errors.title}</p>
+                )}
+              </div>
+            </div>
+
+            {/* Description Input */}
+            <div className="group relative transform transition-all duration-300 hover:scale-[1.02]">
+              <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-900 to-red-600 rounded-lg blur opacity-0 group-hover:opacity-100 transition duration-300"></div>
+              <div className="relative bg-white rounded-lg p-6">
+                <label className="block text-lg font-semibold mb-2 bg-gradient-to-r from-blue-900 to-red-600 bg-clip-text text-transparent">
+                  Description
+                </label>
+                <textarea
+                  value={formData.description}
+                  onChange={(e) => handleInputChange('description', e.target.value)}
+                  rows="4"
+                  className="w-full px-4 py-3 rounded-lg border focus:ring-2 focus:ring-blue-900 focus:border-transparent transition-all duration-300"
+                  placeholder="Provide additional context about the claim"
+                />
+              </div>
+            </div>
+
+            {/* Media Type Selection */}
+            <div className="group relative transform transition-all duration-300 hover:scale-[1.02]">
+              <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-900 to-red-600 rounded-lg blur opacity-0 group-hover:opacity-100 transition duration-300"></div>
+              <div className="relative bg-white rounded-lg p-6">
+                <label className="block text-lg font-semibold mb-4 bg-gradient-to-r from-blue-900 to-red-600 bg-clip-text text-transparent">
+                  Media Type
+                </label>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  {['Article', 'Social Media', 'Video', 'Image'].map((type) => (
+                    <button
+                      key={type}
+                      type="button"
+                      onClick={() => handleInputChange('mediaType', type)}
+                      className={`p-4 rounded-lg text-center transition-all duration-300 transform hover:scale-105 ${
+                        formData.mediaType === type
+                          ? 'bg-gradient-to-r from-blue-900 to-red-600 text-white shadow-lg'
+                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      }`}
+                    >
+                      {type}
+                    </button>
+                  ))}
                 </div>
               </div>
             </div>
-          </div>
-        </div>
-      </div>
 
-      {/* Add Footer */}
+            {/* Sources */}
+            <div className="group relative transform transition-all duration-300 hover:scale-[1.02]">
+              <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-900 to-red-600 rounded-lg blur opacity-0 group-hover:opacity-100 transition duration-300"></div>
+              <div className="relative bg-white rounded-lg p-6">
+                <label className="block text-lg font-semibold mb-4 bg-gradient-to-r from-blue-900 to-red-600 bg-clip-text text-transparent">
+                  Sources
+                </label>
+                {formData.sources.map((source, index) => (
+                  <div key={index} className="flex gap-4 mb-4">
+                    <input
+                      type="text"
+                      value={source}
+                      onChange={(e) => handleSourceChange(index, e.target.value)}
+                      placeholder="Enter source URL"
+                      className="flex-1 px-4 py-3 rounded-lg border focus:ring-2 focus:ring-blue-900 focus:border-transparent transition-all duration-300"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => removeSource(index)}
+                      className="p-3 text-red-600 hover:text-red-700 transition-colors duration-300"
+                      disabled={formData.sources.length === 1}
+                    >
+                      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                      </svg>
+                    </button>
+                  </div>
+                ))}
+                <button
+                  type="button"
+                  onClick={addSource}
+                  className="text-blue-900 hover:text-red-600 font-semibold transition-colors duration-300"
+                >
+                  + Add Another Source
+                </button>
+              </div>
+            </div>
+
+            {/* File Upload Area */}
+            <div 
+              className={`group relative transform transition-all duration-300 hover:scale-[1.02] ${
+                dragActive ? 'ring-2 ring-blue-900' : ''
+              }`}
+              onDragEnter={handleDrag}
+              onDragLeave={handleDrag}
+              onDragOver={handleDrag}
+              onDrop={handleDrop}
+            >
+              <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-900 to-red-600 rounded-lg blur opacity-0 group-hover:opacity-100 transition duration-300"></div>
+              <div className="relative bg-white rounded-lg p-6">
+                <label className="block text-lg font-semibold mb-4 bg-gradient-to-r from-blue-900 to-red-600 bg-clip-text text-transparent">
+                  Attachments
+                </label>
+                <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-blue-900 transition-colors duration-300">
+                  <input
+                    type="file"
+                    multiple
+                    accept="image/*"
+                    onChange={(e) => handleFileUpload(e.target.files)}
+                    className="hidden"
+                    id="file-upload"
+                  />
+                  <label
+                    htmlFor="file-upload"
+                    className="cursor-pointer text-gray-600 hover:text-blue-900 transition-colors duration-300"
+                  >
+                    <svg className="w-12 h-12 mx-auto mb-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                    </svg>
+                    <span className="text-lg">Drop files here or click to upload</span>
+                    <p className="text-sm text-gray-500 mt-2">Maximum 3 images, 5MB each</p>
+                  </label>
+                </div>
+
+                {/* Attachment Previews */}
+                <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                  {formData.attachments.map((att) => (
+                    <div key={att.id} className="relative group">
+                      <img
+                        src={att.preview}
+                        alt={att.name}
+                        className="w-full h-32 object-cover rounded-lg transform transition-all duration-300 group-hover:scale-105"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => removeAttachment(att.id)}
+                        className="absolute top-2 right-2 p-2 bg-red-600 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    </div>
+                  ))}
+                  {Object.entries(uploadProgress).map(([id, progress]) => (
+                    <div key={id} className="relative h-32 bg-gray-100 rounded-lg flex items-center justify-center">
+                      <div className="w-16 h-16 relative">
+                        <svg className="animate-spin w-16 h-16 text-blue-900" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                        </svg>
+                        <span className="absolute inset-0 flex items-center justify-center text-sm font-semibold">
+                          {progress}%
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Submit Button */}
+            <div className="text-center">
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className={`bg-gradient-to-r from-blue-900 to-red-600 text-white px-10 py-4 rounded-lg text-lg font-semibold 
+                  transition-all duration-300 transform hover:scale-110 hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed
+                  ${isSubmitting ? 'animate-pulse' : ''}`}
+              >
+                {isSubmitting ? (
+                  <span className="flex items-center justify-center">
+                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Submitting...
+                  </span>
+                ) : (
+                  'Submit Claim'
+                )}
+              </button>
+            </div>
+          </form>
+        </div>
+      </main>
+
       <Footer />
     </div>
   );

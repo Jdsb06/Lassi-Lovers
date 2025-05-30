@@ -93,43 +93,53 @@ const BrowseClaimsPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-red-50">
       <Header />
-      {/* Add padding top to account for fixed header */}
-      <div className="pt-24">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <h1 className="text-4xl font-bold text-gray-900 mb-8">Browse Claims</h1>
+      
+      <main className="pt-32 pb-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Page Title */}
+          <div className="text-center mb-12">
+            <h1 className="text-4xl md:text-5xl font-extrabold bg-gradient-to-r from-blue-900 to-red-600 bg-clip-text text-transparent mb-6">
+              Browse Claims
+            </h1>
+            <p className="text-xl md:text-2xl text-gray-600 max-w-3xl mx-auto font-light leading-relaxed">
+              Explore fact-checked claims from our AI-powered verification system
+            </p>
+          </div>
+
           {/* Search and Filter */}
-          <div className="bg-white rounded-xl shadow-md p-6 mb-8">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="col-span-2">
-                <label htmlFor="search" className="block text-sm font-medium text-gray-700 mb-1">
-                  Search Claims
-                </label>
-                <input
-                  type="text"
-                  id="search"
-                  placeholder="Search for claims..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full px-4 py-2 rounded-xl border border-gray-200 focus:border-red-500 focus:ring-2 focus:ring-red-500/20 transition-all"
-                />
-              </div>
-              <div>
-                <label htmlFor="filter" className="block text-sm font-medium text-gray-700 mb-1">
-                  Filter by Verdict
-                </label>
-                <select
-                  id="filter"
-                  value={filterCategory}
-                  onChange={(e) => setFilterCategory(e.target.value)}
-                  className="w-full px-4 py-2 rounded-xl border border-gray-200 focus:border-red-500 focus:ring-2 focus:ring-red-500/20 transition-all"
-                >
-                  <option value="all">All Claims</option>
-                  <option value="true">True</option>
-                  <option value="false">False</option>
-                  <option value="neutral">Uncertain</option>
-                </select>
+          <div className="group relative transform transition-all duration-300 hover:scale-[1.02] mb-8">
+            <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-900 to-red-600 rounded-lg blur opacity-0 group-hover:opacity-100 transition duration-300"></div>
+            <div className="relative bg-white rounded-lg p-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="col-span-2">
+                  <label className="block text-lg font-semibold mb-2 bg-gradient-to-r from-blue-900 to-red-600 bg-clip-text text-transparent">
+                    Search Claims
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Search for claims..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-full px-4 py-3 rounded-lg border focus:ring-2 focus:ring-blue-900 focus:border-transparent transition-all duration-300"
+                  />
+                </div>
+                <div>
+                  <label className="block text-lg font-semibold mb-2 bg-gradient-to-r from-blue-900 to-red-600 bg-clip-text text-transparent">
+                    Filter by Verdict
+                  </label>
+                  <select
+                    value={filterCategory}
+                    onChange={(e) => setFilterCategory(e.target.value)}
+                    className="w-full px-4 py-3 rounded-lg border focus:ring-2 focus:ring-blue-900 focus:border-transparent transition-all duration-300"
+                  >
+                    <option value="all">All Claims</option>
+                    <option value="true">True</option>
+                    <option value="false">False</option>
+                    <option value="neutral">Uncertain</option>
+                  </select>
+                </div>
               </div>
             </div>
           </div>
@@ -137,24 +147,41 @@ const BrowseClaimsPage = () => {
           {/* Claims List */}
           {loading ? (
             <div className="flex items-center justify-center h-64">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-600"></div>
+              <div className="w-16 h-16 relative">
+                <svg className="animate-spin w-16 h-16 text-blue-900" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                </svg>
+              </div>
             </div>
           ) : error ? (
-            <div className="bg-red-100 text-red-700 p-4 rounded-xl mb-8">
-              Error: {error}. Please try again later.
+            <div className="group relative transform transition-all duration-300 hover:scale-[1.02] mb-8">
+              <div className="absolute -inset-0.5 bg-gradient-to-r from-red-600 to-red-900 rounded-lg blur opacity-0 group-hover:opacity-100 transition duration-300"></div>
+              <div className="relative bg-red-50 rounded-lg p-6 text-red-700">
+                Error: {error}. Please try again later.
+              </div>
             </div>
           ) : filteredClaims.length === 0 ? (
-            <div className="bg-gray-50 rounded-xl p-8 text-center">
-              <p className="text-gray-600">No claims found matching your search criteria.</p>
+            <div className="group relative transform transition-all duration-300 hover:scale-[1.02] mb-8">
+              <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-900 to-red-600 rounded-lg blur opacity-0 group-hover:opacity-100 transition duration-300"></div>
+              <div className="relative bg-white rounded-lg p-8 text-center">
+                <p className="text-gray-600">No claims found matching your search criteria.</p>
+              </div>
             </div>
           ) : (
             <div className="space-y-6">
               {filteredClaims.map((claim) => (
-                <div key={claim.id} className="bg-white rounded-xl shadow-md overflow-hidden transition-all hover:shadow-lg border border-gray-100">
-                  <div className="p-6">
+                <div 
+                  key={claim.id} 
+                  className="group relative transform transition-all duration-300 hover:scale-[1.02]"
+                >
+                  <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-900 to-red-600 rounded-lg blur opacity-0 group-hover:opacity-100 transition duration-300"></div>
+                  <div className="relative bg-white rounded-lg p-6">
                     <div className="flex justify-between items-start mb-4">
-                      <h3 className="text-xl font-semibold text-blue-900">{claim.text}</h3>
-                      <span className={`px-3 py-1 rounded-full text-sm font-medium ${getVerdictClass(claim.verdict)}`}>
+                      <h3 className="text-xl font-semibold bg-gradient-to-r from-blue-900 to-red-600 bg-clip-text text-transparent">
+                        {claim.text}
+                      </h3>
+                      <span className={`px-4 py-1 rounded-full text-sm font-medium transform transition-transform duration-300 hover:scale-110 ${getVerdictClass(claim.verdict)}`}>
                         {getVerdictText(claim.verdict)}
                       </span>
                     </div>
@@ -162,17 +189,26 @@ const BrowseClaimsPage = () => {
                     <p className="text-gray-600 mb-4">{claim.explanation}</p>
 
                     <div className="flex justify-between items-center text-sm text-gray-500">
-                      <div>
-                        <span className="font-medium">Confidence Score:</span> {claim.score}%
+                      <div className="flex items-center space-x-2">
+                        <span className="font-medium">Confidence:</span>
+                        <div className="w-24 h-2 bg-gray-200 rounded-full overflow-hidden">
+                          <div 
+                            className="h-full bg-gradient-to-r from-blue-900 to-red-600 transition-all duration-500"
+                            style={{ width: `${claim.score}%` }}
+                          ></div>
+                        </div>
+                        <span>{claim.score}%</span>
                       </div>
                       <div>
-                        <span className="font-medium">Verified on:</span> {new Date(claim.timestamp).toLocaleDateString()}
+                        <span className="font-medium">Verified:</span> {new Date(claim.timestamp).toLocaleDateString()}
                       </div>
                     </div>
 
                     {claim.sources && claim.sources.length > 0 && (
                       <div className="mt-4 pt-4 border-t border-gray-100">
-                        <h4 className="font-medium text-gray-700 mb-2">Sources:</h4>
+                        <h4 className="font-medium bg-gradient-to-r from-blue-900 to-red-600 bg-clip-text text-transparent mb-2">
+                          Sources:
+                        </h4>
                         <ul className="list-disc pl-5 space-y-1">
                           {claim.sources.map((source, idx) => (
                             <li key={idx}>
@@ -180,7 +216,7 @@ const BrowseClaimsPage = () => {
                                 href={source.url} 
                                 target="_blank" 
                                 rel="noopener noreferrer" 
-                                className="text-red-600 hover:underline"
+                                className="text-blue-900 hover:text-red-600 transition-colors duration-300"
                               >
                                 {source.name || source.url}
                               </a>
@@ -195,9 +231,8 @@ const BrowseClaimsPage = () => {
             </div>
           )}
         </div>
-      </div>
+      </main>
 
-      {/* Add Footer */}
       <Footer />
     </div>
   );

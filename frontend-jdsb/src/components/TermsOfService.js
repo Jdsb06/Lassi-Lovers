@@ -23,105 +23,207 @@ const TermsOfService = () => {
   });
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-red-50">
       <Header />
-      {/* Add padding top to account for fixed header */}
-      <div className="pt-24">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <h1 className="text-4xl font-bold text-gray-900 mb-8">Terms of Service</h1>
-          <div className="prose prose-lg max-w-none text-gray-700">
-            <p className="text-gray-500">Effective Date: {currentDate}</p>
-            
-            <p className="mt-6">
-              Welcome to FactCheck.com. By accessing or using our website, you agree to be bound by the following 
-              Terms of Service ("Terms"). Please read them carefully.
-            </p>
-
-            <h2 className="text-2xl font-bold text-blue-900 mt-8 mb-4">1. Acceptance of Terms</h2>
-            <p>
-              By using FactCheck.com, you agree to comply with and be legally bound by these Terms. 
-              If you do not agree, please do not use the site.
-            </p>
-
-            <h2 className="text-2xl font-bold text-blue-900 mt-8 mb-4">2. Purpose of the Website</h2>
-            <p>
-              FactCheck.com is a platform created to fact-check public claims by analyzing them against 
-              trustworthy sources. We assign a credibility score (0-100) and provide linked sources for transparency.
-            </p>
-            <p className="text-gray-600 italic mt-2">
-              Disclaimer: We strive for accuracy, but we do not guarantee the completeness, reliability, 
-              or timeliness of the information provided. All content is for informational purposes only, 
-              and should not be construed as legal, political, or professional advice.
-            </p>
-
-            <h2 className="text-2xl font-bold text-blue-900 mt-8 mb-4">3. Use of Content</h2>
-            <p>You may:</p>
-            <ul className="list-disc pl-6 mb-4">
-              <li>View and share links to our content for personal, non-commercial use</li>
-              <li>Use the information for educational and awareness purposes</li>
-            </ul>
-            <p>You may not:</p>
-            <ul className="list-disc pl-6 mb-4">
-              <li>Copy, reproduce, or republish content without credit</li>
-              <li>Misrepresent or alter our content for misleading purposes</li>
-              <li>Use the site to promote false information or spam</li>
-            </ul>
-
-            <h2 className="text-2xl font-bold text-blue-900 mt-8 mb-4">4. User Submissions</h2>
-            <p>If users are allowed to submit claims, comments, or feedback:</p>
-            <ul className="list-disc pl-6 mb-4">
-              <li>You are responsible for the content you submit</li>
-              <li>You must not post anything illegal, harmful, defamatory, or misleading</li>
-              <li>We reserve the right to remove or moderate any content at our discretion</li>
-            </ul>
-
-            <h2 className="text-2xl font-bold text-blue-900 mt-8 mb-4">5. Intellectual Property</h2>
-            <p>
-              All content on FactCheck.com—including text, design, logo, and analysis—is the intellectual 
-              property of the team unless otherwise stated. Unauthorized use is prohibited.
-            </p>
-
-            <h2 className="text-2xl font-bold text-blue-900 mt-8 mb-4">6. External Links</h2>
-            <p>
-              We include links to third-party websites as references. We are not responsible for the 
-              content or privacy practices of these external sites.
-            </p>
-
-            <h2 className="text-2xl font-bold text-blue-900 mt-8 mb-4">7. Limitation of Liability</h2>
-            <p>
-              FactCheck.com and its creators are not liable for any damages, losses, or consequences 
-              resulting from the use of our content or reliance on our fact-checks.
-            </p>
-            <p className="mt-2">Use of the website is at your own risk.</p>
-
-            <h2 className="text-2xl font-bold text-blue-900 mt-8 mb-4">8. Changes to Terms</h2>
-            <p>
-              We may update these Terms from time to time. When we do, we'll revise the "Effective Date" 
-              above. Continued use of the site after changes means you accept the updated Terms.
-            </p>
-
-            <h2 className="text-2xl font-bold text-blue-900 mt-8 mb-4">9. Contact Us</h2>
-            <p>For questions, concerns, or feedback, feel free to contact us at:</p>
-            <p className="mt-2">
-              <strong>Website:</strong>{' '}
-              <a href="https://factcheck.com" className="text-blue-600 hover:text-blue-800">
-                factcheck.com
-              </a>
-            </p>
-            <p>
-              <strong>Email:</strong>{' '}
-              <a href="mailto:ayushpatel11m@gmail.com" className="text-blue-600 hover:text-blue-800">
-                ayushpatel11m@gmail.com
-              </a>
-            </p>
-            <p className="mt-4">
-              <strong>Developed by:</strong> Jashadeep Singh Bedi, Kanav Kumar, and Ayush Patel
+      
+      <main className="pt-32 pb-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Page Title */}
+          <div className="text-center mb-12">
+            <h1 className="text-4xl md:text-5xl font-extrabold bg-gradient-to-r from-blue-900 to-red-600 bg-clip-text text-transparent mb-6">
+              Terms of Service
+            </h1>
+            <p className="text-xl md:text-2xl text-gray-600 max-w-3xl mx-auto font-light leading-relaxed">
+              Effective Date: {currentDate}
             </p>
           </div>
-        </div>
-      </div>
 
-      {/* Add Footer */}
+          {/* Introduction */}
+          <div className="group relative transform transition-all duration-300 hover:scale-[1.02] mb-12">
+            <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-900 to-red-600 rounded-lg blur opacity-0 group-hover:opacity-100 transition duration-300"></div>
+            <div className="relative bg-white rounded-lg p-8">
+              <p className="text-gray-700 text-lg leading-relaxed">
+                Welcome to FactCheck.com. By accessing or using our website, you agree to be bound by the following 
+                Terms of Service ("Terms"). Please read them carefully.
+              </p>
+            </div>
+          </div>
+
+          {/* Acceptance Section */}
+          <div className="group relative transform transition-all duration-300 hover:scale-[1.02] mb-12">
+            <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-900 to-red-600 rounded-lg blur opacity-0 group-hover:opacity-100 transition duration-300"></div>
+            <div className="relative bg-white rounded-lg p-8">
+              <h2 className="text-2xl font-bold bg-gradient-to-r from-blue-900 to-red-600 bg-clip-text text-transparent mb-6">
+                1. Acceptance of Terms
+              </h2>
+              <p className="text-gray-700 text-lg leading-relaxed">
+                By using FactCheck.com, you agree to comply with and be legally bound by these Terms. 
+                If you do not agree, please do not use the site.
+              </p>
+            </div>
+          </div>
+
+          {/* Purpose Section */}
+          <div className="group relative transform transition-all duration-300 hover:scale-[1.02] mb-12">
+            <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-900 to-red-600 rounded-lg blur opacity-0 group-hover:opacity-100 transition duration-300"></div>
+            <div className="relative bg-white rounded-lg p-8">
+              <h2 className="text-2xl font-bold bg-gradient-to-r from-blue-900 to-red-600 bg-clip-text text-transparent mb-6">
+                2. Purpose of the Website
+              </h2>
+              <div className="space-y-4">
+                <p className="text-gray-700 text-lg leading-relaxed">
+                  FactCheck.com is a platform created to fact-check public claims by analyzing them against 
+                  trustworthy sources. We assign a credibility score (0-100) and provide linked sources for transparency.
+                </p>
+                <p className="text-gray-600 italic">
+                  Disclaimer: We strive for accuracy, but we do not guarantee the completeness, reliability, 
+                  or timeliness of the information provided. All content is for informational purposes only, 
+                  and should not be construed as legal, political, or professional advice.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Content Usage Section */}
+          <div className="group relative transform transition-all duration-300 hover:scale-[1.02] mb-12">
+            <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-900 to-red-600 rounded-lg blur opacity-0 group-hover:opacity-100 transition duration-300"></div>
+            <div className="relative bg-white rounded-lg p-8">
+              <h2 className="text-2xl font-bold bg-gradient-to-r from-blue-900 to-red-600 bg-clip-text text-transparent mb-6">
+                3. Use of Content
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div>
+                  <h3 className="text-xl font-semibold bg-gradient-to-r from-green-600 to-green-900 bg-clip-text text-transparent mb-4">
+                    You may:
+                  </h3>
+                  <div className="space-y-4">
+                    {[
+                      {
+                        icon: '👁️',
+                        text: 'View and share links to our content for personal, non-commercial use'
+                      },
+                      {
+                        icon: '📚',
+                        text: 'Use the information for educational and awareness purposes'
+                      }
+                    ].map((item, index) => (
+                      <div 
+                        key={index}
+                        className="flex items-center p-4 rounded-lg bg-gradient-to-r from-green-50 to-green-100 
+                          transform transition-all duration-300 hover:scale-105 hover:shadow-lg"
+                      >
+                        <span className="text-3xl mr-4 animate-bounce">{item.icon}</span>
+                        <p className="text-gray-700">{item.text}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <h3 className="text-xl font-semibold bg-gradient-to-r from-red-600 to-red-900 bg-clip-text text-transparent mb-4">
+                    You may not:
+                  </h3>
+                  <div className="space-y-4">
+                    {[
+                      {
+                        icon: '❌',
+                        text: 'Copy, reproduce, or republish content without credit'
+                      },
+                      {
+                        icon: '⛔',
+                        text: 'Misrepresent or alter our content for misleading purposes'
+                      },
+                      {
+                        icon: '🚫',
+                        text: 'Use the site to promote false information or spam'
+                      }
+                    ].map((item, index) => (
+                      <div 
+                        key={index}
+                        className="flex items-center p-4 rounded-lg bg-gradient-to-r from-red-50 to-red-100 
+                          transform transition-all duration-300 hover:scale-105 hover:shadow-lg"
+                      >
+                        <span className="text-3xl mr-4 animate-pulse">{item.icon}</span>
+                        <p className="text-gray-700">{item.text}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* User Submissions Section */}
+          <div className="group relative transform transition-all duration-300 hover:scale-[1.02] mb-12">
+            <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-900 to-red-600 rounded-lg blur opacity-0 group-hover:opacity-100 transition duration-300"></div>
+            <div className="relative bg-white rounded-lg p-8">
+              <h2 className="text-2xl font-bold bg-gradient-to-r from-blue-900 to-red-600 bg-clip-text text-transparent mb-6">
+                4. User Submissions
+              </h2>
+              <p className="text-gray-700 mb-6">If users are allowed to submit claims, comments, or feedback:</p>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {[
+                  {
+                    icon: '📝',
+                    text: 'You are responsible for the content you submit'
+                  },
+                  {
+                    icon: '⚠️',
+                    text: 'You must not post anything illegal, harmful, defamatory, or misleading'
+                  },
+                  {
+                    icon: '🔄',
+                    text: 'We reserve the right to remove or moderate any content at our discretion'
+                  }
+                ].map((item, index) => (
+                  <div 
+                    key={index}
+                    className="flex items-center p-4 rounded-lg bg-gradient-to-r from-blue-50 to-red-50 
+                      transform transition-all duration-300 hover:scale-105 hover:shadow-lg"
+                  >
+                    <span className="text-3xl mr-4 animate-bounce">{item.icon}</span>
+                    <p className="text-gray-700">{item.text}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Contact Section */}
+          <div className="group relative transform transition-all duration-300 hover:scale-[1.02]">
+            <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-900 to-red-600 rounded-lg blur opacity-0 group-hover:opacity-100 transition duration-300"></div>
+            <div className="relative bg-white rounded-lg p-8">
+              <h2 className="text-2xl font-bold bg-gradient-to-r from-blue-900 to-red-600 bg-clip-text text-transparent mb-6">
+                Contact Us
+              </h2>
+              <div className="text-center">
+                <p className="text-gray-700 mb-6">
+                  For questions, concerns, or feedback about these Terms of Service, please contact us:
+                </p>
+                <div className="space-y-4">
+                  <a 
+                    href="mailto:ayushpatel11m@gmail.com" 
+                    className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-900 to-red-600 
+                      hover:from-red-600 hover:to-blue-900 transition-all duration-300 transform hover:scale-110"
+                  >
+                    ayushpatel11m@gmail.com
+                  </a>
+                  <a 
+                    href="https://factcheck.com" 
+                    className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-900 to-red-600 
+                      hover:from-red-600 hover:to-blue-900 transition-all duration-300 transform hover:scale-110"
+                  >
+                    factcheck.com
+                  </a>
+                  <p className="text-gray-700 mt-6">
+                    Developed by: Jashadeep Singh Bedi, Kanav Kumar, and Ayush Patel
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+
       <Footer />
     </div>
   );

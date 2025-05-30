@@ -43,35 +43,35 @@ const Header = () => {
               className="px-4 py-2 font-semibold relative group"
             >
               <span className="relative z-10 transition-all duration-300 text-blue-900 group-hover:bg-gradient-to-r group-hover:from-blue-900 group-hover:to-red-600 group-hover:bg-clip-text group-hover:text-transparent">Home</span>
-              <div className="absolute inset-0 h-1 w-full bg-red-600 bottom-0 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></div>
+              <div className="absolute inset-0 h-1 w-full bg-gradient-to-r from-blue-900 to-red-600 bottom-0 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></div>
             </Link>
             <Link 
               to="/submit" 
               className="px-4 py-2 font-semibold relative group"
             >
               <span className="relative z-10 transition-all duration-300 text-gray-700 group-hover:bg-gradient-to-r group-hover:from-blue-900 group-hover:to-red-600 group-hover:bg-clip-text group-hover:text-transparent">Submit a Claim</span>
-              <div className="absolute inset-0 h-1 w-full bg-red-600 bottom-0 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></div>
+              <div className="absolute inset-0 h-1 w-full bg-gradient-to-r from-blue-900 to-red-600 bottom-0 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></div>
             </Link>
             <Link 
               to="/browse" 
               className="px-4 py-2 font-semibold relative group"
             >
               <span className="relative z-10 transition-all duration-300 text-gray-700 group-hover:bg-gradient-to-r group-hover:from-blue-900 group-hover:to-red-600 group-hover:bg-clip-text group-hover:text-transparent">Browse Claims</span>
-              <div className="absolute inset-0 h-1 w-full bg-red-600 bottom-0 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></div>
+              <div className="absolute inset-0 h-1 w-full bg-gradient-to-r from-blue-900 to-red-600 bottom-0 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></div>
             </Link>
             <Link 
               to="/about" 
               className="px-4 py-2 font-semibold relative group"
             >
               <span className="relative z-10 transition-all duration-300 text-gray-700 group-hover:bg-gradient-to-r group-hover:from-blue-900 group-hover:to-red-600 group-hover:bg-clip-text group-hover:text-transparent">About</span>
-              <div className="absolute inset-0 h-1 w-full bg-red-600 bottom-0 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></div>
+              <div className="absolute inset-0 h-1 w-full bg-gradient-to-r from-blue-900 to-red-600 bottom-0 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></div>
             </Link>
             <Link 
               to="/faqs" 
               className="px-4 py-2 font-semibold relative group"
             >
               <span className="relative z-10 transition-all duration-300 text-gray-700 group-hover:bg-gradient-to-r group-hover:from-blue-900 group-hover:to-red-600 group-hover:bg-clip-text group-hover:text-transparent">FAQ/Help</span>
-              <div className="absolute inset-0 h-1 w-full bg-red-600 bottom-0 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></div>
+              <div className="absolute inset-0 h-1 w-full bg-gradient-to-r from-blue-900 to-red-600 bottom-0 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></div>
             </Link>
             <div className="ml-8 transform transition-all duration-300 hover:scale-105">
               <AuthButton />
@@ -80,7 +80,7 @@ const Header = () => {
 
           {/* Mobile Menu Button */}
           <button 
-            className="md:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors duration-300"
+            className="md:hidden p-2 rounded-lg hover:bg-gradient-to-r hover:from-blue-50 hover:to-red-50 transition-colors duration-300"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
           >
             {isMenuOpen ? (
@@ -99,11 +99,11 @@ const Header = () => {
         {isMenuOpen && (
           <div className="md:hidden bg-white/95 backdrop-blur-md border-t border-gray-100">
             <div className="px-4 py-3 space-y-2">
-              <Link to="/" className="block py-2 px-4 text-blue-900 font-semibold rounded-lg hover:bg-gray-50 transition-all duration-300 transform hover:scale-105 hover:bg-gradient-to-r hover:from-blue-900 hover:to-red-600 hover:bg-clip-text hover:text-transparent">Home</Link>
-              <Link to="/submit" className="block py-2 px-4 text-gray-700 rounded-lg hover:bg-gray-50 transition-all duration-300 transform hover:scale-105 hover:bg-gradient-to-r hover:from-blue-900 hover:to-red-600 hover:bg-clip-text hover:text-transparent">Submit a Claim</Link>
-              <Link to="/browse" className="block py-2 px-4 text-gray-700 rounded-lg hover:bg-gray-50 transition-all duration-300 transform hover:scale-105 hover:bg-gradient-to-r hover:from-blue-900 hover:to-red-600 hover:bg-clip-text hover:text-transparent">Browse Claims</Link>
-              <Link to="/about" className="block py-2 px-4 text-gray-700 rounded-lg hover:bg-gray-50 transition-all duration-300 transform hover:scale-105 hover:bg-gradient-to-r hover:from-blue-900 hover:to-red-600 hover:bg-clip-text hover:text-transparent">About</Link>
-              <Link to="/faqs" className="block py-2 px-4 text-gray-700 rounded-lg hover:bg-gray-50 transition-all duration-300 transform hover:scale-105 hover:bg-gradient-to-r hover:from-blue-900 hover:to-red-600 hover:bg-clip-text hover:text-transparent">FAQ/Help</Link>
+              <Link to="/" className="block py-2 px-4 text-blue-900 font-semibold rounded-lg hover:bg-gradient-to-r hover:from-blue-50 hover:to-red-50 transition-all duration-300 transform hover:scale-105 hover:bg-gradient-to-r hover:from-blue-900 hover:to-red-600 hover:bg-clip-text hover:text-transparent">Home</Link>
+              <Link to="/submit" className="block py-2 px-4 text-gray-700 rounded-lg hover:bg-gradient-to-r hover:from-blue-50 hover:to-red-50 transition-all duration-300 transform hover:scale-105 hover:bg-gradient-to-r hover:from-blue-900 hover:to-red-600 hover:bg-clip-text hover:text-transparent">Submit a Claim</Link>
+              <Link to="/browse" className="block py-2 px-4 text-gray-700 rounded-lg hover:bg-gradient-to-r hover:from-blue-50 hover:to-red-50 transition-all duration-300 transform hover:scale-105 hover:bg-gradient-to-r hover:from-blue-900 hover:to-red-600 hover:bg-clip-text hover:text-transparent">Browse Claims</Link>
+              <Link to="/about" className="block py-2 px-4 text-gray-700 rounded-lg hover:bg-gradient-to-r hover:from-blue-50 hover:to-red-50 transition-all duration-300 transform hover:scale-105 hover:bg-gradient-to-r hover:from-blue-900 hover:to-red-600 hover:bg-clip-text hover:text-transparent">About</Link>
+              <Link to="/faqs" className="block py-2 px-4 text-gray-700 rounded-lg hover:bg-gradient-to-r hover:from-blue-50 hover:to-red-50 transition-all duration-300 transform hover:scale-105 hover:bg-gradient-to-r hover:from-blue-900 hover:to-red-600 hover:bg-clip-text hover:text-transparent">FAQ/Help</Link>
               <div className="py-2 px-4">
                 <AuthButton />
               </div>

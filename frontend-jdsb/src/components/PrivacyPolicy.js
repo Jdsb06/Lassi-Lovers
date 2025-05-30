@@ -23,162 +23,266 @@ const PrivacyPolicy = () => {
   });
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-red-50">
       <Header />
-      {/* Add padding top to account for fixed header */}
-      <div className="pt-24">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <h1 className="text-4xl font-bold text-gray-900 mb-8">Privacy Policy</h1>
+      
+      <main className="pt-32 pb-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Page Title */}
+          <div className="text-center mb-12">
+            <h1 className="text-4xl md:text-5xl font-extrabold bg-gradient-to-r from-blue-900 to-red-600 bg-clip-text text-transparent mb-6">
+              Privacy Policy
+            </h1>
+            <p className="text-xl md:text-2xl text-gray-600 max-w-3xl mx-auto font-light leading-relaxed">
+              Effective Date: {currentDate}
+            </p>
+          </div>
+
           {/* Back to Home Button */}
-          <Link 
-            to="/" 
-            className="inline-flex items-center text-blue-900 hover:text-blue-700 mb-8 transition-colors"
-          >
-            <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-            </svg>
-            Back to Home
-          </Link>
+          <div className="text-center mb-8">
+            <Link 
+              to="/" 
+              className="inline-flex items-center text-transparent bg-clip-text bg-gradient-to-r from-blue-900 to-red-600 
+                hover:from-red-600 hover:to-blue-900 transition-all duration-300 transform hover:scale-110"
+            >
+              <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+              </svg>
+              Back to Home
+            </Link>
+          </div>
 
-          <div className="bg-white shadow-lg rounded-lg p-8">
-            <h1 className="text-4xl font-bold text-blue-900 mb-4 text-center">Privacy Policy</h1>
-            <p className="text-gray-600 mb-8 text-center">Effective Date: {currentDate}</p>
-
-            <div className="prose prose-lg max-w-none text-gray-700">
-              <p className="mb-8">
+          {/* Introduction */}
+          <div className="group relative transform transition-all duration-300 hover:scale-[1.02] mb-12">
+            <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-900 to-red-600 rounded-lg blur opacity-0 group-hover:opacity-100 transition duration-300"></div>
+            <div className="relative bg-white rounded-lg p-8">
+              <p className="text-gray-700 text-lg leading-relaxed">
                 Welcome to FactCheck.com. We are committed to safeguarding your privacy and ensuring that your 
                 personal data is protected. This Privacy Policy outlines how we collect, use, disclose, and 
                 safeguard your information when you visit our website.
               </p>
+            </div>
+          </div>
 
-              <section className="mb-8">
-                <h2 className="text-2xl font-bold text-blue-900 mb-4">1. Information We Collect</h2>
-                <p className="mb-4">We may collect and process the following data:</p>
-                <ul className="list-disc pl-6 space-y-2">
-                  <li>
-                    <strong>Personal Identification Information:</strong> Such as your name, email address, 
-                    and any other information you voluntarily provide when contacting us or submitting claims.
-                  </li>
-                  <li>
-                    <strong>Usage Data:</strong> Including your IP address, browser type, operating system, 
-                    referral URLs, and pages visited on our site.
-                  </li>
-                  <li>
-                    <strong>Cookies and Tracking Technologies:</strong> We use cookies to enhance user experience, 
-                    analyze site traffic, and for security purposes. For more details, please refer to our Cookie Policy.
-                  </li>
-                </ul>
-              </section>
+          {/* Information Collection Section */}
+          <div className="group relative transform transition-all duration-300 hover:scale-[1.02] mb-12">
+            <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-900 to-red-600 rounded-lg blur opacity-0 group-hover:opacity-100 transition duration-300"></div>
+            <div className="relative bg-white rounded-lg p-8">
+              <h2 className="text-2xl font-bold bg-gradient-to-r from-blue-900 to-red-600 bg-clip-text text-transparent mb-6">
+                1. Information We Collect
+              </h2>
+              <p className="text-gray-700 mb-4">We may collect and process the following data:</p>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {[
+                  {
+                    icon: '👤',
+                    title: 'Personal Information',
+                    description: 'Name, email address, and any other information you voluntarily provide.'
+                  },
+                  {
+                    icon: '📊',
+                    title: 'Usage Data',
+                    description: 'IP address, browser type, operating system, and pages visited.'
+                  },
+                  {
+                    icon: '🍪',
+                    title: 'Cookies',
+                    description: 'Used to enhance user experience and analyze site traffic.'
+                  }
+                ].map((item, index) => (
+                  <div 
+                    key={index}
+                    className="flex items-start p-4 rounded-lg bg-gradient-to-r from-blue-50 to-red-50 
+                      transform transition-all duration-300 hover:scale-105 hover:shadow-lg"
+                  >
+                    <span className="text-3xl mr-4 animate-bounce">{item.icon}</span>
+                    <div>
+                      <h3 className="font-semibold bg-gradient-to-r from-blue-900 to-red-600 bg-clip-text text-transparent mb-2">
+                        {item.title}
+                      </h3>
+                      <p className="text-gray-700">{item.description}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
 
-              <section className="mb-8">
-                <h2 className="text-2xl font-bold text-blue-900 mb-4">2. How We Use Your Information</h2>
-                <p className="mb-4">Your information is used for the following purposes:</p>
-                <ul className="list-disc pl-6 space-y-2">
-                  <li>To provide and maintain our services.</li>
-                  <li>To communicate with you, including responding to inquiries and providing updates.</li>
-                  <li>To analyze usage patterns and improve our website's functionality.</li>
-                  <li>To ensure the security and integrity of our website.</li>
-                  <li>To comply with legal obligations and enforce our terms and policies.</li>
-                </ul>
-              </section>
+          {/* Data Usage Section */}
+          <div className="group relative transform transition-all duration-300 hover:scale-[1.02] mb-12">
+            <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-900 to-red-600 rounded-lg blur opacity-0 group-hover:opacity-100 transition duration-300"></div>
+            <div className="relative bg-white rounded-lg p-8">
+              <h2 className="text-2xl font-bold bg-gradient-to-r from-blue-900 to-red-600 bg-clip-text text-transparent mb-6">
+                2. How We Use Your Information
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {[
+                  {
+                    icon: '🛠️',
+                    text: 'To provide and maintain our services'
+                  },
+                  {
+                    icon: '💬',
+                    text: 'To communicate with you and respond to inquiries'
+                  },
+                  {
+                    icon: '📈',
+                    text: 'To analyze usage patterns and improve functionality'
+                  },
+                  {
+                    icon: '🔒',
+                    text: 'To ensure website security and integrity'
+                  }
+                ].map((item, index) => (
+                  <div 
+                    key={index}
+                    className="flex items-center p-4 rounded-lg bg-gradient-to-r from-blue-50 to-red-50 
+                      transform transition-all duration-300 hover:scale-105 hover:shadow-lg"
+                  >
+                    <span className="text-3xl mr-4 animate-bounce">{item.icon}</span>
+                    <p className="text-gray-700">{item.text}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
 
-              <section className="mb-8">
-                <h2 className="text-2xl font-bold text-blue-900 mb-4">3. Sharing Your Information</h2>
-                <p className="mb-4">
-                  We do not sell, trade, or rent your personal identification information to others. 
-                  However, we may share your information with:
+          {/* Data Sharing Section */}
+          <div className="group relative transform transition-all duration-300 hover:scale-[1.02] mb-12">
+            <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-900 to-red-600 rounded-lg blur opacity-0 group-hover:opacity-100 transition duration-300"></div>
+            <div className="relative bg-white rounded-lg p-8">
+              <h2 className="text-2xl font-bold bg-gradient-to-r from-blue-900 to-red-600 bg-clip-text text-transparent mb-6">
+                3. Sharing Your Information
+              </h2>
+              <p className="text-gray-700 mb-6">
+                We do not sell, trade, or rent your personal identification information to others. 
+                However, we may share your information with:
+              </p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {[
+                  {
+                    icon: '🤝',
+                    title: 'Service Providers',
+                    description: 'Trusted third parties who assist in operating our website, subject to confidentiality.'
+                  },
+                  {
+                    icon: '⚖️',
+                    title: 'Legal Requirements',
+                    description: 'When required by law or in response to valid requests by public authorities.'
+                  }
+                ].map((item, index) => (
+                  <div 
+                    key={index}
+                    className="flex items-start p-4 rounded-lg bg-gradient-to-r from-blue-50 to-red-50 
+                      transform transition-all duration-300 hover:scale-105 hover:shadow-lg"
+                  >
+                    <span className="text-3xl mr-4 animate-bounce">{item.icon}</span>
+                    <div>
+                      <h3 className="font-semibold bg-gradient-to-r from-blue-900 to-red-600 bg-clip-text text-transparent mb-2">
+                        {item.title}
+                      </h3>
+                      <p className="text-gray-700">{item.description}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Your Rights Section */}
+          <div className="group relative transform transition-all duration-300 hover:scale-[1.02] mb-12">
+            <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-900 to-red-600 rounded-lg blur opacity-0 group-hover:opacity-100 transition duration-300"></div>
+            <div className="relative bg-white rounded-lg p-8">
+              <h2 className="text-2xl font-bold bg-gradient-to-r from-blue-900 to-red-600 bg-clip-text text-transparent mb-6">
+                4. Your Data Protection Rights
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {[
+                  {
+                    icon: '🔍',
+                    title: 'Access',
+                    description: 'Request copies of your personal data'
+                  },
+                  {
+                    icon: '✏️',
+                    title: 'Rectification',
+                    description: 'Request correction of inaccurate data'
+                  },
+                  {
+                    icon: '🗑️',
+                    title: 'Erasure',
+                    description: 'Request deletion of your data'
+                  },
+                  {
+                    icon: '⛔',
+                    title: 'Restriction',
+                    description: 'Limit how we use your data'
+                  },
+                  {
+                    icon: '❌',
+                    title: 'Objection',
+                    description: 'Object to data processing'
+                  },
+                  {
+                    icon: '📤',
+                    title: 'Portability',
+                    description: 'Transfer your data elsewhere'
+                  }
+                ].map((item, index) => (
+                  <div 
+                    key={index}
+                    className="flex items-start p-4 rounded-lg bg-gradient-to-r from-blue-50 to-red-50 
+                      transform transition-all duration-300 hover:scale-105 hover:shadow-lg"
+                  >
+                    <span className="text-3xl mr-4 animate-bounce">{item.icon}</span>
+                    <div>
+                      <h3 className="font-semibold bg-gradient-to-r from-blue-900 to-red-600 bg-clip-text text-transparent mb-2">
+                        {item.title}
+                      </h3>
+                      <p className="text-gray-700">{item.description}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Contact Section */}
+          <div className="group relative transform transition-all duration-300 hover:scale-[1.02]">
+            <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-900 to-red-600 rounded-lg blur opacity-0 group-hover:opacity-100 transition duration-300"></div>
+            <div className="relative bg-white rounded-lg p-8">
+              <h2 className="text-2xl font-bold bg-gradient-to-r from-blue-900 to-red-600 bg-clip-text text-transparent mb-6">
+                Contact Us
+              </h2>
+              <div className="text-center">
+                <p className="text-gray-700 mb-6">
+                  If you have any questions or concerns about this Privacy Policy, please contact us:
                 </p>
-                <ul className="list-disc pl-6 space-y-2">
-                  <li>
-                    <strong>Service Providers:</strong> Trusted third parties who assist us in operating our 
-                    website and conducting our business, provided they agree to keep this information confidential.
-                  </li>
-                  <li>
-                    <strong>Legal Requirements:</strong> If required by law or in response to valid requests 
-                    by public authorities.
-                  </li>
-                </ul>
-              </section>
-
-              <section className="mb-8">
-                <h2 className="text-2xl font-bold text-blue-900 mb-4">4. Data Security</h2>
-                <p>
-                  We implement appropriate technical and organizational measures to protect your personal data 
-                  against unauthorized access, alteration, disclosure, or destruction.
-                </p>
-              </section>
-
-              <section className="mb-8">
-                <h2 className="text-2xl font-bold text-blue-900 mb-4">5. Your Data Protection Rights</h2>
-                <p className="mb-4">Depending on your location, you may have the following rights:</p>
-                <ul className="list-disc pl-6 space-y-2">
-                  <li><strong>Access:</strong> You have the right to request copies of your personal data.</li>
-                  <li><strong>Rectification:</strong> You can request correction of any inaccurate or incomplete data.</li>
-                  <li><strong>Erasure:</strong> You can request the deletion of your personal data under certain conditions.</li>
-                  <li><strong>Restriction:</strong> You can request that we restrict the processing of your personal data.</li>
-                  <li><strong>Objection:</strong> You can object to our processing of your personal data.</li>
-                  <li>
-                    <strong>Data Portability:</strong> You can request that we transfer the data we have 
-                    collected to another organization or directly to you.
-                  </li>
-                </ul>
-              </section>
-
-              <section className="mb-8">
-                <h2 className="text-2xl font-bold text-blue-900 mb-4">6. Third-Party Links</h2>
-                <p>
-                  Our website may contain links to external sites. We are not responsible for the privacy 
-                  practices or content of these third-party websites.
-                </p>
-              </section>
-
-              <section className="mb-8">
-                <h2 className="text-2xl font-bold text-blue-900 mb-4">7. Children's Privacy</h2>
-                <p>
-                  Our services are not directed to individuals under the age of 13. We do not knowingly 
-                  collect personal information from children under 13.
-                </p>
-              </section>
-
-              <section className="mb-8">
-                <h2 className="text-2xl font-bold text-blue-900 mb-4">8. Changes to This Privacy Policy</h2>
-                <p>
-                  We may update our Privacy Policy from time to time. We will notify you of any changes by 
-                  posting the new Privacy Policy on this page with an updated effective date.
-                </p>
-              </section>
-
-              <section className="mb-8">
-                <h2 className="text-2xl font-bold text-blue-900 mb-4">9. Contact Us</h2>
-                <p className="mb-4">If you have any questions or concerns about this Privacy Policy, please contact us at:</p>
-                <p>
-                  <strong>Email: </strong>
+                <div className="space-y-4">
                   <a 
-                    href="mailto:ayushpatel11m@gmail.com" 
-                    className="text-blue-600 hover:text-blue-800 transition-colors"
+                    href="mailto:fact-checkers@gmail.com" 
+                    className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-900 to-red-600 
+                      hover:from-red-600 hover:to-blue-900 transition-all duration-300 transform hover:scale-110"
                   >
                     ayushpatel11m@gmail.com
                   </a>
-                </p>
-                <p className="mt-4">
-                  <strong>Website: </strong>
                   <a 
                     href="https://factcheck.com" 
-                    className="text-blue-600 hover:text-blue-800 transition-colors"
+                    className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-900 to-red-600 
+                      hover:from-red-600 hover:to-blue-900 transition-all duration-300 transform hover:scale-110"
                   >
                     factcheck.com
                   </a>
-                </p>
-                <p className="mt-4">
-                  <strong>Developed by:</strong> Jashadeep Singh Bedi, Kanav Kumar, and Ayush Patel
-                </p>
-              </section>
+                  <p className="text-gray-700 mt-6">
+                    Developed by: Jashadeep Singh Bedi, Kanav Kumar, and Ayush Patel
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      </main>
 
-      {/* Add Footer */}
       <Footer />
     </div>
   );

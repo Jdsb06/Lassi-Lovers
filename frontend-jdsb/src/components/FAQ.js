@@ -58,89 +58,102 @@ const FAQ = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-red-50">
       <Header />
-      {/* Add padding top to account for fixed header */}
-      <div className="pt-24">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <h1 className="text-4xl font-bold text-gray-900 mb-8">Frequently Asked Questions</h1>
+      
+      <main className="pt-32 pb-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Page Title */}
+          <div className="text-center mb-12">
+            <h1 className="text-4xl md:text-5xl font-extrabold bg-gradient-to-r from-blue-900 to-red-600 bg-clip-text text-transparent mb-6">
+              Frequently Asked Questions
+            </h1>
+            <p className="text-xl md:text-2xl text-gray-600 max-w-3xl mx-auto font-light leading-relaxed">
+              Everything you need to know about using our AI-powered fact-checking platform
+            </p>
+          </div>
+
           {/* FAQ Section */}
-          <section className="py-16 bg-white">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-              <div className="text-center mb-12">
-                <h2 className="text-3xl font-bold text-gray-900 mb-4">Get Your Questions Answered</h2>
-                <p className="text-gray-600 max-w-2xl mx-auto">
-                  Everything you need to know about using our platform effectively.
-                </p>
-              </div>
-              
-              <div className="max-w-4xl mx-auto space-y-6">
-                {faqData.map((faq, index) => (
-                  <div 
-                    key={index}
-                    className="bg-white border border-gray-200 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden"
+          <div className="max-w-4xl mx-auto space-y-6">
+            {faqData.map((faq, index) => (
+              <div 
+                key={index}
+                className="group relative transform transition-all duration-300 hover:scale-[1.02]"
+              >
+                <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-900 to-red-600 rounded-lg blur opacity-0 group-hover:opacity-100 transition duration-300"></div>
+                <div className="relative bg-white rounded-lg overflow-hidden">
+                  <button
+                    onClick={() => toggleFAQ(index)}
+                    className="w-full px-8 py-6 text-left flex items-center justify-between hover:bg-gray-50/50 transition-colors"
                   >
-                    <button
-                      onClick={() => toggleFAQ(index)}
-                      className="w-full px-8 py-6 text-left flex items-center justify-between hover:bg-gray-50 transition-colors"
-                    >
-                      <h3 className="text-xl font-semibold text-gray-900 pr-4">
-                        {faq.question}
-                      </h3>
-                      <div className={`flex-shrink-0 transform transition-transform duration-300 ${
-                        openFAQ === index ? 'rotate-180' : ''
-                      }`}>
-                        <ChevronDown className={`w-6 h-6 ${
-                          openFAQ === index ? 'text-red-600' : 'text-blue-900'
-                        }`} />
-                      </div>
-                    </button>
-                    
-                    <div className={`transition-all duration-500 ease-in-out ${
-                      openFAQ === index ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
+                    <h3 className={`text-xl font-semibold pr-4 transition-colors duration-300 ${
+                      openFAQ === index 
+                        ? 'bg-gradient-to-r from-blue-900 to-red-600 bg-clip-text text-transparent'
+                        : 'text-gray-900'
                     }`}>
-                      <div className="px-8 pb-6">
-                        <div className="border-t border-gray-100 pt-6">
-                          <p className="text-gray-600 leading-relaxed text-lg">
-                            {faq.answer}
-                          </p>
-                        </div>
+                      {faq.question}
+                    </h3>
+                    <div className={`flex-shrink-0 transform transition-all duration-300 ${
+                      openFAQ === index ? 'rotate-180' : ''
+                    }`}>
+                      <ChevronDown className={`w-6 h-6 transition-colors duration-300 ${
+                        openFAQ === index 
+                          ? 'text-red-600' 
+                          : 'text-blue-900 group-hover:text-red-600'
+                      }`} />
+                    </div>
+                  </button>
+                  
+                  <div className={`transition-all duration-500 ease-in-out ${
+                    openFAQ === index ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'
+                  } overflow-hidden`}>
+                    <div className="px-8 pb-6">
+                      <div className="border-t border-gray-100 pt-6">
+                        <p className="text-gray-600 leading-relaxed text-lg">
+                          {faq.answer}
+                        </p>
                       </div>
                     </div>
                   </div>
-                ))}
-              </div>
-
-              {/* Additional Help Section */}
-              <div className="mt-16 bg-gradient-to-r from-blue-50 to-red-50 rounded-2xl p-8 text-center">
-                <h2 className="text-2xl font-bold text-gray-900 mb-4">
-                  Still Have Questions?
-                </h2>
-                <p className="text-gray-600 mb-6 max-w-2xl mx-auto">
-                  Can't find what you're looking for? Our community and support team 
-                  are here to help you make the most of FactCheck - No Misinfo.
-                </p>
-                <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                  <Link 
-                    to="/submit" 
-                    className="bg-red-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-red-700 transition-colors"
-                  >
-                    Try Submitting a Claim
-                  </Link>
-                  <Link 
-                    to="/about" 
-                    className="bg-white text-blue-900 px-6 py-3 rounded-lg font-semibold border-2 border-blue-900 hover:bg-blue-50 transition-colors"
-                  >
-                    Learn More About Us
-                  </Link>
                 </div>
               </div>
-            </div>
-          </section>
-        </div>
-      </div>
+            ))}
+          </div>
 
-      {/* Add Footer */}
+          {/* Additional Help Section */}
+          <div className="mt-16 relative group transform transition-all duration-300 hover:scale-[1.02]">
+            <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-900 to-red-600 rounded-lg blur opacity-0 group-hover:opacity-100 transition duration-300"></div>
+            <div className="relative bg-white rounded-lg p-12 text-center">
+              <h2 className="text-3xl font-bold bg-gradient-to-r from-blue-900 to-red-600 bg-clip-text text-transparent mb-6">
+                Still Have Questions?
+              </h2>
+              <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
+                Can't find what you're looking for? Our community and support team 
+                are here to help you make the most of FactCheck - No Misinfo.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-6 justify-center">
+                <Link 
+                  to="/submit" 
+                  className="bg-gradient-to-r from-blue-900 to-red-600 text-white px-8 py-4 rounded-lg font-semibold 
+                    transform transition-all duration-300 hover:scale-110 hover:shadow-xl"
+                >
+                  Try Submitting a Claim
+                </Link>
+                <Link 
+                  to="/about" 
+                  className="bg-white text-transparent bg-clip-text bg-gradient-to-r from-blue-900 to-red-600 px-8 py-4 rounded-lg font-semibold 
+                    border-2 border-transparent hover:border-current transform transition-all duration-300 hover:scale-110 hover:shadow-xl
+                    relative after:absolute after:inset-0 after:bg-gradient-to-r after:from-blue-900 after:to-red-600 
+                    after:opacity-0 after:transition-opacity after:hover:opacity-10"
+                >
+                  Learn More About Us
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+
       <Footer />
     </div>
   );

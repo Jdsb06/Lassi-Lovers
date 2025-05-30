@@ -215,200 +215,185 @@ const ChatbotWindow = ({ onClose }) => {
   };
 
   return (
-    <div className="w-80 sm:w-96 h-96 bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden">
+    <div className="w-96 h-[32rem] bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden border border-gray-100">
       {/* Header */}
-      <div className="bg-blue-900 text-white p-4 rounded-t-2xl flex items-center justify-between">
+      <div className="bg-gradient-to-r from-blue-900 to-red-600 p-4 flex items-center justify-between">
         <div className="flex items-center space-x-3">
-          <div className="w-8 h-8 bg-red-600 rounded-full flex items-center justify-center">
-            <span role="img" aria-label="robot" className="text-xl">🤖</span>
+          <div className="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center backdrop-blur-sm">
+            <svg className="w-6 h-6 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4c4.97 0 9 3.13 9 7a6.5 6.5 0 01-2 4.5c-1.5 1.5-3.5 2.5-5.5 2.5h-3l-4 4v-4c-2.5-1-4-3-4-5.5C2.5 7.13 6.53 4 12 4z" />
+            </svg>
           </div>
           <div>
-            <div className="flex items-center space-x-2">
-              <h3 className="font-semibold">Vaani</h3>
-              <button
-                onClick={toggleModel}
-                className="text-xs bg-blue-700 hover:bg-blue-600 px-2 py-1 rounded transition-colors"
-              >
-                {currentModel === MODELS.GEMINI 
-                  ? 'Using Gemini' 
-                  : currentModel === MODELS.GPT 
-                    ? 'Using GPT-4o' 
-                    : 'Using Grok'}
-              </button>
-            </div>
-            <p className={`text-xs ${showFlashingMessage ? 'text-blue-200' : 'opacity-0'} transition-opacity duration-500`}>
-              Hi, it's Vaani, here to assist you
-            </p>
+            <h3 className="text-white font-semibold">Vaani</h3>
+            <p className="text-white/80 text-sm">AI Assistant</p>
           </div>
         </div>
-        <button
+        <button 
           onClick={onClose}
-          className="text-white hover:text-red-200 transition-colors"
+          className="text-white/80 hover:text-white transition-colors duration-200"
         >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
           </svg>
         </button>
       </div>
 
-      {/* Body */}
-      <div className="flex-1 overflow-hidden flex flex-col">
-        {/* Quick Start View */}
+      {/* Main Content Area */}
+      <div className="flex-1 overflow-y-auto bg-gradient-to-br from-blue-50 to-red-50 p-4">
         {currentView === 'quickStart' && (
-          <div className="p-4 overflow-y-auto">
-            <h4 className="text-sm font-semibold text-gray-900 mb-3">Quick Start - What can I help you with?</h4>
-            <div className="space-y-2">
-              {QUICK_START_QUESTIONS.map((question) => (
-                <button
-                  key={question.id}
-                  onClick={() => handleQuickStart(question)}
-                  className="w-full text-left p-3 bg-gray-50 hover:bg-blue-50 rounded-lg text-sm text-gray-700 hover:text-blue-900 transition-colors border border-transparent hover:border-blue-200"
-                >
+          <div className="space-y-3">
+            {QUICK_START_QUESTIONS.map((question) => (
+              <button
+                key={question.id}
+                onClick={() => handleQuickStart(question)}
+                className="w-full p-4 bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-300 transform hover:scale-[1.02] hover:bg-gradient-to-r hover:from-blue-50 hover:to-red-50 group"
+              >
+                <h4 className="text-left font-semibold text-gray-800 group-hover:bg-gradient-to-r group-hover:from-blue-900 group-hover:to-red-600 group-hover:bg-clip-text group-hover:text-transparent">
                   {question.title}
-                </button>
-              ))}
-            </div>
-            <div className="mt-4 pt-4 border-t border-gray-200">
-              <p className="text-xs text-gray-500 mb-2">Or ask me anything:</p>
-            </div>
+                </h4>
+              </button>
+            ))}
           </div>
         )}
 
-        {/* Sub Questions View */}
         {currentView === 'subQuestions' && selectedQuestion && (
-          <div className="p-4 overflow-y-auto">
-            <div className="flex items-center mb-4">
-              <button
-                onClick={backToQuickStart}
-                className="text-blue-600 hover:text-blue-800 mr-2"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                </svg>
-              </button>
-              <h4 className="text-sm font-semibold text-gray-900">{selectedQuestion.title}</h4>
-            </div>
+          <div className="space-y-3">
+            <button
+              onClick={backToQuickStart}
+              className="flex items-center space-x-2 text-sm text-gray-600 hover:text-gray-800 mb-4 group"
+            >
+              <svg className="w-4 h-4 transform transition-transform group-hover:-translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+              <span>Back to topics</span>
+            </button>
+            <h3 className="font-semibold text-lg bg-gradient-to-r from-blue-900 to-red-600 bg-clip-text text-transparent mb-4">
+              {selectedQuestion.title}
+            </h3>
             <div className="space-y-2">
               {selectedQuestion.subQuestions.map((subQuestion, index) => (
                 <button
                   key={index}
                   onClick={() => handleSubQuestion(subQuestion)}
-                  className="w-full text-left p-3 bg-gray-50 hover:bg-blue-50 rounded-lg text-sm text-gray-700 hover:text-blue-900 transition-colors border border-transparent hover:border-blue-200"
+                  className="w-full p-3 bg-white rounded-lg text-left hover:shadow-md transition-all duration-300 transform hover:scale-[1.02] hover:bg-gradient-to-r hover:from-blue-50 hover:to-red-50 group"
                 >
-                  {subQuestion}
+                  <span className="text-gray-700 group-hover:bg-gradient-to-r group-hover:from-blue-900 group-hover:to-red-600 group-hover:bg-clip-text group-hover:text-transparent">
+                    {subQuestion}
+                  </span>
                 </button>
               ))}
             </div>
           </div>
         )}
 
-        {/* Chat View */}
         {currentView === 'chat' && (
-          <div className="flex-1 overflow-y-auto p-4 space-y-3">
-            {messages.map((message) => (
-              <div
-                key={message.id}
-                className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}
-              >
+          <div className="space-y-4">
+            <button
+              onClick={backToQuickStart}
+              className="flex items-center space-x-2 text-sm text-gray-600 hover:text-gray-800 group"
+            >
+              <svg className="w-4 h-4 transform transition-transform group-hover:-translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+              <span>Back to topics</span>
+            </button>
+            <div className="space-y-4">
+              {messages.map((message) => (
                 <div
-                  className={`max-w-xs lg:max-w-md px-3 py-2 rounded-lg text-sm ${
-                    message.type === 'user'
-                      ? 'bg-blue-600 text-white'
-                      : message.isError
-                      ? 'bg-red-50 text-red-800 border border-red-200'
-                      : message.isLoading
-                      ? 'bg-gray-50 text-gray-600 border border-gray-200'
-                      : 'bg-gray-100 text-gray-900'
-                  }`}
+                  key={message.id}
+                  className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}
                 >
-                  {message.file && (
-                    <div className="mb-2 text-xs opacity-75">
-                      📎 {message.file.name}
-                    </div>
-                  )}
-                  {message.isLoading ? (
-                    <div className="flex items-center space-x-2">
-                      <span>{message.content}</span>
-                      <div className="flex space-x-1">
+                  <div
+                    className={`max-w-[80%] p-3 rounded-2xl shadow-sm ${
+                      message.type === 'user'
+                        ? 'bg-gradient-to-r from-blue-900 to-red-600 text-white'
+                        : 'bg-white'
+                    } ${message.isError ? 'bg-red-50 border border-red-200' : ''}`}
+                  >
+                    {message.isLoading ? (
+                      <div className="flex items-center space-x-2">
                         <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></div>
+                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce [animation-delay:0.2s]"></div>
+                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce [animation-delay:0.4s]"></div>
                       </div>
-                    </div>
-                  ) : (
-                    <p>{message.content}</p>
-                  )}
-                  <p className="text-xs mt-1 opacity-75">
-                    {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                  </p>
-                </div>
-              </div>
-            ))}
-            
-            {isLoading && (
-              <div className="flex justify-start">
-                <div className="bg-gray-100 px-3 py-2 rounded-lg text-sm">
-                  <div className="flex space-x-1">
-                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                    ) : (
+                      <div className="space-y-1">
+                        <p className={message.type === 'user' ? 'text-white' : 'text-gray-800'}>
+                          {message.content}
+                        </p>
+                        {message.file && (
+                          <div className="flex items-center space-x-2 text-sm text-gray-500">
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
+                            </svg>
+                            <span>{message.file.name}</span>
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
                 </div>
-              </div>
-            )}
-            
-            <div ref={messagesEndRef} />
+              ))}
+              <div ref={messagesEndRef} />
+            </div>
           </div>
         )}
       </div>
 
-      {/* Footer - Input Area */}
-      <div className="border-t border-gray-200 p-4">
-        {fileUpload && (
-          <div className="mb-2 flex items-center justify-between bg-blue-50 p-2 rounded text-sm">
-            <span className="text-blue-800">📎 {fileUpload.name}</span>
-            <button onClick={removeFile} className="text-red-600 hover:text-red-800">
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
+      {/* Input Area */}
+      <div className="p-4 bg-white border-t border-gray-100">
+        <form onSubmit={handleSendMessage} className="flex items-end space-x-2">
+          <div className="flex-1 relative">
+            <textarea
+              value={inputValue}
+              onChange={(e) => setInputValue(e.target.value)}
+              placeholder="Type your message..."
+              className="w-full p-3 pr-10 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 resize-none transition-shadow duration-200"
+              rows={1}
+              style={{ minHeight: '44px', maxHeight: '120px' }}
+            />
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleFileUpload}
+              className="hidden"
+              accept=".txt,.pdf,.doc,.docx,image/*"
+            />
+            {fileUpload && (
+              <div className="absolute left-2 -top-8 flex items-center space-x-2 bg-blue-50 px-2 py-1 rounded-md text-sm">
+                <span className="text-blue-700">{fileUpload.name}</span>
+                <button
+                  type="button"
+                  onClick={removeFile}
+                  className="text-blue-700 hover:text-blue-900"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+            )}
           </div>
-        )}
-        
-        <form onSubmit={handleSendMessage} className="flex items-center space-x-2">
-          <input
-            type="file"
-            ref={fileInputRef}
-            onChange={handleFileUpload}
-            accept="image/*,.pdf,.doc,.docx"
-            className="hidden"
-          />
-          
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
-            className="p-2 text-gray-400 hover:text-blue-600 transition-colors"
+            className="p-2 text-gray-500 hover:text-gray-700 transition-colors duration-200"
           >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
             </svg>
           </button>
-          
-          <input
-            type="text"
-            value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
-            placeholder="Type your message..."
-            className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 text-sm"
-            disabled={isLoading}
-          />
-          
           <button
             type="submit"
-            disabled={(!inputValue.trim() && !fileUpload) || isLoading}
-            className="p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+            disabled={!inputValue.trim() && !fileUpload}
+            className={`p-2 rounded-xl ${
+              !inputValue.trim() && !fileUpload
+                ? 'text-gray-400 cursor-not-allowed'
+                : 'bg-gradient-to-r from-blue-900 to-red-600 text-white shadow-lg hover:shadow-xl transform hover:scale-105'
+            } transition-all duration-200`}
           >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
             </svg>
           </button>
