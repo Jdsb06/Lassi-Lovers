@@ -6,6 +6,19 @@ import Footer from './Footer';
 /** @type {any} */
 const puter = window.puter;
 
+const LoadingScreen = () => (
+  <div className="fixed inset-0 bg-white flex items-center justify-center z-50">
+    <div className="text-center">
+      <div className="relative w-24 h-24 mb-4">
+        <div className="absolute inset-0 border-4 border-red-200 rounded-full"></div>
+        <div className="absolute inset-0 border-4 border-red-600 rounded-full animate-spin" style={{ borderTopColor: 'transparent', animationDuration: '1s' }}></div>
+      </div>
+      <h2 className="text-xl font-semibold text-gray-900">Analyzing Claim</h2>
+      <p className="text-gray-600 mt-2">Getting Grok's assessment...</p>
+    </div>
+  </div>
+);
+
 const TrustScoreDisplay = () => {
   const navigate = useNavigate();
   const [color, setColor] = useState('');
@@ -21,6 +34,7 @@ const TrustScoreDisplay = () => {
   const [feedbackText, setFeedbackText] = useState('');
   const [showFeedbackForm, setShowFeedbackForm] = useState(false);
   const [grokScore, setGrokScore] = useState(null);
+  const [isGrokLoading, setIsGrokLoading] = useState(true);
 
   // Constants for the circle
   const radius = 100; // Increased size for better visibility
@@ -33,6 +47,7 @@ const TrustScoreDisplay = () => {
     if (!storedResult) {
       setError('No claim found. Please submit a claim first.');
       setIsLoading(false);
+      setIsGrokLoading(false);
       return;
     }
 
@@ -47,13 +62,17 @@ const TrustScoreDisplay = () => {
           if (grokScore !== null) {
             setScore(grokScore); // Set the main score to Grok score
           }
+          setIsGrokLoading(false);
         });
+      } else {
+        setIsGrokLoading(false);
       }
       
       setIsLoading(false);
     } catch (e) {
       setError('Error loading results. Please try again.');
       setIsLoading(false);
+      setIsGrokLoading(false);
     }
   }, [navigate]);
 
@@ -152,8 +171,8 @@ Analysis: ${analysis}`;
     );
   }
 
-  if (!claimResult) {
-    return null;
+  if (!claimResult || isGrokLoading) {
+    return <LoadingScreen />;
   }
 
   const { text, emoji } = getMessage();
