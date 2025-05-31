@@ -36,7 +36,7 @@
     <a href="#about-the-project"><strong>📋 Explore the Documentation »</strong></a>
     <br />
     <br />
-    <a href="https://drive.google.com/file/d/1UtPyWxxLA3S288J9zgPqrnrupQv6BDo8/view?usp=sharing">
+    <a href="https://drive.google.com/file/d/1JEPy8ThnTDxvXv0R-WrQggtOADhNdgSf/view?usp=sharing">
       <img src="https://img.shields.io/badge/🎥%20Frontend%20Demo-4285F4?style=for-the-badge&logoColor=white" alt="Frontend Demo Video">
     </a>
     &nbsp;&nbsp;
@@ -63,7 +63,7 @@
 **FactCheck - No Misinfo** is a cutting-edge AI-powered fact-checking platform designed to combat the spread of misinformation across social and news media. In an era where false information spreads faster than truth, our platform empowers users with reliable, evidence-backed verification tools.
 
 <div align="center">
-  <a href="https://drive.google.com/file/d/1UtPyWxxLA3S288J9zgPqrnrupQv6BDo8/view?usp=sharing">
+  <a href="https://drive.google.com/file/d/1JEPy8ThnTDxvXv0R-WrQggtOADhNdgSf/view?usp=sharing">
     <img src="https://img.shields.io/badge/🖥️%20Watch%20Frontend%20Walkthrough-FF4B4B?style=for-the-badge&logo=play&logoColor=white" alt="Frontend Walkthrough">
   </a>
 </div>
@@ -229,7 +229,7 @@ graph LR
 
 <div align="center">
 
-<a href="https://drive.google.com/file/d/1UtPyWxxLA3S288J9zgPqrnrupQv6BDo8/view?usp=sharing">
+<a href="https://drive.google.com/file/d/1JEPy8ThnTDxvXv0R-WrQggtOADhNdgSf/view?usp=sharing">
   <img src="https://img.shields.io/badge/🎬%20Complete%20Frontend%20Tour-FF6B35?style=for-the-badge&logo=youtube&logoColor=white" alt="Frontend Complete Tour">
 </a>
 &nbsp;&nbsp;
@@ -431,7 +431,7 @@ MongoDB >= 5.0 (local or cloud instance)
    - Access source citations and links
 
 <div align="center">
-  <a href="https://drive.google.com/file/d/1UtPyWxxLA3S288J9zgPqrnrupQv6BDo8/view?usp=sharing">
+  <a href="https://drive.google.com/file/d/1JEPy8ThnTDxvXv0R-WrQggtOADhNdgSf/view?usp=sharing">
     <img src="https://img.shields.io/badge/📋%20Step--by--Step%20Usage%20Guide-9932CC?style=for-the-badge&logo=guide&logoColor=white" alt="Usage Guide Video">
   </a>
 </div>
@@ -647,7 +647,7 @@ Code Quality:      █████████████████     9.2/1
 
 ### 🚀 **Ready to Fight Misinformation?**
 
-<a href="https://drive.google.com/file/d/1UtPyWxxLA3S288J9zgPqrnrupQv6BDo8/view?usp=sharing">
+<a href="https://drive.google.com/file/d/1JEPy8ThnTDxvXv0R-WrQggtOADhNdgSf/view?usp=sharing">
   <img src="https://img.shields.io/badge/🎥%20Frontend%20Demo-4285F4?style=for-the-badge&logoColor=white" alt="Frontend Demo">
 </a>
 &nbsp;&nbsp;
