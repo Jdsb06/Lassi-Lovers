@@ -677,7 +677,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 📞 Support
 
-For support, email support@factchecker.com or open an issue in the repository.
+For support, open an issue in the repository.
 
 ---
 
