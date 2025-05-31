@@ -232,7 +232,7 @@ graph LR
 <div align="center">
 
 ### 🏠 **Homepage - Clean & Professional Design**
-<img src="images/homepage-full.png" alt="Homepage Screenshot" width="800">
+<img src="images/homepage-full.jpeg" alt="Homepage Screenshot" width="800">
 
 ---
 
@@ -240,11 +240,11 @@ graph LR
 <table>
 <tr>
 <td width="50%" align="center">
-<img src="images/submit-claim-form.png" alt="Submit Claim Form" width="400"><br>
+<img src="images/submit-claim-form.jpeg" alt="Submit Claim Form" width="400"><br>
 <em>Intuitive claim submission form</em>
 </td>
 <td width="50%" align="center">
-<img src="images/claim-analysis.png" alt="Claim Analysis" width="400"><br>
+<img src="images/claim-analysis.jpeg" alt="Claim Analysis" width="400"><br>
 <em>Real-time claim analysis</em>
 </td>
 </tr>
@@ -253,24 +253,16 @@ graph LR
 ---
 
 ### 📊 **Verification Results Dashboard**
-<img src="images/results-dashboard.png" alt="Results Dashboard" width="800">
+<img src="images/claim-result.jpeg" alt="Results Dashboard" width="800">
+</br>
 <em>Comprehensive results with trust scores and evidence</em>
 
 ---
 
 ### 🤖 **AI Chatbot Assistant**
-<table>
-<tr>
-<td width="50%" align="center">
-<img src="images/chatbot-interface.png" alt="Chatbot Interface" width="400"><br>
+<img src="images/chatbot-interface.jpeg" alt="Chatbot Interface" width="800"><br>
 <em>Interactive AI assistant</em>
-</td>
-<td width="50%" align="center">
-<img src="images/chatbot-explanation.png" alt="Chatbot Explanation" width="400"><br>
-<em>Detailed explanations with sources</em>
-</td>
-</tr>
-</table>
+
 
 ---
 
