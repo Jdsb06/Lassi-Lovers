@@ -1,21 +1,5 @@
 <a id="readme-top"></a>
 
-<div align="center" style="text-align: center; margin-top: 20px;">
-  <a href="https://your-deployment-url">
-    <img src="https://img.shields.io/badge/deployment-active-success?style=for-the-badge" alt="Deployment Status">
-  </a>
-  <a href="https://github.com/your-username/factcheck-no-misinfo/graphs/contributors">
-    <img src="https://img.shields.io/github/contributors/your-username/factcheck-no-misinfo.svg?style=for-the-badge" alt="Contributors">
-  </a>
-  <a href="https://reactjs.org/">
-    <img src="https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB" alt="Made with React">
-  </a>
-  <a href="https://nodejs.org/">
-    <img src="https://img.shields.io/badge/Node.js-43853D?style=for-the-badge&logo=node.js&logoColor=white" alt="Made with Node.js">
-  </a>
-</div>
-
-
 <!-- PROJECT LOGO -->
 <br />
 <div align="center">
@@ -52,7 +36,7 @@
     <a href="#about-the-project"><strong>📋 Explore the Documentation »</strong></a>
     <br />
     <br />
-    <a href="https://your-demo-link.com">
+    <a href="[https://your-demo-link.com](https://drive.google.com/file/d/19We-d3s6NkkHkLtVes2pWY-lj_oMeiJ6/view?usp=sharing)">
       <img src="https://img.shields.io/badge/🎥%20Watch%20Demo%20Video-FF6B6B?style=for-the-badge&logoColor=white" alt="Demo Video">
     </a>
     &nbsp;&nbsp;
@@ -60,9 +44,7 @@
       <img src="https://img.shields.io/badge/📸%20View%20Screenshots-4ECDC4?style=for-the-badge&logoColor=white" alt="Screenshots">
     </a>
     &nbsp;&nbsp;
-    <a href="https://your-live-site.com">
-      <img src="https://img.shields.io/badge/🚀%20Live%20Demo-45B7D1?style=for-the-badge&logoColor=white" alt="Live Demo">
-    </a>
+  
   </p>
 </div>
 
