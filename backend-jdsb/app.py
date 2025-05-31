@@ -313,7 +313,7 @@ async def analyze_url(
     try:
         # Extract text from URL
         text = extract_text_from_url(str(url_request.url))
-        
+
         # Extract claims from text
         claims = extract_claims(text)
         
@@ -384,109 +384,108 @@ async def find_similar_claims(
 async def verify_claim_stub(request: Request, claim_data: dict):
     """
     Verify a single claim using the fact-checking system.
+    If is_incognito is true, the claim is verified but not saved to the public database.
     """
     try:
-        claim = claim_data.get("claim", "").strip()
-        logger.info(f"Received claim verification request: {claim[:100]}...")  # Log first 100 chars
-        
-        if not claim:
-            logger.warning("Empty claim received")
+        claim_text = claim_data.get("claim_text", "").strip()
+        is_incognito = claim_data.get("is_incognito", False)
+        full_claim_data = claim_data.get("full_claim_data", {}) # Contains title, description, sources etc.
+
+        logger.info(f"Received claim verification request: {claim_text[:100]}... | Incognito: {is_incognito}")
+
+        if not claim_text:
+            logger.warning("Empty claim_text received")
             return JSONResponse(
                 status_code=400,
-                content={"success": False, "message": "No claim provided"}
+                content={"success": False, "message": "No claim text provided"}
             )
 
-        # Log fact checker status
         logger.info(f"Using fact checker instance: {async_fact_checker}")
-        
-        # Use the global fact checker instance
         logger.info("Starting claim verification...")
-        result = await async_fact_checker.verify_claim(claim)
+        result = await async_fact_checker.verify_claim(claim_text)
         logger.info("Claim verification completed")
 
-        # Ensure we have all required fields
         if not result.get("explanation"):
             logger.warning("No explanation in result, using default")
             result["explanation"] = "Analysis not available"
-        if not result.get("score"):
+        if not result.get("score"): # Score should be 0-100 from fact_checker
             logger.warning("No score in result, using default")
             result["score"] = 50
         if not result.get("verdict"):
             logger.warning("No verdict in result, using default")
             result["verdict"] = "neutral"
 
-        # Add the claim text to the response
-        result["text"] = claim
-        
-        # Add default sources if none are provided
+        result["text"] = claim_text
+
         if not result.get("sources") or not isinstance(result.get("sources"), list) or len(result.get("sources")) == 0:
-            # Create sample sources based on the verdict
-            logger.info("No sources found in result, adding default sources")
-            if result.get("verdict") == "true":
-                result["sources"] = [
-                    {"name": "Verified Source", "url": "https://www.factcheck.org"},
-                    {"name": "Research Database", "url": "https://www.science.org"}
-                ]
-            elif result.get("verdict") == "false":
-                result["sources"] = [
-                    {"name": "Fact Checking Organization", "url": "https://www.politifact.com"},
-                    {"name": "Misinformation Research", "url": "https://www.snopes.com"}
-                ]
+            logger.info("No sources found in result, adding default sources based on full_claim_data or verdict")
+            # Use sources from full_claim_data if available and valid
+            provided_sources = full_claim_data.get("sources", [])
+            formatted_provided_sources = []
+            if isinstance(provided_sources, list):
+                for src_url in provided_sources:
+                    if isinstance(src_url, str) and src_url.strip():
+                        formatted_provided_sources.append({"name": "User Provided Source", "url": src_url})
+
+            if formatted_provided_sources:
+                result["sources"] = formatted_provided_sources
             else:
-                result["sources"] = [
-                    {"name": "Research Article", "url": "https://www.google.com/search?q=" + claim.replace(" ", "+")}
-                ]
+                # Fallback to verdict-based default sources
+                if result.get("verdict") == "true":
+                    result["sources"] = [
+                        {"name": "Verified Source", "url": "https://www.factcheck.org"},
+                        {"name": "Research Database", "url": "https://www.science.org"}
+                    ]
+                elif result.get("verdict") == "false":
+                    result["sources"] = [
+                        {"name": "Fact Checking Organization", "url": "https://www.politifact.com"},
+                        {"name": "Misinformation Research", "url": "https://www.snopes.com"}
+                    ]
+                else:
+                    result["sources"] = [
+                        {"name": "General Search", "url": "https://www.google.com/search?q=" + claim_text.replace(" ", "+")}
+                    ]
 
-        # Save the verified claim to the database
-        try:
-            session = db.SessionLocal()
+        # Only save to DB if not in incognito mode
+        if not is_incognito:
+            try:
+                session = db.SessionLocal()
+                score_value = result.get("score", 50)
+                if score_value > 1: # Assuming score is 0-100, convert to 0-1 for DB
+                    score_value = score_value / 100.0
 
-            # Convert score from percentage (0-100) to decimal (0-1) if needed
-            score_value = result.get("score", 50)
-            if score_value > 1:
-                score_value = score_value / 100
+                sources_list_for_db = []
+                if result.get("sources") and isinstance(result["sources"], list):
+                    for source_item in result["sources"]:
+                        if isinstance(source_item, dict) and source_item.get("name") and source_item.get("url"):
+                            sources_list_for_db.append(source_item)
+                        elif isinstance(source_item, str): # Handle if sources are just URLs from older format
+                            sources_list_for_db.append({"name": "Provided Source", "url": source_item})
 
-            # Format sources as JSON string - ensure sources are properly formatted
-            sources_str = None
-            if result.get("sources"):
-                # Make sure each source has name and url properties
-                formatted_sources = []
-                for source in result["sources"]:
-                    if isinstance(source, dict):
-                        formatted_source = {
-                            "name": source.get("name", "Source"),
-                            "url": source.get("url", "https://factcheck.org")
-                        }
-                        formatted_sources.append(formatted_source)
+                if not sources_list_for_db: # Default if still empty
+                     sources_list_for_db = [{"name": "FactCheck Database", "url": "https://factcheck.org"}]
 
-                # If no valid sources were found, create a default source
-                if not formatted_sources:
-                    formatted_sources = [{"name": "FactCheck Database", "url": "https://factcheck.org"}]
+                sources_str = json.dumps(sources_list_for_db)
 
-                sources_str = json.dumps(formatted_sources)
-            else:
-                # Default source if none provided
-                sources_str = json.dumps([{"name": "FactCheck Database", "url": "https://factcheck.org"}])
+                new_fact_check = FactCheck(
+                    claim=claim_text,
+                    verdict=result.get("verdict", "neutral"),
+                    explanation=result.get("explanation", "Analysis not available"),
+                    score=score_value,
+                    sources=sources_str,
+                    created_at=datetime.utcnow()
+                )
+                session.add(new_fact_check)
+                session.commit()
+                logger.info(f"Claim saved to database with ID: {new_fact_check.id}")
 
-            # Create new FactCheck record
-            new_fact_check = FactCheck(
-                claim=claim,
-                verdict=result.get("verdict", "neutral"),
-                explanation=result.get("explanation", "Analysis not available"),
-                score=score_value,
-                sources=sources_str,
-                created_at=datetime.utcnow()
-            )
-
-            # Add to database
-            session.add(new_fact_check)
-            session.commit()
-            logger.info(f"Claim saved to database with ID: {new_fact_check.id}")
-
-        except Exception as db_error:
-            logger.error(f"Error saving claim to database: {str(db_error)}")
-        finally:
-            session.close()
+            except Exception as db_error:
+                logger.error(f"Error saving claim to database: {str(db_error)}")
+            finally:
+                if 'session' in locals() and session is not None: # Ensure session was initialized
+                    session.close()
+        else:
+            logger.info(f"Incognito mode: Claim '{claim_text[:50]}...' verified but not saved to public database.")
 
         logger.info(f"Returning result with score: {result.get('score')}, verdict: {result.get('verdict')}")
         return JSONResponse(
@@ -498,13 +497,10 @@ async def verify_claim_stub(request: Request, claim_data: dict):
         )
 
     except Exception as e:
-        logger.error(f"Error verifying claim: {str(e)}", exc_info=True)  # Include full traceback
+        logger.error(f"Error verifying claim: {str(e)}", exc_info=True)
         return JSONResponse(
             status_code=500,
-            content={
-                "success": False,
-                "message": f"Error verifying claim: {str(e)}"
-            }
+            content={"success": False, "message": "Internal server error during claim verification"}
         )
 
 # Error handler

@@ -5,8 +5,8 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
 from datetime import datetime
 import json
-# import chromadb
-# from chromadb.config import Settings
+import chromadb
+from chromadb.config import Settings
 import numpy as np
 
 # Load environment variables
@@ -55,11 +55,19 @@ class Database:
         # Create tables if they don't exist
         Base.metadata.create_all(bind=self.engine)
         
-        # Vector database connection (disabled)
-        self.vector_client = None
-        self.collection = None
-    
-    def store_fact_check(self, 
+        # Initialize vector database connection
+        try:
+            self.vector_client = chromadb.PersistentClient(
+                path=CHROMA_PERSIST_DIR,
+                settings=Settings(anonymized_telemetry=False)
+            )
+            self.collection = self.vector_client.get_or_create_collection("claims")
+        except Exception as e:
+            print(f"Error initializing vector database: {e}")
+            self.vector_client = None
+            self.collection = None
+
+    def store_fact_check(self,
                         claim: str, 
                         score: float, 
                         verdict: str, 
@@ -140,3 +148,6 @@ class Database:
 
 # Create global database instance
 db = Database()
+
+
+

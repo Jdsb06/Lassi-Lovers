@@ -32,10 +32,10 @@ def get_embedding_model():
 async def extract_text_from_url(url: str) -> Tuple[str, Dict[str, Any]]:
     """
     Extract text content from a URL
-    
+
     Args:
         url: URL to extract text from
-        
+
     Returns:
         Tuple of (extracted text, metadata)
     """
@@ -45,7 +45,7 @@ async def extract_text_from_url(url: str) -> Tuple[str, Dict[str, Any]]:
         "url": url,
         "site_name": ""
     }
-    
+
     try:
         async with httpx.AsyncClient(timeout=30.0) as client:
             response = await client.get(url)
@@ -56,38 +56,38 @@ async def extract_text_from_url(url: str) -> Tuple[str, Dict[str, Any]]:
             
             # Extract metadata
             metadata["title"] = soup.title.string if soup.title else ""
-            
+
             # Extract description from meta tags
             description_tag = soup.find("meta", attrs={"name": "description"}) or soup.find("meta", attrs={"property": "og:description"})
             if description_tag and description_tag.get("content"):
                 metadata["description"] = description_tag["content"]
-                
+
             # Extract site name
             site_name_tag = soup.find("meta", attrs={"property": "og:site_name"})
             if site_name_tag and site_name_tag.get("content"):
                 metadata["site_name"] = site_name_tag["content"]
-            
+
             # Extract main content
             # Remove script and style elements
             for script in soup(["script", "style", "header", "footer", "nav"]):
                 script.extract()
-                
+
             # Get text
             text = soup.get_text()
-            
+
             # Break into lines and remove leading and trailing space on each
             lines = (line.strip() for line in text.splitlines())
-            
+
             # Break multi-headlines into a line each
             chunks = (phrase.strip() for line in lines for phrase in line.split("  "))
-            
+
             # Remove blank lines
             text = '\n'.join(chunk for chunk in chunks if chunk)
-            
+
             # Clean up text
             text = re.sub(r'\n+', '\n', text)  # Remove multiple newlines
             text = re.sub(r'\s+', ' ', text)   # Remove multiple spaces
-            
+
             return text, metadata
     except Exception as e:
         return f"Error extracting text from URL: {str(e)}", metadata
