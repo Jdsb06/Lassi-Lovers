@@ -36,8 +36,12 @@
     <a href="#about-the-project"><strong>📋 Explore the Documentation »</strong></a>
     <br />
     <br />
-    <a href="https://drive.google.com/file/d/19We-d3s6NkkHkLtVes2pWY-lj_oMeiJ6/view?usp=sharing">
-      <img src="https://img.shields.io/badge/🎥%20Watch%20Demo%20Video-FF6B6B?style=for-the-badge&logoColor=white" alt="Demo Video">
+    <a href="https://drive.google.com/file/d/1UtPyWxxLA3S288J9zgPqrnrupQv6BDo8/view?usp=sharing">
+      <img src="https://img.shields.io/badge/🎥%20Frontend%20Demo-4285F4?style=for-the-badge&logoColor=white" alt="Frontend Demo Video">
+    </a>
+    &nbsp;&nbsp;
+    <a href="https://drive.google.com/file/d/11NbOXFmmHrbhxVFcT_Qx-V_TjxyWdEA0/view?usp=sharing">
+      <img src="https://img.shields.io/badge/⚙️%20Backend%20Demo-34A853?style=for-the-badge&logoColor=white" alt="Backend Demo Video">
     </a>
     &nbsp;&nbsp;
     <a href="#screenshots">
@@ -57,6 +61,12 @@
 </div>
 
 **FactCheck - No Misinfo** is a cutting-edge AI-powered fact-checking platform designed to combat the spread of misinformation across social and news media. In an era where false information spreads faster than truth, our platform empowers users with reliable, evidence-backed verification tools.
+
+<div align="center">
+  <a href="https://drive.google.com/file/d/1UtPyWxxLA3S288J9zgPqrnrupQv6BDo8/view?usp=sharing">
+    <img src="https://img.shields.io/badge/🖥️%20Watch%20Frontend%20Walkthrough-FF4B4B?style=for-the-badge&logo=play&logoColor=white" alt="Frontend Walkthrough">
+  </a>
+</div>
 
 ### 🎯 Mission Statement
 > *"To create a world where truth prevails over misinformation by providing accessible, transparent, and community-driven fact-checking tools."*
@@ -121,6 +131,12 @@
 </td>
 </tr>
 </table>
+
+<div align="center">
+  <a href="https://drive.google.com/file/d/11NbOXFmmHrbhxVFcT_Qx-V_TjxyWdEA0/view?usp=sharing">
+    <img src="https://img.shields.io/badge/⚡%20See%20Backend%20in%20Action-7B68EE?style=for-the-badge&logo=database&logoColor=white" alt="Backend Demo">
+  </a>
+</div>
 
 ### 🎨 **Modern User Interface**
 - **Responsive Design:** Seamless experience across desktop, tablet, and mobile
@@ -212,6 +228,14 @@ graph LR
 ## 📸 Screenshots & Demo <a id="screenshots"></a>
 
 <div align="center">
+
+<a href="https://drive.google.com/file/d/1UtPyWxxLA3S288J9zgPqrnrupQv6BDo8/view?usp=sharing">
+  <img src="https://img.shields.io/badge/🎬%20Complete%20Frontend%20Tour-FF6B35?style=for-the-badge&logo=youtube&logoColor=white" alt="Frontend Complete Tour">
+</a>
+&nbsp;&nbsp;
+<a href="https://drive.google.com/file/d/11NbOXFmmHrbhxVFcT_Qx-V_TjxyWdEA0/view?usp=sharing">
+  <img src="https://img.shields.io/badge/🔧%20Backend%20%26%20Multiple%20Tests-28A745?style=for-the-badge&logo=server&logoColor=white" alt="Backend Multiple Tests">
+</a>
 
 ### 🏠 **Homepage - Clean & Professional Design**
 <img src="images/homepage-full.jpeg" alt="Homepage Screenshot" width="800">
@@ -375,6 +399,11 @@ MongoDB >= 5.0 (local or cloud instance)
    - Backend API: `http://localhost:5000`
    - AI Services: `http://localhost:8000`
 
+<div align="center">
+  <a href="https://drive.google.com/file/d/11NbOXFmmHrbhxVFcT_Qx-V_TjxyWdEA0/view?usp=sharing">
+    <img src="https://img.shields.io/badge/🎯%20See%20Setup%20in%20Action-DC143C?style=for-the-badge&logo=rocket&logoColor=white" alt="Setup Demo">
+  </a>
+</div>
 
 ---
 
@@ -400,6 +429,12 @@ MongoDB >= 5.0 (local or cloud instance)
    - View trust score: Verified ✅, Disputed ⚠️, or Unverified ❌
    - Read detailed explanations and evidence
    - Access source citations and links
+
+<div align="center">
+  <a href="https://drive.google.com/file/d/1UtPyWxxLA3S288J9zgPqrnrupQv6BDo8/view?usp=sharing">
+    <img src="https://img.shields.io/badge/📋%20Step--by--Step%20Usage%20Guide-9932CC?style=for-the-badge&logo=guide&logoColor=white" alt="Usage Guide Video">
+  </a>
+</div>
 
 ### 🤖 **Using the AI Chatbot**
 
@@ -545,6 +580,12 @@ graph TD
 - **Performance Tests:** Load testing with k6
 - **Security Tests:** Automated vulnerability scanning
 
+<div align="center">
+  <a href="https://drive.google.com/file/d/11NbOXFmmHrbhxVFcT_Qx-V_TjxyWdEA0/view?usp=sharing">
+    <img src="https://img.shields.io/badge/🧪%20Watch%20Live%20Testing-FF8C00?style=for-the-badge&logo=flask&logoColor=white" alt="Live Testing Demo">
+  </a>
+</div>
+
 ### 📊 **Quality Metrics**
 
 ```
@@ -606,8 +647,12 @@ Code Quality:      █████████████████     9.2/1
 
 ### 🚀 **Ready to Fight Misinformation?**
 
-<a href="https://drive.google.com/file/d/19We-d3s6NkkHkLtVes2pWY-lj_oMeiJ6/view?usp=sharing">
-  <img src="https://img.shields.io/badge/🌟%20Try%20FactCheck%20Now-FF6B6B?style=for-the-badge&logoColor=white" alt="Try Now" height="50">
+<a href="https://drive.google.com/file/d/1UtPyWxxLA3S288J9zgPqrnrupQv6BDo8/view?usp=sharing">
+  <img src="https://img.shields.io/badge/🎥%20Frontend%20Demo-4285F4?style=for-the-badge&logoColor=white" alt="Frontend Demo">
+</a>
+&nbsp;&nbsp;
+<a href="https://drive.google.com/file/d/11NbOXFmmHrbhxVFcT_Qx-V_TjxyWdEA0/view?usp=sharing">
+  <img src="https://img.shields.io/badge/⚙️%20Backend%20Demo-34A853?style=for-the-badge&logoColor=white" alt="Backend Demo">
 </a>
 
 **Made with ❤️ and commitment to truth**
