@@ -1,70 +1,210 @@
-# Getting Started with Create React App
+# 🕵️‍♂️ FactChecker Frontend
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+[![React](https://img.shields.io/badge/React-19.1.0-61dafb?logo=react)](https://react.dev/)
+[![TailwindCSS](https://img.shields.io/badge/TailwindCSS-3.3.0-38bdf8?logo=tailwindcss)](https://tailwindcss.com/)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](../LICENSE)
 
-## Available Scripts
+> A modern, interactive web interface for the FactChecker platform. Verify claims, browse fact-checks, and interact with AI-powered tools in real time.
 
-In the project directory, you can run:
+---
 
-### `npm start`
+## 📋 Table of Contents
+- [Features](#features)
+- [Screenshots](#screenshots)
+- [Project Structure](#project-structure)
+- [Technology Stack](#technology-stack)
+- [Architecture](#architecture)
+- [Setup & Installation](#setup--installation)
+- [Environment Variables](#environment-variables)
+- [Usage](#usage)
+- [API Integration](#api-integration)
+- [Testing](#testing)
+- [Linting & Formatting](#linting--formatting)
+- [Deployment](#deployment)
+- [Contributing](#contributing)
+- [License](#license)
+- [Acknowledgments](#acknowledgments)
+- [Contact & Support](#contact--support)
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+---
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+## ✨ Features
+- 🔍 Submit claims for instant fact-checking
+- 🧠 AI-powered chatbot (Gemini/OpenAI integration)
+- 📊 Trust score and evidence display
+- 🗂️ Browse and search public claims
+- 👤 User authentication (login/logout)
+- 🛡️ Privacy, Terms, and Community Guidelines
+- 📱 Responsive design (mobile & desktop)
+- 🧩 Modular React components
+- 🎨 TailwindCSS for rapid UI development
 
-### `npm test`
+---
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+## 🖼️ Screenshots
+![Home Page](./images/homepage.png)
+---
 
-### `npm run build`
+## 📁 Project Structure
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+```
+frontend/
+├── public/                  # Static assets
+├── src/
+│   ├── components/          # React UI components (pages, modals, chatbot, etc.)
+│   ├── hooks/               # Custom React hooks
+│   ├── services/            # API and backend integration
+│   ├── App.js               # Main app component
+│   ├── index.js             # Entry point
+│   ├── App.css, index.css   # Styles
+│   └── ...
+├── package.json             # Project metadata & scripts
+├── tailwind.config.js       # TailwindCSS config
+├── postcss.config.js        # PostCSS config
+└── README.md                # This file
+```
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+### Key Files
+- **`src/components/`**: All major UI and page components (e.g., `SubmitClaimPage.js`, `ProfilePage.js`, `ChatbotWindow.js`)
+- **`src/services/api.js`**: Handles API requests to the backend
+- **`src/hooks/`**: Custom React hooks for state and logic
+- **`App.js`**: Main application logic and routing
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+---
 
-### `npm run eject`
+## 🛠️ Technology Stack
+- **React 19** – UI library
+- **React Router** – Routing
+- **TailwindCSS** – Utility-first CSS
+- **OpenAI & Google Generative AI SDKs** – Chatbot/AI features
+- **Jest & React Testing Library** – Testing
+- **Lucide-react** – Icon library
+- **ESLint, Prettier** – Linting & formatting
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+---
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+## 🏗️ Architecture
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+```mermaid
+graph TD
+    A[User] -->|Browser| B[React App]
+    B --> C[API Service Layer]
+    C -->|HTTP| D[FactChecker Backend]
+    D --> E[Database/AI]
+    B --> F[Chatbot]
+    F -->|AI API| G[OpenAI/Gemini]
+```
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+- **Component-based**: Each page/feature is a React component
+- **Service layer**: All backend/API calls are centralized
+- **State management**: Via React hooks/context
+- **Styling**: TailwindCSS utility classes
 
-## Learn More
+---
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+## ⚡ Setup & Installation
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+### Prerequisites
+- Node.js (v18+ recommended)
+- npm (v9+ recommended)
 
-### Code Splitting
+### Local Development
+```bash
+# Clone the repo
+cd frontend
+npm install
+npm start
+```
+- App runs at [http://localhost:3000](http://localhost:3000)
+- Backend should be running at [http://localhost:5000](http://localhost:5000) (see proxy in `package.json`)
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+### Production Build
+```bash
+npm run build
+```
+- Outputs static files to `build/`
 
-### Analyzing the Bundle Size
+---
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+## 🔑 Environment Variables
+Create a `.env` file in the root:
+```
+REACT_APP_API_URL=http://localhost:5000
+REACT_APP_OPENAI_KEY=your_openai_key
+REACT_APP_GEMINI_KEY=your_gemini_key
+```
+- _Never commit real secrets to source control!_
 
-### Making a Progressive Web App
+---
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+## 🚀 Usage
+- Visit `/` to submit a claim
+- Use the chatbot for AI-powered Q&A
+- Browse `/claims` for public fact-checks
+- View your profile and history
+- Access privacy, terms, and FAQ from the footer
 
-### Advanced Configuration
+---
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+## 🔗 API Integration
+- All API calls are handled in `src/services/api.js`
+- Uses `fetch` or `axios` (depending on your implementation)
+- Handles authentication tokens and error states
+- Example:
+  ```js
+  import { verifyClaim } from './services/api';
+  verifyClaim({ claim: 'The sky is blue.' })
+    .then(res => console.log(res));
+  ```
 
-### Deployment
+---
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+## 🧪 Testing
+```bash
+npm test
+```
+- Uses Jest and React Testing Library
+- Test files: `*.test.js`
 
-### `npm run build` fails to minify
+---
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+## 🧹 Linting & Formatting
+```bash
+npm run lint
+npm run format
+```
+- ESLint and Prettier are recommended (add config if not present)
+
+---
+
+## 🚢 Deployment
+- **Vercel/Netlify**: Connect repo, set environment variables, deploy
+- **Docker**: (Optional) Add a `Dockerfile` for containerized deployment
+- **Static Hosting**: Upload `build/` to S3, Firebase, etc.
+
+---
+
+## 🤝 Contributing
+1. Fork the repo
+2. Create a feature branch (`git checkout -b feature/your-feature`)
+3. Commit and push your changes
+4. Open a Pull Request
+
+---
+
+## 📄 License
+MIT – see [LICENSE](../LICENSE)
+
+---
+
+## 🙏 Acknowledgments
+- [React](https://react.dev/)
+- [TailwindCSS](https://tailwindcss.com/)
+- [OpenAI](https://openai.com/)
+- [Google Generative AI](https://ai.google/)
+
+---
+
+## 📬 Contact & Support
+- Open an issue or discussion in this repo
+- Email: support@factchecker.com
