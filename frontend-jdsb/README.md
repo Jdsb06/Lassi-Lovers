@@ -27,7 +27,7 @@
 - [Contact & Support](#contact--support)
 
 ---
-
+<a id="features"></a>
 ## ✨ Features
 - 🔍 Submit claims for instant fact-checking
 - 🧠 AI-powered chatbot (Gemini/OpenAI integration)
@@ -40,11 +40,11 @@
 - 🎨 TailwindCSS for rapid UI development
 
 ---
-
+<a id="screenshots"></a>
 ## 🖼️ Screenshots
 ![Home Page](./images/homepage.png)
 ---
-
+<a id="project-structure"></a>
 ## 📁 Project Structure
 
 ```
@@ -71,7 +71,7 @@ frontend/
 - **`App.js`**: Main application logic and routing
 
 ---
-
+<a id="technology-stack"></a>
 ## 🛠️ Technology Stack
 - **React 19** – UI library
 - **React Router** – Routing
@@ -82,7 +82,7 @@ frontend/
 - **ESLint, Prettier** – Linting & formatting
 
 ---
-
+<a id="architecture"></a>
 ## 🏗️ Architecture
 
 ```mermaid
@@ -101,7 +101,7 @@ graph TD
 - **Styling**: TailwindCSS utility classes
 
 ---
-
+<a id="setup--installation"></a>
 ## ⚡ Setup & Installation
 
 ### Prerequisites
@@ -125,7 +125,7 @@ npm run build
 - Outputs static files to `build/`
 
 ---
-
+<a id="environment-variables"></a>
 ## 🔑 Environment Variables
 Create a `.env` file in the root:
 ```
@@ -136,7 +136,7 @@ REACT_APP_GEMINI_KEY=your_gemini_key
 - _Never commit real secrets to source control!_
 
 ---
-
+<a id="usage"></a>
 ## 🚀 Usage
 - Visit `/` to submit a claim
 - Use the chatbot for AI-powered Q&A
@@ -145,7 +145,7 @@ REACT_APP_GEMINI_KEY=your_gemini_key
 - Access privacy, terms, and FAQ from the footer
 
 ---
-
+<a id="api-integration"></a>
 ## 🔗 API Integration
 - All API calls are handled in `src/services/api.js`
 - Uses `fetch` or `axios` (depending on your implementation)
@@ -158,7 +158,7 @@ REACT_APP_GEMINI_KEY=your_gemini_key
   ```
 
 ---
-
+<a id="testing"></a>
 ## 🧪 Testing
 ```bash
 npm test
@@ -167,7 +167,7 @@ npm test
 - Test files: `*.test.js`
 
 ---
-
+<a id="linting--formatting"></a>
 ## 🧹 Linting & Formatting
 ```bash
 npm run lint
@@ -176,14 +176,14 @@ npm run format
 - ESLint and Prettier are recommended (add config if not present)
 
 ---
-
+<a id="deployment"></a>
 ## 🚢 Deployment
 - **Vercel/Netlify**: Connect repo, set environment variables, deploy
 - **Docker**: (Optional) Add a `Dockerfile` for containerized deployment
 - **Static Hosting**: Upload `build/` to S3, Firebase, etc.
 
 ---
-
+<a id="contributing"></a>
 ## 🤝 Contributing
 1. Fork the repo
 2. Create a feature branch (`git checkout -b feature/your-feature`)
@@ -191,12 +191,12 @@ npm run format
 4. Open a Pull Request
 
 ---
-
+<a id="license"></a>
 ## 📄 License
 MIT – see [LICENSE](../LICENSE)
 
 ---
-
+<a id="acknowledgments"></a>
 ## 🙏 Acknowledgments
 - [React](https://react.dev/)
 - [TailwindCSS](https://tailwindcss.com/)
@@ -204,7 +204,7 @@ MIT – see [LICENSE](../LICENSE)
 - [Google Generative AI](https://ai.google/)
 
 ---
-
+<a id="contact--support"></a>
 ## 📬 Contact & Support
 - Open an issue or discussion in this repo
 - Email: support@factchecker.com
