@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import AuthButton from './AuthButton';
 import Footer from './Footer';
+import useInView from '../hooks/useInView';
 
 /** @type {any} */
 const puter = window.puter;
@@ -23,9 +24,11 @@ const TrustScoreDisplay = () => {
   const navigate = useNavigate();
   const [color, setColor] = useState('');
   const [circumference, setCircumference] = useState(0);
-  const [offset, setOffset] = useState(0);
+  const [offset, setOffset] = useState(circumference); // Start with full offset (no progress)
+  const [animatedOffset, setAnimatedOffset] = useState(circumference); // For animation
   const [gradientColors, setGradientColors] = useState(['#DC2626', '#DC2626']); // Start with red
   const [claimResult, setClaimResult] = useState(null);
+  const [claimTitle, setClaimTitle] = useState(''); // Added state for claim title
   const [score, setScore] = useState(0);
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -35,6 +38,10 @@ const TrustScoreDisplay = () => {
   const [showFeedbackForm, setShowFeedbackForm] = useState(false);
   const [grokScore, setGrokScore] = useState(null);
   const [isGrokLoading, setIsGrokLoading] = useState(true);
+  const [hasAnimated, setHasAnimated] = useState(false);
+
+  // Refs for scroll animation
+  const [gaugeRef, isGaugeInView] = useInView({ threshold: 0.5 });
 
   // Constants for the circle
   const radius = 100; // Increased size for better visibility
@@ -44,6 +51,8 @@ const TrustScoreDisplay = () => {
   useEffect(() => {
     // Get the claim result from localStorage
     const storedResult = localStorage.getItem('claimResult');
+    const storedClaim = localStorage.getItem('submittedClaim'); // Get the claim title if stored separately
+
     if (!storedResult) {
       setError('No claim found. Please submit a claim first.');
       setIsLoading(false);
@@ -54,7 +63,26 @@ const TrustScoreDisplay = () => {
     try {
       const result = JSON.parse(storedResult);
       setClaimResult(result.result || result); // Handle both new and old response format
-      
+
+      // Try to get the claim title from various possible sources
+      if (storedClaim) {
+        try {
+          const claim = JSON.parse(storedClaim);
+          setClaimTitle(claim.text || claim.claim || '');
+        } catch (e) {
+          // If not JSON, it might be just the text
+          setClaimTitle(storedClaim);
+        }
+      } else if (result.claim) {
+        setClaimTitle(result.claim);
+      } else if (result.result?.claim) {
+        setClaimTitle(result.result.claim);
+      } else if (result.text) {
+        setClaimTitle(result.text);
+      } else if (result.result?.text) {
+        setClaimTitle(result.result.text);
+      }
+
       // Get Grok's score based on the AI analysis
       if (result.result?.explanation || result.explanation) {
         const analysis = result.result?.explanation || result.explanation;
@@ -126,6 +154,37 @@ Analysis: ${analysis}`;
       setColor('#059669');
     }
   }, [score, normalizedRadius]);
+
+  useEffect(() => {
+    // Handle gauge animation when it comes into view
+    if (isGaugeInView && !hasAnimated) {
+      setHasAnimated(true);
+      setAnimatedOffset(circumference); // Start with full offset (no progress)
+
+      // Animate the gauge filling in
+      const animationDuration = 1500; // 1.5 seconds
+      const startTime = Date.now();
+
+      const animateGauge = () => {
+        const currentTime = Date.now();
+        const elapsed = currentTime - startTime;
+        const progress = Math.min(elapsed / animationDuration, 1);
+
+        // Ease out cubic function
+        const easeOut = (t) => 1 - Math.pow(1 - t, 3);
+        const easeProgress = easeOut(progress);
+
+        const currentOffset = circumference - (easeProgress * (circumference - offset));
+        setAnimatedOffset(currentOffset);
+
+        if (progress < 1) {
+          requestAnimationFrame(animateGauge);
+        }
+      };
+
+      requestAnimationFrame(animateGauge);
+    }
+  }, [isGaugeInView, hasAnimated, circumference, offset]);
 
   const getMessage = () => {
     if (score <= 33) {
@@ -240,11 +299,21 @@ Analysis: ${analysis}`;
           <p className="text-gray-600">Our AI-powered analysis evaluates claims using multiple trusted sources</p>
         </div>
 
+        {/* Claim Title Section */}
+        {claimTitle && (
+          <div className="mb-8 bg-gradient-to-r from-blue-500 to-red-500 p-0.5 rounded-2xl shadow-lg animate-fadeIn">
+            <div className="bg-white rounded-2xl p-6 sm:p-8">
+              <h3 className="text-lg text-center text-gray-500 mb-2 uppercase tracking-wider font-medium">Claim Analyzed:</h3>
+              <p className="text-xl sm:text-2xl text-center font-bold text-gray-800 leading-tight">{claimTitle}</p>
+            </div>
+          </div>
+        )}
+
         {/* Trust Score Wheel with Info Cards */}
-        <div className="bg-white rounded-2xl shadow-xl p-8 mb-8">
+        <div className="bg-white rounded-2xl shadow-xl p-6 sm:p-8 mb-8 transform transition-all duration-500 hover:shadow-2xl animate-slideUp">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {/* Left Info Card */}
-            <div className="bg-blue-50/50 backdrop-blur-sm rounded-xl p-4 border border-blue-100 flex flex-col justify-center items-center">
+            <div className="bg-blue-50/50 backdrop-blur-sm rounded-xl p-4 border border-blue-100 flex flex-col justify-center items-center transform transition hover:scale-105 hover:shadow-lg duration-300">
               <div className="text-blue-600 mb-2">
                 <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
@@ -254,12 +323,12 @@ Analysis: ${analysis}`;
             </div>
 
             {/* Center Trust Score Wheel */}
-            <div className="relative flex flex-col items-center">
+            <div ref={gaugeRef} className="relative flex flex-col items-center transform hover:scale-105 duration-300">
               <div className="relative">
                 <svg
                   height={radius * 2}
                   width={radius * 2}
-                  className="transform -rotate-90"
+                  className="transform -rotate-90 filter drop-shadow-lg"
                 >
                   <defs>
                     <linearGradient id="scoreGradient" x1="0%" y1="0%" x2="100%" y2="0%">
@@ -280,10 +349,12 @@ Analysis: ${analysis}`;
                     fill="transparent"
                     strokeWidth={strokeWidth}
                     strokeDasharray={circumference + ' ' + circumference}
-                    style={{ strokeDashoffset: offset }}
+                    style={{ strokeDashoffset: animatedOffset }}
                     r={normalizedRadius}
                     cx={radius}
                     cy={radius}
+                    className="transition-all duration-1000 ease-out"
+                    strokeLinecap="round"
                   />
                 </svg>
                 <div className="absolute inset-0 flex flex-col items-center justify-center">
@@ -299,7 +370,7 @@ Analysis: ${analysis}`;
             </div>
 
             {/* Right Info Card */}
-            <div className="bg-red-50/50 backdrop-blur-sm rounded-xl p-4 border border-red-100 flex flex-col justify-center items-center">
+            <div className="bg-red-50/50 backdrop-blur-sm rounded-xl p-4 border border-red-100 flex flex-col justify-center items-center transform transition hover:scale-105 hover:shadow-lg duration-300">
               <div className="text-red-600 mb-2">
                 <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
@@ -312,13 +383,13 @@ Analysis: ${analysis}`;
         </div>
 
         {/* Analysis and Evidence Section */}
-        <div className="space-y-8">
+        <div className="space-y-6">
           {/* Gemini Analysis */}
-          <div className="bg-blue-50/50 backdrop-blur-sm rounded-2xl shadow-xl p-8 border border-blue-100">
+          <div className="bg-blue-50/50 backdrop-blur-sm rounded-2xl shadow-xl p-6 sm:p-8 border border-blue-100 transition-all duration-300 hover:shadow-2xl">
             <h3 className="text-2xl font-bold mb-4 text-gray-900">AI Analysis</h3>
             <div className="prose max-w-none">
               {claimResult.explanation && (
-                <div className="mb-6">
+                <div className="mb-4">
                   <h4 className="text-lg font-semibold mb-3 text-blue-900">AI Analysis:</h4>
                   <p className="text-gray-700 leading-relaxed">{claimResult.explanation}</p>
                 </div>
@@ -328,13 +399,13 @@ Analysis: ${analysis}`;
 
           {/* Grok Score Box */}
           {grokScore !== null && (
-            <div className="bg-purple-50/50 backdrop-blur-sm rounded-2xl shadow-xl p-8 border border-purple-100">
-              <div className="flex items-center justify-between">
+            <div className="bg-purple-50/50 backdrop-blur-sm rounded-2xl shadow-xl p-6 sm:p-8 border border-purple-100 transition-all duration-300 hover:shadow-2xl">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
                   <h3 className="text-2xl font-bold mb-2 text-gray-900">Grok Score</h3>
                   <p className="text-gray-600">AI-generated trustworthiness score</p>
                 </div>
-                <div className="flex items-center justify-center w-24 h-24 bg-white rounded-full shadow-lg border-4" style={{ borderColor: color }}>
+                <div className="flex items-center justify-center w-24 h-24 bg-white rounded-full shadow-lg border-4 transform transition-transform hover:scale-105" style={{ borderColor: color }}>
                   <span className="text-4xl font-bold" style={{ color }}>{grokScore}</span>
                 </div>
               </div>
@@ -342,11 +413,11 @@ Analysis: ${analysis}`;
           )}
 
           {/* Evidence Sources */}
-          <div className="bg-red-50/50 backdrop-blur-sm rounded-2xl shadow-xl p-8 border border-red-100">
+          <div className="bg-red-50/50 backdrop-blur-sm rounded-2xl shadow-xl p-6 sm:p-8 border border-red-100 transition-all duration-300 hover:shadow-2xl">
             <h3 className="text-2xl font-bold mb-6 text-gray-900">Evidence Sources</h3>
             <div className="space-y-4">
               {claimResult?.evidence?.map((source, index) => (
-                <div key={index} className="bg-white/80 backdrop-blur-sm rounded-xl p-4 hover:bg-white transition-colors border border-red-50">
+                <div key={index} className="bg-white/80 backdrop-blur-sm rounded-xl p-4 hover:bg-white transition-all duration-200 border border-red-50 hover:border-red-100 hover:shadow-md">
                   <a
                     href={source.link}
                     target="_blank"
@@ -359,15 +430,18 @@ Analysis: ${analysis}`;
                       </div>
                     </div>
                     <div className="flex-1">
-                      <span className="text-red-600 hover:underline break-all">{source.title || source.link}</span>
+                      <span className="text-red-600 hover:underline font-medium break-all">{source.title || source.link}</span>
                       <p className="text-sm text-gray-500 mt-1">{source.snippet}</p>
                     </div>
                   </a>
                 </div>
               ))}
               {(!claimResult?.evidence || claimResult.evidence.length === 0) && (
-                <div className="text-center py-4 text-gray-500">
-                  No evidence sources found for this claim.
+                <div className="text-center py-6 bg-white/50 rounded-xl border border-red-50">
+                  <svg className="w-12 h-12 text-red-300 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.879 7.121A3 3 0 1 0 12 12m-2.121 2.121A3 3 0 1 1 12 12m-2.121 2.121a3 3 0 1 0 2.121 2.121M12 14l9-5-9-5-9 5 9 5z" />
+                  </svg>
+                  <p className="text-gray-500 font-medium">No evidence sources found for this claim.</p>
                 </div>
               )}
             </div>
@@ -502,4 +576,4 @@ Analysis: ${analysis}`;
   );
 };
 
-export default TrustScoreDisplay; 
+export default TrustScoreDisplay;

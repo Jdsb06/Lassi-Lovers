@@ -17,6 +17,7 @@ const SubmitClaimPage = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [uploadProgress, setUploadProgress] = useState({});
   const [dragActive, setDragActive] = useState(false);
+  const [isIncognito, setIsIncognito] = useState(false);
 
   // Validation functions
   const validateTitle = (title) => {
@@ -163,15 +164,14 @@ const SubmitClaimPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!validateForm()) {
       return;
     }
 
     setIsSubmitting(true);
-    
+
     try {
-      // Prepare form data for submission
       const submitData = {
         title: formData.title.trim(),
         description: formData.description.trim(),
@@ -179,8 +179,9 @@ const SubmitClaimPage = () => {
         mediaType: formData.mediaType,
         attachments: formData.attachments.map(att => ({
           name: att.name,
-          url: att.preview
-        }))
+          url: att.preview // Assuming preview is the data URL or a temporary link
+        })),
+        isIncognito: isIncognito // Add incognito status to the payload
       };
 
       // Send claim to backend
@@ -189,7 +190,8 @@ const SubmitClaimPage = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ claim: submitData.title }),
+        // Modify body to send the whole submitData, or adjust backend to expect `claim` and `isIncognito` separately
+        body: JSON.stringify({ claim_text: submitData.title, is_incognito: submitData.isIncognito, full_claim_data: submitData }),
       });
 
       if (!response.ok) {
@@ -198,16 +200,16 @@ const SubmitClaimPage = () => {
       }
 
       const result = await response.json();
-      
+
       // Store the result in localStorage
       localStorage.setItem('claimResult', JSON.stringify({
         ...result,
         claim: submitData.title // Make sure the claim text is included
       }));
-      
+
       // Navigate to result page
       navigate('/result');
-      
+
     } catch (error) {
       console.error('Submission error:', error);
       alert(error.message || 'Failed to submit claim. Please try again.');
@@ -411,6 +413,36 @@ const SubmitClaimPage = () => {
               </div>
             </div>
 
+            {/* Incognito Mode Toggle */}
+            <div className="group relative transform transition-all duration-300 hover:scale-[1.02]">
+              <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-900 to-red-600 rounded-lg blur opacity-0 group-hover:opacity-100 transition duration-300"></div>
+              <div className="relative bg-white rounded-lg p-6">
+                <div className="flex items-center justify-between">
+                  <label htmlFor="incognito-toggle" className="block text-lg font-semibold bg-gradient-to-r from-blue-900 to-red-600 bg-clip-text text-transparent">
+                    Submit Anonymously (Incognito)
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => setIsIncognito(!isIncognito)}
+                    className={`relative inline-flex items-center h-6 rounded-full w-11 transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-900 ${
+                      isIncognito ? 'bg-blue-900' : 'bg-gray-300'
+                    }`}
+                    id="incognito-toggle"
+                  >
+                    <span className="sr-only">Enable Incognito Mode</span>
+                    <span
+                      className={`inline-block w-4 h-4 transform bg-white rounded-full transition-transform duration-200 ease-in-out ${
+                        isIncognito ? 'translate-x-6' : 'translate-x-1'
+                      }`}
+                    />
+                  </button>
+                </div>
+                <p className="text-sm text-gray-500 mt-2">
+                  When enabled, your claim will be verified, but it will not appear on the "Browse Claims" page or be linked to your profile (if logged in).
+                </p>
+              </div>
+            </div>
+
             {/* Submit Button */}
             <div className="text-center">
               <button
@@ -443,3 +475,8 @@ const SubmitClaimPage = () => {
 };
 
 export default SubmitClaimPage;
+
+
+
+
+

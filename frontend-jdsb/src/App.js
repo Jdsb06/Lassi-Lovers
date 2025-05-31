@@ -14,6 +14,7 @@ import AuthButton from './components/AuthButton';
 import { AuthProvider } from './components/AuthContext';
 import Footer from './components/Footer';
 import Header from './components/Header';
+import ProfilePage from './components/ProfilePage';
 
 // ScrollToTop component to handle scroll restoration
 const ScrollToTop = () => {
@@ -367,6 +368,7 @@ const App = () => {
             <Route path="/privacy" element={<PrivacyPolicy />} />
             <Route path="/faqs" element={<FAQ />} />
             <Route path="/result" element={<TrustScoreDisplay />} />
+            <Route path="/profile" element={<ProfilePage />} />
           </Routes>
           <ChatbotLauncher />
         </div>
